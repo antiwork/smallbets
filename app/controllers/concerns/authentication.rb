@@ -5,7 +5,7 @@ module Authentication
   included do
     before_action :require_authentication
     before_action :deny_bots
-    helper_method :signed_in?
+    helper_method :signed_in?, :authenticated?
 
     protect_from_forgery with: :exception, unless: -> { authenticated_by.bot_key? }
   end
@@ -22,6 +22,17 @@ module Authentication
     def require_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
       before_action :restore_authentication, :redirect_signed_in_user_to_root, **options
+    end
+
+    def require_authentication
+      before_action :require_authentication
+      before_action :deny_bots
+    end
+  end
+
+  def authenticate
+    unless authenticated?
+      redirect_to new_session_path
     end
   end
 
@@ -93,5 +104,9 @@ module Authentication
 
     def authenticated_by
       @authenticated_by ||= "".inquiry
+    end
+
+    def authenticated?
+      Current.user.present?
     end
 end

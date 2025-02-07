@@ -1,4 +1,5 @@
 class RoomsController < ApplicationController
+  require_authentication
   before_action :set_room, only: %i[ edit update show destroy ]
   before_action :set_membership, only: %i[ show ]
   before_action :ensure_has_real_name, only: %i[ show ]

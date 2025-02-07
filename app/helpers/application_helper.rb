@@ -37,6 +37,14 @@ module ApplicationHelper
     end
   end
 
+  def root_path_for(user)
+    if user&.authenticated?
+      chat_root_path
+    else
+      root_path
+    end
+  end
+
   private
     def admin_body_class
       "admin" if Current.user&.can_administer?
