@@ -73,6 +73,7 @@ module Authentication
       Current.user = session.user
       set_authenticated_by(:session)
       cookies.signed.permanent[:session_token] = { value: session.token, httponly: true, same_site: :lax }
+      request.session[:user_id] = session.user.id
     end
 
     def post_authenticating_url
@@ -80,6 +81,7 @@ module Authentication
     end
 
     def reset_authentication
+      request.session.delete(:user_id)
       cookies.delete(:session_token)
     end
 

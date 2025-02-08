@@ -1,5 +1,13 @@
 Rails.application.routes.draw do
-  root "welcome#show"
+  constraints(lambda { |req| req.session[:user_id].present? }) do
+    root to: "welcome#show"
+  end
+
+  constraints(lambda { |req| req.session[:user_id].blank? }) do
+    root to: "marketing#show", as: :unauthenticated_root
+  end
+
+  get "/chat", to: "welcome#show"
 
   resource :first_run
 
