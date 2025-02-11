@@ -61,14 +61,14 @@ class Rooms::ClosedsController < RoomsController
     def broadcast_update_room
       for_each_sidebar_section do |list_name|
         each_user_and_html_for(@room, list_name:) do |user, html|
-          broadcast_replace_to user, :rooms, target: [@room, helpers.dom_prefix(list_name, :node_content)], html: html
+          broadcast_replace_to user, :rooms, target: [@room, helpers.dom_prefix(list_name, :list_node)], html: html
         end
       end
     end
 
     def each_user_and_html_for_create(room, **locals)
       # Optimization to avoid rendering the same partial for every user
-      html = render_to_string(partial: "users/sidebars/rooms/shared_with_threads", locals: { room: room }.merge(locals))
+      html = render_to_string(partial: "users/sidebars/rooms/shared", locals: { room: room }.merge(locals))
 
       room.memberships.visible.each do |membership|
         yield membership.user, html
@@ -81,10 +81,7 @@ class Rooms::ClosedsController < RoomsController
       room.memberships.visible.includes(:user).with_has_unread_notifications.each do |membership|
         yield membership.user, render_or_cached(html_cache,
                                                 partial: "users/sidebars/rooms/shared",
-                                                locals: { room: room,
-                                                          involvement: membership.involvement, 
-                                                          unread: membership.unread?,
-                                                          has_notifications: membership.has_unread_notifications? }.merge(locals))
+                                                locals: { membership: }.merge(locals))
       end
     end
 end

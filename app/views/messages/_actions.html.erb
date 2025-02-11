@@ -41,7 +41,7 @@
           <span>Delete</span>
         <% end %>
 
-        <%= tag.button class: "btn message__action-btn full-width", data: { controller: "copy-to-clipboard", action: "copy-to-clipboard#copy", copy_to_clipboard_success_class: "btn--success", copy_to_clipboard_content_value: room_at_message_url(current_room || message.room, message) } do %>
+        <%= tag.button class: "btn message__action-btn full-width", data: { controller: "copy-to-clipboard", action: "copy-to-clipboard#copy", copy_to_clipboard_success_class: "btn--success", copy_to_clipboard_content_value: room_at_message_url(message.room, message) } do %>
           <span>Copy link</span>
         <% end %>
 
@@ -72,13 +72,6 @@
         <% if current_room.present? %>
           <%= button_to room_message_unreads_path(current_room, message), class: "btn message__action-btn full-width" do %>
             <span>Mark unread</span>
-          <% end %>
-        <% end %>
-        
-        <% unless message.room.direct? %>
-          <%= link_to new_rooms_thread_path(parent_message_id: message.id), class: "btn message__action-btn full-width",
-                      target: "_top", style: "view-transition-name: new-room" do %>
-            <span>New thread</span>
           <% end %>
         <% end %>
       </div>

@@ -4,10 +4,8 @@
   <%= turbo_stream.replace dom_id(@membership.room, :list), partial: "users/sidebars/rooms/direct", locals: { membership: @membership } %>
 <% else %>
   <% for_each_sidebar_section do |list_name| %>
-    <%= turbo_stream.replace dom_id(@membership.root_membership.room, dom_prefix(list_name, :list_node)), 
-                             partial: "users/sidebars/rooms/shared_with_threads", 
-                             locals: { list_name:, 
-                                       membership: @membership.root_membership,
-                                       thread_memberships: @thread_memberships } %>
+    <%= turbo_stream.replace dom_id(@membership.room, dom_prefix(list_name, :list_node)), 
+                             partial: "users/sidebars/rooms/shared", 
+                             locals: { list_name:, membership: @membership } %>
   <% end %>
 <% end %>

@@ -1,7 +1,7 @@
 <div id="<%= list_name %>" contents data-sorted-list-target="container" class="sidebar__list">
   <% memberships.each do |membership| %>
-    <% cache_sidebar_room(list_name, membership, thread_memberships) do %>
-      <%= render "users/sidebars/rooms/shared_with_threads", list_name:, membership:, thread_memberships: %>
+    <% cache(sidebar_membership_cache_key(list_name, membership)) do %>
+      <%= render "users/sidebars/rooms/shared", list_name:, membership: %>
     <% end %>
   <% end %>
 </div>

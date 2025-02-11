@@ -1,6 +1,4 @@
 class Room < ApplicationRecord
-  EXPIRES_INTERVAL = 30.days
-
   include Deactivatable
 
   has_many :memberships, -> { active } do
@@ -52,8 +50,6 @@ class Room < ApplicationRecord
 
   scope :ordered, -> { order(:sortable_name) }
 
-  scope :without_expired_threads, -> { where("type != 'Rooms::Thread' or last_active_at > ?", EXPIRES_INTERVAL.ago) }
-
   after_update_commit -> do
     if saved_change_to_attribute?(:active) && active?
       broadcast_reactivation
@@ -101,25 +97,8 @@ class Room < ApplicationRecord
     is_a?(Rooms::Thread)
   end
 
-  def expired?
-    thread? && last_active_at.present? && last_active_at < EXPIRES_INTERVAL.ago
-  end
-
   def default_involvement(user: nil)
     "mentions"
-  end
-
-  def messages_with_parent
-    Message.active.where(room_id: id).or(Message.active.where(id: parent_message_id))
-  end
-
-  def top_level_parent_room
-    return @top_level_parent_room if defined?(@top_level_parent_room)
-
-    node = self
-    node = node.parent_room while node.parent_room.present?
-
-    @top_level_parent_room = node
   end
 
   def reactivate
@@ -171,7 +150,7 @@ class Room < ApplicationRecord
 
     def broadcast_reactivation
       [ :starred_rooms, :shared_rooms ].each do |list_name|
-        broadcast_append_to :rooms, target: list_name, partial: "users/sidebars/rooms/shared_with_threads", locals: { list_name:, room: self }, attributes: { maintain_scroll: true }
+        broadcast_append_to :rooms, target: list_name, partial: "users/sidebars/rooms/shared", locals: { list_name:, room: self }, attributes: { maintain_scroll: true }
       end
     end
 end

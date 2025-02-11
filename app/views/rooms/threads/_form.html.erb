@@ -1,6 +1,4 @@
 <%= render layout: "rooms/layouts/form", locals: { room: room } do |form| %>
-  <%= form.hidden_field :parent_message_id, name: "parent_message_id" %>
-
   <% if users.any? %>
       <%= user_filter_menu_tag do %>
         <%= user_filter_search_tag if users.count > 20 %>

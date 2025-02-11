@@ -50,7 +50,7 @@
           <%= render "users/sidebars/inbox_actions" %>
         </div>
 
-        <%= render "users/sidebars/rooms/shared_rooms_list", list_name: :starred_rooms, memberships: @starred_memberships, thread_memberships: @thread_memberships %>
+        <%= render "users/sidebars/rooms/shared_rooms_list", list_name: :starred_rooms, memberships: @starred_memberships %>
 
         <div class="margin-block"></div>
       </div>
@@ -62,7 +62,7 @@
       <div data-controller="sorted-list" <%= all_rooms_sort_order %>
            data-action="rooms-list:unread@window->sorted-list#reSort rooms-list:read@window->sorted-list#reSort rooms-list:renamed@window->sorted-list#reSort"
            class="flex position-relative flex-column rooms-list overflow">
-        <%= render "users/sidebars/rooms/shared_rooms_list", list_name: :shared_rooms, memberships: @all_memberships, thread_memberships: @thread_memberships %>
+        <%= render "users/sidebars/rooms/shared_rooms_list", list_name: :shared_rooms, memberships: @all_memberships %>
       </div>
 
       <%= link_to new_rooms_open_path, class: "rooms__new-btn btn room align-center gap txt-reversed", aria: { label: "New Chat Room" } do %>

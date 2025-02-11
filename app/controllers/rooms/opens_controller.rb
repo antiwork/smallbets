@@ -35,14 +35,14 @@ class Rooms::OpensController < RoomsController
 
     def broadcast_create_room
       for_each_sidebar_section do |list_name|
-        broadcast_append_to :rooms, target: list_name, partial: "users/sidebars/rooms/shared_with_threads", locals: { list_name:, room: @room }, attributes: { maintain_scroll: true }
+        broadcast_append_to :rooms, target: list_name, partial: "users/sidebars/rooms/shared", locals: { list_name:, room: @room }, attributes: { maintain_scroll: true }
       end
     end
 
     def broadcast_update_room
       for_each_sidebar_section do |list_name|
         each_user_and_html_for(@room, list_name:) do | user, html |
-          broadcast_replace_to user, :rooms, target: [@room, helpers.dom_prefix(list_name, :node_content)], html: html 
+          broadcast_replace_to user, :rooms, target: [@room, helpers.dom_prefix(list_name, :list_node)], html: html 
         end
       end
     end
@@ -53,10 +53,7 @@ class Rooms::OpensController < RoomsController
     room.memberships.visible.includes(:user).with_has_unread_notifications.each do |membership|
       yield membership.user, render_or_cached(html_cache,
                                               partial: "users/sidebars/rooms/shared",
-                                              locals: { room: room,
-                                                        involvement: membership.involvement,
-                                                        unread: membership.unread?,
-                                                        has_notifications: membership.has_unread_notifications? }.merge(locals))
+                                              locals: { membership: }.merge(locals))
     end
   end
 end

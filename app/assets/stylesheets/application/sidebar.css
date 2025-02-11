@@ -254,12 +254,12 @@
     opacity: 0.4;
     font-weight: 500;
   
-    .sidebar__list:not(#shared_rooms) .room.unread & {
+    .sidebar__list:not(#shared_rooms) .room.unread &, .sidebar__list .room.unread.badge & {
       opacity: 1;
       font-weight: 800;
     }
   
-    .sidebar__list:not(#shared_rooms) .room.unread.badge & {
+    .sidebar__list .room.unread.badge & {
       padding-inline-start: calc(var(--inline-space) * 4 / 3);
     
       &::after {

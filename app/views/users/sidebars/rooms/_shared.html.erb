@@ -1,17 +1,27 @@
-<div id="<%= dom_id(room, dom_prefix(list_name, :node_content)) %>" class="flex gap align-center justify-space-between">
-  <%= link_to_room room,
-        class: [ "flex flex-item-grow gap align-center justify-space-between room full-height txt-nowrap overflow-ellipsis txt-lighter txt-undecorated pad-block position-relative", "unread": local_assigns[:unread], "badge": local_assigns[:has_notifications] ],
-        style: "padding-block: calc(var(--block-space) / 4);" do %>
-    <span class="overflow-ellipsis"><%= room_display_name(room) %></span>
+<% room = local_assigns[:room] || local_assigns[:membership].room %>
+<% involvement = local_assigns[:membership]&.involvement || "mentions" %>
+<% unread = local_assigns[:membership]&.unread? %>
+<% has_notifications = local_assigns[:membership]&.has_unread_notifications? %>
 
-    <hr class="separator flex-item-grow" aria-hidden="true">
+<div id="<%= dom_id(room, dom_prefix(list_name, :list_node)) %>" data-sorted-list-target="item"
+     data-name="<%= room.sortable_name %>" data-search-text="<%= room.sortable_name %>" data-size="<%= room.messages_count %>"
+     data-updated-at="<%= room.last_active_at.iso8601 %>"
+     data-sidebar-starred-rooms-target="room" data-involvement="<%= involvement %>"
+     data-type="list_node"
+     class="flex gap align-center justify-space-between">
+    <%= link_to_room room,
+                     class: [ "flex flex-item-grow gap align-center justify-space-between room full-height txt-nowrap overflow-ellipsis txt-lighter txt-undecorated pad-block position-relative", "unread": unread, "badge": has_notifications ],
+                     style: "padding-block: calc(var(--block-space) / 4);" do %>
+      <span class="overflow-ellipsis"><%= room_display_name(room) %></span>
 
-    <%= local_datetime_tag room.last_active_at, style: :relative, class: "txt-x-small txt-primary txt-nowrap position-relative" %>
-  <% end %>
-  
-  <span class="txt-small">
-    <%= turbo_frame_tag dom_id(room, dom_prefix(:sidebar, :involvement)) do %>
-      <%= button_to_change_involvement(room, involvement, from_sidebar: true) %>
+      <hr class="separator flex-item-grow" aria-hidden="true">
+
+      <%= local_datetime_tag room.last_active_at, style: :relative, class: "txt-x-small txt-primary txt-nowrap position-relative" %>
     <% end %>
-  </span>
+
+    <span class="txt-small">
+      <%= turbo_frame_tag dom_id(room, dom_prefix(:sidebar, :involvement)) do %>
+        <%= button_to_change_involvement(room, involvement, from_sidebar: true) %>
+      <% end %>
+    </span>
 </div>

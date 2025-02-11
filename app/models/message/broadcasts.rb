@@ -21,22 +21,20 @@ module Message::Broadcasts
   end
 
   def broadcast_reactivation
-    containing_rooms.each do |room|
-      previous_message = room.messages.active.order(:created_at).where("created_at < ?", created_at).last
-      if previous_message.present?
-        target = previous_message
-        action = "after"
-      else
-        target = [ room, :messages ]
-        action = "prepend"
-      end
-
-      broadcast_action_to room, :messages,
-                          action:,
-                          target:,
-                          partial: "messages/message",
-                          locals: { message: self, current_room: room },
-                          attributes: { maintain_scroll: true }
+    previous_message = room.messages.active.order(:created_at).where("created_at < ?", created_at).last
+    if previous_message.present?
+      target = previous_message
+      action = "after"
+    else
+      target = [ room, :messages ]
+      action = "prepend"
     end
+
+    broadcast_action_to room, :messages,
+                        action:,
+                        target:,
+                        partial: "messages/message",
+                        locals: { message: self, current_room: room },
+                        attributes: { maintain_scroll: true }
   end
 end

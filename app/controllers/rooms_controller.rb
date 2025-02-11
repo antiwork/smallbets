@@ -20,11 +20,9 @@ class RoomsController < ApplicationController
 
   private
     def deactivate_room
-      @room.parent_message&.touch
       @room.deactivate
 
       broadcast_remove_room
-      broadcast_update_parent_message
     end
   
     def set_room
@@ -48,7 +46,7 @@ class RoomsController < ApplicationController
     end
 
     def find_messages
-      messages = @room.messages_with_parent.with_threads.with_creator.includes(:mentionees)
+      messages = @room.messages.with_threads.with_creator.includes(:mentionees)
       @first_unread_message = messages.ordered.since(@membership.unread_at).first if @membership.unread?
 
       if show_first_message = messages.find_by(id: params[:message_id]) || @first_unread_message 
@@ -65,15 +63,6 @@ class RoomsController < ApplicationController
     def broadcast_remove_room
       for_each_sidebar_section do |list_name|
         broadcast_remove_to :rooms, target: [@room, helpers.dom_prefix(list_name, :list_node)]
-      end
-    end
-  
-    def broadcast_update_parent_message
-      if @room.thread?
-        threads_html = render_to_string(partial: "messages/threads", locals: { message: @room.parent_message })
-
-        @room.parent_message.broadcast_replace_to @room.parent_message.room, :messages, target: [@room.parent_message, :threads], html: threads_html, attributes: { maintain_scroll: true }
-        @room.parent_message.broadcast_replace_to :inbox, target: [@room.parent_message, :threads], html: threads_html, attributes: { maintain_scroll: true }
       end
     end
 end

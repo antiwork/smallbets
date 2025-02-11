@@ -53,24 +53,6 @@
           <% end %>
         </div>
       </div>
-      
-      <% if room.messages_with_parent.any? %>
-        <% curl_text_line = %[curl -H "Content-Type: application/json" #{rooms_bot_threads_url(bot.bot_key)} -d '{ "name": "Testing threads", "parent_message_id": #{room.messages_with_parent.ordered.last.id} }'] %>
-        <div class="flex align-center gap">
-          <%= image_tag "thread.svg", aria: { hidden: "true" }, size: 24, class: "colorize--black" %>
-
-          <div class="flex-item-grow">
-            <input type="text" class="input full-width fill-white" value="<%= curl_text_line %>" aria-label="curl command for posting threads" readonly>
-          </div>
-
-          <div class="txt-small">
-            <%= button_to_copy_to_clipboard(curl_text_line) do %>
-              <%= image_tag "copy-paste.svg", aria: { hidden: "true" }, size: 20 %>
-              <span class="for-screen-reader">Copy thread command</span>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
     </fieldset>
   <% end %>
 </li>

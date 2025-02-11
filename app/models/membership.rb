@@ -36,8 +36,6 @@ class Membership < ApplicationRecord
 
   enum involvement: %w[ invisible nothing mentions everything ].index_by(&:itself), _prefix: :involved_in
 
-  after_update :make_parent_involvements_visible, if: -> { saved_change_to_involvement? && involvement_before_last_save.inquiry.invisible? }
-  after_update :set_nested_involvements_to_mentions, if: -> { saved_change_to_involvement? && involved_in_invisible? }
   after_update :broadcast_involvement, if: :saved_change_to_involvement?
   
 
@@ -55,11 +53,9 @@ class Membership < ApplicationRecord
       with_room_by_last_active_newest_first
     end
   }
+  scope :shared, -> { joins(:room).where(rooms: { type: %w[Rooms::Open Rooms::Closed] }) }
   scope :without_direct_rooms, -> { joins(:room).where.not(rooms: { type: "Rooms::Direct" }) }
   scope :without_thread_rooms, -> { joins(:room).where.not(rooms: { type: "Rooms::Thread" }) }
-  scope :thread_rooms, -> { joins(:room).where(rooms: { type: "Rooms::Thread" }) }
-  scope :without_expired_threads, -> { joins(:room).where("rooms.type != 'Rooms::Thread' or rooms.last_active_at > ?", Room::EXPIRES_INTERVAL.ago) }
-  scope :with_active_threads, -> { joins(:room).where("rooms.type == 'Rooms::Thread' and rooms.last_active_at > ?", Room::EXPIRES_INTERVAL.ago) }
 
   scope :notifications_on, -> { where(involvement: :everything) }
   scope :visible, -> { where.not(involvement: :invisible) }
@@ -104,31 +100,7 @@ class Membership < ApplicationRecord
   end
   
   def ensure_receives_mentions!
-    current_membership = self
-    while current_membership.present?
-      current_membership.update(involvement: :mentions) unless current_membership.receives_mentions?
-      current_membership = current_membership.parent_membership
-    end
-  end
-
-  def parent_membership
-    return unless room.parent_room
-
-    room.parent_room.memberships.create_with(involvement: "invisible").find_or_create_by(user: user)
-  end
-
-  # Top level parent in hierarchy
-  def root_membership
-    parent_membership.nil? ? self : parent_membership.root_membership
-  end
-
-  def set_nested_involvements_to_mentions
-    room.threads.each do |thread|
-      thread_membership = thread.memberships.find_by(user: user)
-      next unless thread_membership
-      thread_membership.update(involvement: :mentions) if thread_membership.involved_in_everything?
-      thread_membership.set_nested_involvements_to_mentions
-    end
+    update(involvement: :mentions) unless receives_mentions?
   end
   
   private
@@ -144,12 +116,5 @@ class Membership < ApplicationRecord
 
   def broadcast_involvement
     ActionCable.server.broadcast "user_#{user_id}_involvements", { roomId: room_id, involvement: involvement }
-  end
-  
-  def make_parent_involvements_visible
-    current_membership = self
-    while (current_membership = current_membership.parent_membership).present?
-      current_membership.update(involvement: :mentions) if current_membership.involved_in_invisible?  
-    end
   end
 end

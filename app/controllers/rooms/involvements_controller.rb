@@ -1,5 +1,5 @@
 class Rooms::InvolvementsController < ApplicationController
-  include RoomScoped, Threads::Broadcasts
+  include RoomScoped
 
   helper_method :from_sidebar
 
@@ -41,13 +41,9 @@ class Rooms::InvolvementsController < ApplicationController
     def broadcast_involvement_change_to_sidebar
       for_each_sidebar_section do |list_name|
         broadcast_replace_to @membership.user, :rooms,
-                             target: [ @room, helpers.dom_prefix(list_name, :node_content) ],
+                             target: [ @room, helpers.dom_prefix(list_name, :list_node) ],
                              partial: "users/sidebars/rooms/shared",
-                             locals: { list_name:,
-                                       room: @room,
-                                       involvement: @membership.involvement,
-                                       unread: @membership.unread?,
-                                       has_notifications: @membership.has_unread_notifications? }
+                             locals: { list_name:, membership: @membership }
       end
     end
 
@@ -58,14 +54,10 @@ class Rooms::InvolvementsController < ApplicationController
           broadcast_remove_to @membership.user, :rooms, target: [@room, helpers.dom_prefix(list_name, :list_node)]
         end
       when @membership.involvement_previously_was.inquiry.invisible?
-        if @room.thread?
-          refresh_shared_rooms(@membership.user)
-        else
-          for_each_sidebar_section do |list_name|
-            broadcast_append_to @membership.user, :rooms, target: list_name,
-                                partial: "users/sidebars/rooms/shared_with_threads", locals: { list_name:, membership: @membership },
-                                attributes: { maintain_scroll: true }
-          end
+        for_each_sidebar_section do |list_name|
+          broadcast_append_to @membership.user, :rooms, target: list_name,
+                              partial: "users/sidebars/rooms/shared", locals: { list_name:, membership: @membership },
+                              attributes: { maintain_scroll: true }
         end
       end
     end

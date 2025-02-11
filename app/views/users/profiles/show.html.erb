@@ -119,7 +119,7 @@
 
   <div class="margin-block pad-inline pad-block fill-shade border-radius">
     <menu class="flex flex-column gap margin-none pad">
-      <%= render "users/profiles/shared_memberships", shared_memberships: @shared_memberships, thread_memberships: @thread_memberships %>
+      <%= render partial: "users/profiles/membership", collection: @shared_memberships %>
     </menu>
   </div>
 

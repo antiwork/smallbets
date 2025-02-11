@@ -1,5 +1,5 @@
 class MessagesController < ApplicationController
-  include ActiveStorage::SetCurrent, RoomScoped, NotifyBots, Threads::Broadcasts
+  include ActiveStorage::SetCurrent, RoomScoped, NotifyBots
 
   before_action :set_room, only: %i[ index create destroy ]
   before_action :set_room_if_found, only: %i[ show edit update ]
@@ -19,8 +19,7 @@ class MessagesController < ApplicationController
     @message = @room.messages.create_with_attachment!(message_params)
 
     @message.broadcast_create
-    broadcast_update_message_involvements(@message)
-    broadcast_unexpire_thread if @room.expired?
+    broadcast_update_message_involvements
     deliver_webhooks_to_bots(@message, :created)
   rescue ActiveRecord::RecordNotFound
     render action: :room_not_found
@@ -36,22 +35,15 @@ class MessagesController < ApplicationController
     @message.update!(message_params)
 
     presentation_html = render_to_string(partial: "messages/presentation", locals: { message: @message })
-    @message.containing_rooms.each do |room|
-      @message.broadcast_replace_to room, :messages, target: [ @message, :presentation ], html: presentation_html, attributes: { maintain_scroll: true }
-    end
+    @message.broadcast_replace_to @message.room, :messages, target: [ @message, :presentation ], html: presentation_html, attributes: { maintain_scroll: true }
     @message.broadcast_replace_to :inbox, target: [ @message, :presentation ], html: presentation_html, attributes: { maintain_scroll: true }
-    broadcast_update_message_involvements(@message)
+    broadcast_update_message_involvements
     deliver_webhooks_to_bots(@message, :updated)
 
     redirect_to @room ? room_message_url(@room, @message) : @message
   end
 
   def destroy
-    @message.threads.each do |thread|
-      for_each_sidebar_section do |list_name|
-        broadcast_remove_to :rooms, target: [thread, helpers.dom_prefix(list_name, :list_node)]
-      end
-    end
     @message.deactivate
     @message.broadcast_remove_to @room, :messages
     @message.broadcast_remove_to :inbox
@@ -61,7 +53,7 @@ class MessagesController < ApplicationController
   private
     def set_message
       if @room
-        @message = @room.messages_with_parent.find(params[:id])
+        @message = @room.messages.find(params[:id])
       else
         @message = Current.user.reachable_messages.find(params[:id])
       end
@@ -75,21 +67,34 @@ class MessagesController < ApplicationController
     def find_paged_messages
       case
       when params[:before].present?
-        @room.messages_with_parent.with_threads.with_creator.page_before(@room.messages_with_parent.find(params[:before]))
+        @room.messages.with_threads.with_creator.page_before(@room.messages.find(params[:before]))
       when params[:after].present?
-        @room.messages_with_parent.with_threads.with_creator.page_after(@room.messages_with_parent.find(params[:after]))
+        @room.messages.with_threads.with_creator.page_after(@room.messages.find(params[:after]))
       else
-        @room.messages_with_parent.with_threads.with_creator.last_page
-      end
-    end
-
-    def broadcast_unexpire_thread
-      @room.memberships.active.visible.each do |membership|
-        refresh_shared_rooms(membership.user)
+        @room.messages.with_threads.with_creator.last_page
       end
     end
 
     def message_params
       params.require(:message).permit(:body, :attachment, :client_message_id)
+    end
+
+    def broadcast_update_message_involvements
+      @message.mentionees.each do |user|
+        refresh_shared_rooms(user)
+      end
+    end
+  
+    def refresh_shared_rooms(user)
+      memberships = user.memberships.shared.visible
+      {
+        starred_rooms: memberships.with_room_by_last_active_newest_first,
+        shared_rooms: memberships.with_room_by_sort_preference(Current.user.preference("all_rooms_sort_order"))
+      }.each do |list_name, memberships|
+        user.broadcast_replace_to user, :rooms, target: list_name,
+                                  partial: "users/sidebars/rooms/shared_rooms_list",
+                                  locals: { list_name:, memberships: },
+                                  attributes: { maintain_scroll: true }
+      end
     end
 end

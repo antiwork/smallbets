@@ -26,17 +26,17 @@
               <span class="message__author" title="<%= message.creator.title %>">
                 <strong data-reply-target="author"><%= message.creator.name %></strong>
               </span>
-              <%= link_to message_timestamp(message, class: "message__timestamp"), room_at_message_path(current_room || message.room, message), target: "_top",
+              <%= link_to message_timestamp(message, class: "message__timestamp"), room_at_message_path(message.room, message), target: "_top",
                     class: "message__permalink" %>
               <span class="message__room <%= "message__original-room" if current_room.present? && current_room != message.room %>">
                 <%= link_to room_display_name(message.room, for_user: nil), room_at_message_path(message.room, message), target: "_top", data: { reply_target: "link" } %>
               </span>
             </h3>
-            <%= render "messages/actions", message: message, current_room: current_room %>
+            <%= render "messages/actions", message:, current_room: %>
           </div>
-          <%= render "messages/presentation", message: message %>
-          <%= render "messages/threads", message: message if current_room.blank? || current_room == message.room %>
-          <%= render "messages/boosts/boosts", message: message %>
+          <%= render "messages/presentation", message: %>
+          <%= render "messages/threads", message: %>
+          <%= render "messages/boosts/boosts", message: %>
         </div>
       </div>
     </turbo-frame>

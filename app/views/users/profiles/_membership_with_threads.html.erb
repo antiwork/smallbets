@@ -1,9 +1,0 @@
-<% indent = local_assigns[:indent].to_i %>
-<%= render "users/profiles/membership", membership: membership, indent: indent %>
-
-<% (local_assigns[:thread_memberships] || []).each do |thread_membership| %>
-  <% if thread_membership.room.parent_room == membership.room %>
-    <%= render "users/profiles/membership_with_threads", membership: thread_membership,
-               thread_memberships: local_assigns[:thread_memberships], indent: indent + 1 %>
-  <% end %>
-<% end %>

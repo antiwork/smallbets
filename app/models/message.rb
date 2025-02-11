@@ -22,7 +22,6 @@ class Message < ApplicationRecord
 
   after_create_commit -> { involve_mentionees_in_room(unread: true) }
   after_update_commit -> { involve_mentionees_in_room(unread: false) }
-  after_save -> { involve_author_in_thread }, if: -> { room.thread? }
 
   scope :ordered, -> { order(:created_at) }
   scope :with_creator, -> { includes(:creator) }
@@ -34,10 +33,6 @@ class Message < ApplicationRecord
 
   attr_accessor :bookmarked
   alias_method :bookmarked?, :bookmarked
-
-  def containing_rooms
-    Room.where(id: room_id).or(Room.where(parent_message_id: id))
-  end
   
   def bookmarked_by_current_user?
     return bookmarked? unless bookmarked.nil?
@@ -71,10 +66,6 @@ class Message < ApplicationRecord
 
   def involve_mentionees_in_room(unread:)
     mentionees.each { |user| room.involve_user(user, unread: unread) }
-  end
-
-  def involve_author_in_thread
-    room.involve_user(creator)
   end
 
   def touch_room_activity
