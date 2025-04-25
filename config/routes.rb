@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   end
 
   get "/chat", to: "welcome#show"
+  get "/welcome", to: "welcome#show"
 
   resource :first_run
 

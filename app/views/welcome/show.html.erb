@@ -1,13 +1,65 @@
-<% @page_title = "No rooms yet" %>
+<% @page_title = "Welcome to Small Bets" %>
 <% @body_class = "sidebar" %>
 
 <% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
 
 <div id="message-area" class="message-area">
-  <div class="message-area--empty min-width center">
-    <figure class="center pad">
-      <%= image_tag "messages-empty.svg", aria: { hidden: "true" }, class: "colorize--black translucent" %>
-      <span class="for-screen-reader"><%= Current.user.name %></span>
-    </figure>
+  <div class="welcome-container center pad">
+    <h1 class="txt-large welcome-title">Welcome to the Small Bets community!</h1>
+    
+    <p class="welcome-description margin-block">
+      This is a place for ambitious builders to connect, share ideas, and support each other.
+    </p>
+    
+    <div class="welcome-checklist margin-block">
+      <h2 class="txt-medium">Getting Started Checklist:</h2>
+      
+      <ul class="checklist">
+        <li class="<%= has_avatar? ? 'checked' : '' %>">
+          <div class="checklist-item">
+            <% if has_avatar? %>
+              <%= image_tag "check.svg", size: 20, aria: { hidden: "true" }, class: "check-icon" %>
+            <% else %>
+              <div class="unchecked-circle"></div>
+            <% end %>
+            <span>Add your profile picture</span>
+          </div>
+          <% unless has_avatar? %>
+            <%= link_to "Update Profile", user_profile_path, class: "btn btn--small" %>
+          <% end %>
+        </li>
+        
+        <li class="<%= has_posted_message? ? 'checked' : '' %>">
+          <div class="checklist-item">
+            <% if has_posted_message? %>
+              <%= image_tag "check.svg", size: 20, aria: { hidden: "true" }, class: "check-icon" %>
+            <% else %>
+              <div class="unchecked-circle"></div>
+            <% end %>
+            <span>Post your first message</span>
+          </div>
+          <% unless has_posted_message? %>
+            <% open_room = Room.opens.active.first %>
+            <% if open_room %>
+              <%= link_to "Join Conversation", room_path(open_room), class: "btn btn--small" %>
+            <% end %>
+          <% end %>
+        </li>
+        
+        <li class="<%= has_starred_room? ? 'checked' : '' %>">
+          <div class="checklist-item">
+            <% if has_starred_room? %>
+              <%= image_tag "check.svg", size: 20, aria: { hidden: "true" }, class: "check-icon" %>
+            <% else %>
+              <div class="unchecked-circle"></div>
+            <% end %>
+            <span>Star your favorite rooms</span>
+          </div>
+          <% unless has_starred_room? %>
+            <%= link_to "Find Rooms", rooms_path, class: "btn btn--small" %>
+          <% end %>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>

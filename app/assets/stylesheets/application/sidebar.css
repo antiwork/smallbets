@@ -5,6 +5,24 @@
   --sidebar-tools-width: 70px;
 }
 
+.welcome-notification {
+  position: relative;
+}
+
+.welcome-notification::after {
+  --size: 0.6em;
+  aspect-ratio: 1;
+  background-color: var(--color-negative);
+  block-size: var(--size);
+  border-radius: calc(var(--size) * 2);
+  content: "";
+  flex-shrink: 0;
+  inline-size: var(--size);
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+}
+
 .sidebar__container {
   block-size: 100dvh;
   max-block-size: 100dvh;

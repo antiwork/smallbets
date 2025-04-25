@@ -74,6 +74,8 @@
 
   <div class="sidebar__tools d-hotwire-native-none">
     <div class="sidebar__tool-container">
+      <%= render "users/sidebars/welcome_notification" %>
+      
       <%= link_to inbox_path, class: "btn sidebar__tool" do %>
         <%= image_tag "mentions.svg", size: 20, aria: { hidden: "true" } %>
         <span class="for-screen-reader">Mentions</span>

@@ -1,0 +1,7 @@
+<%= turbo_frame_tag "welcome_notification", class: "position-relative" do %>
+  <%= link_to welcome_path, class: "btn sidebar__tool #{'welcome-notification' unless welcome_checklist_complete?}" do %>
+    <%= image_tag "welcome.svg", size: 20, aria: { hidden: "true" } %>
+    <span class="for-screen-reader">Welcome</span>
+    <span class="sidebar__tool-label">Welcome</span>
+  <% end %>
+<% end %>

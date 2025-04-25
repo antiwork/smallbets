@@ -1,0 +1,60 @@
+.welcome-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--block-space);
+}
+
+.welcome-title {
+  margin-bottom: var(--block-space);
+}
+
+.welcome-description {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-bottom: var(--block-space-double);
+}
+
+.welcome-checklist {
+  background-color: var(--color-bg-light);
+  border-radius: var(--btn-border-radius);
+  padding: var(--block-space);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+}
+
+.checklist li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--block-space-half) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.checklist li:last-child {
+  border-bottom: none;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: var(--inline-space-half);
+}
+
+.unchecked-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border-darker);
+  border-radius: 50%;
+}
+
+.check-icon {
+  color: var(--color-positive);
+}
+
+.checklist .checked {
+  color: var(--color-text-dimmed);
+}
