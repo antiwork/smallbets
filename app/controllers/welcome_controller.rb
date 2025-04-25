@@ -1,6 +1,10 @@
 class WelcomeController < ApplicationController
   def show
-    render
+    if Current.user.rooms.any?
+      redirect_to room_url(landing_room)
+    else
+      render
+    end
   end
 
   private

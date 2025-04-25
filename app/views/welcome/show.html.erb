@@ -14,8 +14,8 @@
     <div class="welcome-checklist margin-block">
       <h2 class="txt-medium">Getting Started Checklist:</h2>
       
-      <ul class="checklist">
-        <li class="<%= has_avatar? ? 'checked' : '' %>">
+      <div class="checklist">
+        <div class="checklist-row <%= has_avatar? ? 'checked' : '' %>">
           <div class="checklist-item">
             <% if has_avatar? %>
               <%= image_tag "check.svg", size: 20, aria: { hidden: "true" }, class: "check-icon" %>
@@ -27,9 +27,9 @@
           <% unless has_avatar? %>
             <%= link_to "Update Profile", user_profile_path, class: "btn btn--small" %>
           <% end %>
-        </li>
+        </div>
         
-        <li class="<%= has_posted_message? ? 'checked' : '' %>">
+        <div class="checklist-row <%= has_posted_message? ? 'checked' : '' %>">
           <div class="checklist-item">
             <% if has_posted_message? %>
               <%= image_tag "check.svg", size: 20, aria: { hidden: "true" }, class: "check-icon" %>
@@ -44,9 +44,9 @@
               <%= link_to "Join Conversation", room_path(open_room), class: "btn btn--small" %>
             <% end %>
           <% end %>
-        </li>
+        </div>
         
-        <li class="<%= has_starred_room? ? 'checked' : '' %>">
+        <div class="checklist-row <%= has_starred_room? ? 'checked' : '' %>">
           <div class="checklist-item">
             <% if has_starred_room? %>
               <%= image_tag "check.svg", size: 20, aria: { hidden: "true" }, class: "check-icon" %>
@@ -58,8 +58,8 @@
           <% unless has_starred_room? %>
             <%= link_to "Find Rooms", rooms_path, class: "btn btn--small" %>
           <% end %>
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>
