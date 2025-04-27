@@ -159,6 +159,19 @@ export default class extends Controller {
   failPendingMessage(clientMessageId) {
     this.#clientMessage.failed(clientMessageId)
   }
+  
+  retryMessage(event) {
+    const clientMessageId = event.params.clientMessageId
+    this.#clientMessage.retry(clientMessageId)
+    
+    const composerController = this.application.getControllerForElementAndIdentifier(
+      document.querySelector("#composer"), "composer"
+    )
+    
+    if (composerController) {
+      composerController.retryMessage(clientMessageId)
+    }
+  }
 
   // Callbacks
 

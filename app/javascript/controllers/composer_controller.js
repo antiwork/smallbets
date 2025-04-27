@@ -33,6 +33,14 @@ export default class extends Controller {
       this.messagesOutlet.failPendingMessage(this.clientidTarget.value)
     }
   }
+  
+  retryMessage(clientMessageId) {
+    this.clientidTarget.value = clientMessageId
+    
+    if (!this.fieldsTarget.disabled) {
+      this.element.requestSubmit()
+    }
+  }
 
   toggleToolbar() {
     this.element.classList.toggle(this.toolbarClass)

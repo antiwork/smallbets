@@ -35,6 +35,33 @@ export default class ClientMessage {
 
     if (element) {
       element.classList.add("message--failed")
+      
+      const bodyContent = element.querySelector(".message__body-content")
+      if (bodyContent) {
+        const retryLink = document.createElement("a")
+        retryLink.className = "message__retry-link"
+        retryLink.textContent = "Retry"
+        retryLink.dataset.action = "messages#retryMessage"
+        retryLink.dataset.messagesClientMessageIdParam = clientMessageId
+        bodyContent.appendChild(retryLink)
+      }
+    }
+  }
+  
+  retry(clientMessageId) {
+    const element = this.#findWithId(clientMessageId)
+
+    if (element) {
+      element.classList.remove("message--failed")
+      
+      const bodyContent = element.querySelector(".message__body-content")
+      if (bodyContent) {
+        const retryLink = bodyContent.querySelector(".message__retry-link")
+        if (retryLink) {
+          retryLink.textContent = ""
+          retryLink.className = "busy txt-muted"
+        }
+      }
     }
   }
 

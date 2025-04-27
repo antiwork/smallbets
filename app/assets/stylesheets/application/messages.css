@@ -158,6 +158,13 @@
       animation: wiggle 0.4s both;
       outline: 1px dashed var(--color-negative);
     }
+    
+    .message__retry-link {
+      color: var(--color-negative);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-left: 0.5em;
+    }
   }
 }
 
