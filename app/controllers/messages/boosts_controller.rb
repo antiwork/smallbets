@@ -38,10 +38,10 @@ class Messages::BoostsController < ApplicationController
       boost_html = render_to_string(partial: "messages/boosts/boost", locals: { boost: @boost })
 
       @boost.broadcast_append_to @boost.message.room, :messages,
-        target: "boosts_message_#{@boost.message.client_message_id}", html: boost_html, attributes: { maintain_scroll: true }
+        target: "boosts_message_#{@boost.message.client_message_id}", html: boost_html
 
       @boost.broadcast_append_to :inbox, target: "boosts_message_#{@boost.message.client_message_id}",
-                                 html: boost_html, attributes: { maintain_scroll: true }
+                                 html: boost_html
     end
 
     def broadcast_remove

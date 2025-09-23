@@ -27,7 +27,6 @@ class Boost < ApplicationRecord
                           action:,
                           target:,
                           partial: "messages/boosts/boost",
-                          locals: { boost: self },
-                          attributes: { maintain_scroll: true }
+                          locals: { boost: self }
     end
 end
