@@ -19,6 +19,7 @@ class Message < ApplicationRecord
       broadcast_reactivation
     end
   end
+  after_update_commit :clear_unread_timestamps_if_deactivated
 
   after_create_commit -> { involve_mentionees_in_room(unread: true) }
   after_update_commit -> { involve_mentionees_in_room(unread: false) }
@@ -83,5 +84,25 @@ class Message < ApplicationRecord
 
   def ensure_can_message_recipient
     errors.add(:base, "Messaging this user isn't allowed") if creator.blocked_in?(room)
+  end
+
+  private
+
+  def clear_unread_timestamps_if_deactivated
+    if saved_change_to_attribute?(:active) && !active?
+      # Find memberships where unread_at points to this deleted message
+      room.memberships.where(unread_at: created_at).find_each do |membership|
+        # Find the next unread message after this one, or mark as read
+        next_unread = room.messages.active.ordered
+                         .where("created_at > ?", created_at)
+                         .first
+
+        if next_unread
+          membership.update!(unread_at: next_unread.created_at)
+        else
+          membership.read # This sets unread_at to nil and broadcasts read status
+        end
+      end
+    end
   end
 end
