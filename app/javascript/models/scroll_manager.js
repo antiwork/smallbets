@@ -46,7 +46,7 @@ export default class ScrollManager {
       const newScrollTop = top ? scrollTop + (this.#container.scrollHeight - scrollHeight) : scrollTop
       
       if (delay) {
-        onNextEventLoopTick(() => this.#container.scrollTo({ top: newScrollTop, behavior: scrollBehaviour }))
+        requestAnimationFrame(() => this.#container.scrollTo({ top: newScrollTop, behavior: scrollBehaviour }))
       } else {
         this.#container.scrollTo({ top: newScrollTop, behavior: scrollBehaviour })
       }
