@@ -6,16 +6,22 @@ module Sidebar
   end
 
   def set_sidebar_memberships
-    memberships = Current.user.memberships.visible.without_thread_rooms.joins(:room).where(rooms: { active: true }).with_has_unread_notifications.includes(:room).with_room_by_last_active_newest_first
+    # Optimize queries by loading only essential data initially
+    base_memberships = Current.user.memberships
+                               .visible
+                               .without_thread_rooms
+                               .joins(:room)
+                               .where(rooms: { active: true })
+                               .includes(:room)
 
-    # Get all direct memberships and filter them
-    all_direct_memberships = memberships.select { |m| m.room.direct? }
-    @direct_memberships   = filter_direct_memberships(all_direct_memberships)
+    # Get direct memberships with minimal data
+    all_direct_memberships = base_memberships.select { |m| m.room.direct? }
+    @direct_memberships = filter_direct_memberships(all_direct_memberships)
 
-    # Get other memberships using the without_direct_rooms scope
-    other_memberships     = Current.user.memberships.visible.without_thread_rooms.without_direct_rooms.joins(:room).where(rooms: { active: true }).with_has_unread_notifications.includes(:room)
-    @all_memberships      = other_memberships
-    @starred_memberships  = other_memberships
+    # Get other memberships with minimal data
+    other_memberships = base_memberships.reject { |m| m.room.direct? }
+    @all_memberships = other_memberships
+    @starred_memberships = other_memberships
 
     @direct_memberships.select! { |m| m.room.messages_count > 0 }
   end

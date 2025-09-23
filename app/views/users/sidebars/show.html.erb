@@ -6,8 +6,8 @@
       data-controller="badge-dot maintain-scroll"
       data-badge-dot-unread-class="badge"
       data-action="rooms-list:unread@window->badge-dot#update rooms-list:read@window->badge-dot#update rooms-list:addBadge@window->badge-dot#update turbo:submit-start->turbo-frame#unpermanize turbo:before-render@document->maintain-scroll#beforeRender">
-    <turbo-frame id="direct_rooms_control" target="_top">
-      <div class="directs gap overflow-x overflow-hide-scrollbar">
+      <turbo-frame id="direct_rooms_control" target="_top">
+        <div class="directs gap overflow-x overflow-hide-scrollbar">
         <%= link_to new_rooms_direct_path, class: "direct direct__new", data: { turbo_frame: "_self" } do %>
           <span class="avatar avatar--icon">
             <%= image_tag "messages-add.svg", size: 20, aria: { hidden: "true" }, class: "colorize--black" %>

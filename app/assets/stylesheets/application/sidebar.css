@@ -12,6 +12,128 @@
   position: relative;
 }
 
+.sidebar__room-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--inline-space);
+  padding: calc(var(--block-space) / 4) var(--inline-space);
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 400;
+  min-width: 0;
+  position: relative;
+}
+
+.sidebar__room-item:hover {
+  background-color: var(--color-bg-hover);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.sidebar__room-item.unread {
+  font-weight: 600;
+  color: var(--color-text-strong);
+}
+
+.sidebar__room-item.badge::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: calc(var(--inline-space) * 2);
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.sidebar__room-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.sidebar__room-time {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--txt-x-small);
+}
+
+.sidebar__room-actions {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar__room-item:hover .sidebar__room-actions {
+  opacity: 1;
+}
+
+.sidebar__room-action-placeholder {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar__room-action-dot {
+  width: 4px;
+  height: 4px;
+  background-color: var(--color-border);
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+.sidebar__direct-item {
+  display: flex;
+  align-items: center;
+  gap: var(--inline-space);
+  padding: calc(var(--block-space) / 4) var(--inline-space);
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 400;
+  width: 100%;
+  min-width: 0;
+}
+
+.sidebar__direct-item:hover {
+  background-color: var(--color-bg-hover);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.sidebar__direct-item.unread {
+  font-weight: 600;
+  color: var(--color-text-strong);
+}
+
+.sidebar__direct-avatar {
+  flex-shrink: 0;
+}
+
+.sidebar__direct-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  font-size: var(--txt-small);
+}
+
+.sidebar__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .sidebar__tools {
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
