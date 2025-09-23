@@ -40,7 +40,8 @@ class Messages::AttachmentPresentation
 
       inline_media_dimension_constraints(width, height) do
         lightbox_link do
-          broadcast_image_tag message.attachment.representation(:thumb), width: width, height: height, class: "message__attachment", loading: "lazy"
+          image_source = gif_attachment? ? message.attachment : message.attachment.representation(:thumb)
+          broadcast_image_tag image_source, width: width, height: height, class: "message__attachment", loading: "lazy"
         end
       end
     end
@@ -103,5 +104,9 @@ class Messages::AttachmentPresentation
 
     def download_url
       rails_blob_path message.attachment, disposition: "attachment", only_path: true
+    end
+
+    def gif_attachment?
+      message.attachment.content_type == "image/gif"
     end
 end
