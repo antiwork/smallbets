@@ -12,9 +12,136 @@ And if you're not part of the [Small Bets](https://smallbets.com) community yet,
 
 ## Running in development
 
+### Prerequisites
+
+- Ruby 3.3.1 (check with `ruby --version`)
+- Redis server
+- SQLite3
+
+### Setup
+
     bin/setup
+    redis-server  # In a separate terminal
     bin/rails server
+
+The `bin/setup` script will install dependencies, prepare the database, and configure the application.
 
 ## Running in production
 
-_Details coming soon: https://github.com/antiwork/smallbets/issues/26_
+Small Bets uses **Kamal** for production deployment - a modern deployment tool created by 37signals (the makers of Rails) that provides zero-downtime deployments with Docker.
+
+### Prerequisites
+
+- A Linux server (Ubuntu 20.04+ recommended)
+- Docker installed on the server
+- A domain name pointing to your server
+- Docker Hub account (or another container registry)
+
+### Initial Server Setup
+
+1. **Install Kamal locally:**
+   ```bash
+   gem install kamal
+   ```
+
+2. **Configure environment variables:**
+   Create a `.kamal/secrets` file with your production secrets:
+   ```bash
+   mkdir -p .kamal
+   cat > .kamal/secrets << EOF
+   KAMAL_REGISTRY_PASSWORD=your-docker-hub-password
+   SERVER_IP=your-server-ip
+   PROXY_HOST=your-domain.com
+   REGISTRY_USERNAME=your-docker-hub-username
+   
+   # Application secrets (generate with: rails secret)
+   SECRET_KEY_BASE=your-rails-secret-key
+   RESEND_API_KEY=your-resend-api-key
+   AWS_ACCESS_KEY_ID=your-aws-access-key
+   AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+   AWS_DEFAULT_REGION=us-east-1
+   VAPID_PUBLIC_KEY=your-vapid-public-key
+   VAPID_PRIVATE_KEY=your-vapid-private-key
+   WEBHOOK_SECRET=your-webhook-secret
+   COOKIE_DOMAIN=your-domain.com
+   
+   # Optional features
+   GUMROAD_ACCESS_TOKEN=your-gumroad-token
+   GUMROAD_ON=true
+   GUMROAD_PRODUCT_IDS=your-product-ids
+   EOF
+   ```
+
+3. **Initial deployment:**
+   ```bash
+   kamal setup    # Sets up Docker, builds image, starts services
+   ```
+
+### Subsequent Deployments
+
+```bash
+kamal deploy   # Zero-downtime deployment
+```
+
+### Automated Deployments
+
+This repository includes GitHub Actions for automatic deployment:
+
+1. **Set GitHub Secrets** in your repository settings:
+   - `SSH_PRIVATE_KEY` - SSH key for server access
+   - `SERVER_IP` - Your production server IP
+   - `DOMAIN` - Your domain name (PROXY_HOST)
+   - `DOCKER_USERNAME` & `DOCKER_PASSWORD` - Docker Hub credentials
+   - `SECRET_KEY_BASE` - Rails encryption key
+   - `RESEND_API_KEY` - Email delivery service
+   - `AWS_ACCESS_KEY_ID` & `AWS_SECRET_ACCESS_KEY` - File storage
+   - `AWS_DEFAULT_REGION` - AWS region (default: us-east-1)
+   - `VAPID_PUBLIC_KEY` & `VAPID_PRIVATE_KEY` - Push notifications
+   - `WEBHOOK_SECRET` - Webhook security
+   - `COOKIE_DOMAIN` - Your domain for cookies
+   - Optional: `GUMROAD_ACCESS_TOKEN`, `GUMROAD_ON`, `GUMROAD_PRODUCT_IDS`
+
+2. **Deploy automatically:**
+   - Push to `master` branch for automatic deployment
+   - Or use "Deploy with Kamal" workflow for manual deployment
+
+### Monitoring and Management
+
+- **Health check:** `https://your-domain.com/up`
+- **View logs:** `kamal app logs`
+- **Server console:** `kamal app exec -i --reuse "bin/rails console"`
+- **Restart services:** `kamal deploy`
+
+### Alternative: Manual Docker Deployment
+
+If you prefer not to use Kamal, you can deploy manually with Docker:
+
+```bash
+# Build and run
+docker build -t smallbets/campfire .
+docker run -p 3000:3000 \
+  -e RAILS_ENV=production \
+  -e SECRET_KEY_BASE=your-secret-key \
+  -v /path/to/storage:/rails/storage \
+  smallbets/campfire
+```
+
+### Environment Variables Reference
+
+| Variable | Purpose | Required |
+|----------|---------|----------|
+| `SECRET_KEY_BASE` | Rails encryption key | ✅ |
+| `RESEND_API_KEY` | Email delivery via Resend | ✅ |
+| `AWS_ACCESS_KEY_ID` | File storage on AWS | ✅ |
+| `AWS_SECRET_ACCESS_KEY` | File storage on AWS | ✅ |
+| `AWS_DEFAULT_REGION` | AWS region (us-east-1) | ✅ |
+| `VAPID_PUBLIC_KEY` | Web push notifications | ✅ |
+| `VAPID_PRIVATE_KEY` | Web push notifications | ✅ |
+| `WEBHOOK_SECRET` | Webhook security | ✅ |
+| `COOKIE_DOMAIN` | Session cookies domain | ✅ |
+| `GUMROAD_ACCESS_TOKEN` | Payment processing | ⚠️ |
+| `GUMROAD_ON` | Enable Gumroad features | ⚠️ |
+| `GUMROAD_PRODUCT_IDS` | Gumroad product IDs | ⚠️ |
+
+✅ = Required for production deployment  
+⚠️ = Optional (payment features only)
