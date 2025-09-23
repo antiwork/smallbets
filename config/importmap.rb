@@ -9,6 +9,7 @@ pin "trix", to: "trix.esm.min.js" # @2.0.10
 pin "@rails/actiontext", to: "actiontext.js"
 pin "highlight.js", to: "highlight.js/core.js"
 pin "@hotwired/hotwire-native-bridge", to: "@hotwired--hotwire-native-bridge.js" # @1.0.0
+pin "panzoom", to: "panzoom.js"
 
 pin_all_from "app/javascript/initializers", under: "initializers"
 pin_all_from "app/javascript/lib", under: "lib"
