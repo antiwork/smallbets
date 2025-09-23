@@ -1,5 +1,6 @@
 MIT License
 
+Copyright (c) 37signals, LLC
 Copyright (c) 2025 Gumroad, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
