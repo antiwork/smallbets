@@ -256,6 +256,40 @@ class StatsService
           .order("date ASC")
   end
 
+  # Get recent daily stats (last X days with messages)
+  def self.recent_daily_stats(days_limit = 365)
+    # Get the last X days that have messages, then reverse for chronological order
+    stats = Message.select("strftime('%Y-%m-%d', created_at) as date, count(*) as count")
+                  .group("date")
+                  .order("date DESC")
+                  .limit(days_limit)
+                  .to_a
+    
+    # Reverse to get chronological order for chart display
+    stats.reverse
+  end
+
+  # Get aggregated daily stats when there are too many days
+  def self.aggregated_daily_stats(max_bars = 300)
+    all_stats = all_time_daily_stats.to_a
+    return all_stats if all_stats.length <= max_bars
+
+    # Calculate aggregation factor (how many days to group together)
+    aggregation_factor = (all_stats.length.to_f / max_bars).ceil
+    
+    aggregated = []
+    all_stats.each_slice(aggregation_factor) do |slice|
+      # Take the last date in the slice as the representative date
+      representative_date = slice.last.date
+      total_count = slice.sum(&:count)
+      
+      # Create a struct-like object that responds to .date and .count
+      aggregated << OpenStruct.new(date: representative_date, count: total_count)
+    end
+    
+    aggregated
+  end
+
   # Get top posters for a specific day
   def self.top_posters_for_day(day, limit = 10)
     # Explicitly parse the date in UTC timezone

@@ -524,7 +524,19 @@
     <!-- Daily stats table with graph -->
     <div class="card grid-card">
       <div class="card-header">
-        <h2 class="txt-h3 margin-none">Messages</h2>
+        <div class="flex-between-center">
+          <h2 class="txt-h3 margin-none">Messages</h2>
+          <div class="flex gap-2">
+            <%= link_to stats_path(chart_view: 'recent'), 
+                class: "btn btn-small #{@chart_view == 'recent' ? 'btn-primary' : 'btn-ghost'}" do %>
+              Last Year
+            <% end %>
+            <%= link_to stats_path(chart_view: 'all_time'), 
+                class: "btn btn-small #{@chart_view == 'all_time' ? 'btn-primary' : 'btn-ghost'}" do %>
+              All Time
+            <% end %>
+          </div>
+        </div>
       </div>
       <div class="card-body compact">
         <!-- Table data -->
@@ -545,9 +557,9 @@
         <div class="margin-top">
           <div style="height: 300px;">
             <%
-              # Use all-time stats
-              max_count = @all_time_stats.map(&:count).max
-              total_days = @all_time_stats.length
+              # Use chart stats (recent or aggregated all-time)
+              max_count = @chart_stats.map(&:count).max
+              total_days = @chart_stats.length
               
               # Fixed dimensions
               graph_height = 240
@@ -633,7 +645,7 @@
               />
 
               <!-- Bars -->
-              <% @all_time_stats.each_with_index do |stat, index| %>
+              <% @chart_stats.each_with_index do |stat, index| %>
                 <% 
                   bar_height = (stat.count.to_f / max_count * (graph_height - bottom_margin - 10)).round
                   x_pos = left_margin + (index * (bar_width + bar_spacing))

@@ -121,9 +121,22 @@ class StatsController < ApplicationController
       Rails.logger.error "Error getting system metrics: #{e.message}"
     end
 
-    # Get daily and all-time stats
+    # Get daily stats
     @daily_stats = StatsService.daily_stats
-    @all_time_stats = StatsService.all_time_daily_stats
+    
+    # Get chart stats - use recent by default, all-time with aggregation if requested
+    chart_view = params[:chart_view] || 'recent'
+    case chart_view
+    when 'all_time'
+      @chart_stats = StatsService.aggregated_daily_stats(300) # Max 300 bars to prevent overflow
+      @chart_view = 'all_time'
+    else
+      @chart_stats = StatsService.recent_daily_stats(365) # Last 365 days with messages
+      @chart_view = 'recent'
+    end
+    
+    # Keep @all_time_stats for backward compatibility with table
+    @all_time_stats = @chart_stats
 
     # Get top posters for different time periods
     @top_posters_today = StatsService.top_posters_today
