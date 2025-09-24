@@ -50,7 +50,6 @@ Small Bets uses [Kamal](https://kamal-deploy.org/docs/installation/) for deploym
    # Registry
    KAMAL_REGISTRY_PASSWORD=your-docker-hub-password
    REGISTRY_USERNAME=your-docker-hub-username
-   # Note: Use REGISTRY_USERNAME (canonical). Do not use KAMAL_REGISTRY_USERNAME.
 
    # Server + domain
    SERVER_IP=your-server-ip
