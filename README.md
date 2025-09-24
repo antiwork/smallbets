@@ -28,7 +28,7 @@ The `bin/setup` script will install dependencies, prepare the database, and conf
 
 ## Running in production
 
-Small Bets uses **Kamal** for production deployment - a modern deployment tool created by 37signals (the makers of Rails) that provides zero-downtime deployments with Docker.
+Small Bets uses [Kamal](https://kamal-deploy.org/docs/installation/) for deployment. A modern tool that provides zero-downtime deployments with Docker.
 
 ### Prerequisites
 
