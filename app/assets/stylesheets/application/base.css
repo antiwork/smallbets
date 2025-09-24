@@ -110,8 +110,10 @@ legend {
   margin-inline: var(--inline-space);
   inline-size: var(--width);
   max-inline-size: calc(100dvw - var(--inline-space) * 2);
-  position: relative;
-
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   &::backdrop {
     background-image: linear-gradient(
       45deg,
@@ -127,6 +129,21 @@ legend {
 .dialog__close {
   position: absolute;
   inset: calc(var(--block-space) * 1.5) var(--inline-space) auto auto;
+}
+
+.btn--plain {
+  --btn-background: transparent;
+  --btn-border-color: transparent;
+  --btn-border-size: 0;
+  --btn-padding: 0.25em 0.75em;
+  color: var(--color-text);
+  text-decoration: underline;
+
+  @media (any-hover: hover) {
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
 /* Misc */
