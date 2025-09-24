@@ -6,11 +6,10 @@ class Rooms::Open < Room
     def grant_access_to_all_users
       return unless type_previously_changed?(to: "Rooms::Open")
 
-      # Find the IDs of users who are already members of this room
-      existing_member_ids = self.memberships.pluck(:user_id)
-
-      # Find all active users who are NOT already members
-      users_to_add = User.active.where.not(id: existing_member_ids)
+      # Find active users who are NOT already members of this room
+      users_to_add = User.active
+                         .joins("LEFT JOIN memberships ON memberships.user_id = users.id AND memberships.room_id = #{id} AND memberships.active = true")
+                         .where("memberships.id IS NULL")
 
       # Grant memberships ONLY to the new users
       memberships.grant_to(users_to_add) if users_to_add.exists?
