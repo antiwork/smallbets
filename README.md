@@ -21,7 +21,6 @@ And if you're not part of the [Small Bets](https://smallbets.com) community yet,
 ### Setup
 
     bin/setup
-    redis-server  # In a separate terminal
     bin/rails server
 
 The `bin/setup` script will install dependencies, prepare the database, and configure the application.
