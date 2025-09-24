@@ -85,7 +85,12 @@ module ApplicationHelper
                 end,
                 tag.p("Unable to load download options right now.", class: "library__download-error", hidden: true, data: { video_download_target: "error" }),
                 tag.ul("", class: "library__download-list", data: { video_download_target: "list" }),
-                link_to("Download default quality", video.download_path, class: "library__download-fallback btn btn--plain", hidden: true, data: { video_download_target: "fallback" }, rel: "nofollow", target: "_blank" )
+                link_to(video.download_path, class: "library__download-fallback", hidden: true, data: { video_download_target: "fallback" }, rel: "nofollow", target: "_blank") do
+                  safe_join([
+                    tag.span("Download default quality", class: "library__download-fallback-text"),
+                    tag.span("", class: "library__download-fallback-size")
+                  ])
+                end
               ])
             end
           ])
