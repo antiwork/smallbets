@@ -35,24 +35,27 @@ Small Bets uses [Kamal](https://kamal-deploy.org/docs/installation/) for deploym
 - Docker installed on the server
 - A domain name pointing to your server
 - Docker Hub account (or another container registry)
+- Kamal CLI installed locally (install via `gem install kamal`)
 
 ### Initial Server Setup
 
-1. **Install Kamal locally:**
+1. **Initialize Kamal (creates `.kamal/secrets` if missing):**
    ```bash
-   gem install kamal
+   kamal init
    ```
 
 2. **Configure environment variables:**
-   Create a `.kamal/secrets` file with your production secrets:
+   Edit `.kamal/secrets` and add your production secrets, for example:
    ```bash
-   mkdir -p .kamal
-   cat > .kamal/secrets << EOF
+   # Registry
    KAMAL_REGISTRY_PASSWORD=your-docker-hub-password
+   REGISTRY_USERNAME=your-docker-hub-username
+   # Note: Use REGISTRY_USERNAME (canonical). Do not use KAMAL_REGISTRY_USERNAME.
+
+   # Server + domain
    SERVER_IP=your-server-ip
    PROXY_HOST=your-domain.com
-   REGISTRY_USERNAME=your-docker-hub-username
-   
+
    # Application secrets (generate with: rails secret)
    SECRET_KEY_BASE=your-rails-secret-key
    RESEND_API_KEY=your-resend-api-key
@@ -63,12 +66,9 @@ Small Bets uses [Kamal](https://kamal-deploy.org/docs/installation/) for deploym
    VAPID_PRIVATE_KEY=your-vapid-private-key
    WEBHOOK_SECRET=your-webhook-secret
    COOKIE_DOMAIN=your-domain.com
-   
+
    # Optional features
-   GUMROAD_ACCESS_TOKEN=your-gumroad-token
-   GUMROAD_ON=true
-   GUMROAD_PRODUCT_IDS=your-product-ids
-   EOF
+   GUMROAD_ON=false
    ```
 
 3. **Initial deployment:**
@@ -103,13 +103,6 @@ This repository includes GitHub Actions for automatic deployment:
 2. **Deploy automatically:**
    - Push to `master` branch for automatic deployment
    - Or use "Deploy with Kamal" workflow for manual deployment
-
-### Monitoring and Management
-
-- **Health check:** `https://your-domain.com/up`
-- **View logs:** `kamal app logs`
-- **Server console:** `kamal app exec -i --reuse "bin/rails console"`
-- **Restart services:** `kamal deploy`
 
 ### Alternative: Manual Docker Deployment
 

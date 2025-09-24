@@ -43,3 +43,9 @@ env:
 
 volumes:
   - "/disk/campfire/:/rails/storage/"
+
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole"
