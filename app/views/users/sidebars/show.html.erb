@@ -3,7 +3,7 @@
   <%= turbo_stream_from Current.user, :rooms %>
 
   <div class="sidebar__container overflow-y overflow-hide-scrollbar"
-      data-controller="badge-dot maintain-scroll"
+      data-controller="badge-dot maintain-scroll debounce-updates"
       data-badge-dot-unread-class="badge"
       data-action="rooms-list:unread@window->badge-dot#update rooms-list:read@window->badge-dot#update rooms-list:addBadge@window->badge-dot#update turbo:submit-start->turbo-frame#unpermanize turbo:before-render@document->maintain-scroll#beforeRender">
     <turbo-frame id="direct_rooms_control" target="_top">
