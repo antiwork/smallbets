@@ -12,6 +12,16 @@ class AuthTokens::ValidationsController < ApplicationController
     if auth_token
       auth_token.use!
       session.delete(:otp_email_address)
+      
+      # If there's pending OAuth data, connect it to the user
+      if session[:oauth_data].present?
+        oauth_data = session[:oauth_data]
+        if auth_token.user.connect_oauth_account(oauth_data['provider'], oauth_data['uid'], oauth_data['info'])
+          flash[:notice] = "Successfully signed in and connected your #{oauth_data['provider'].titleize} account!"
+        end
+        session.delete(:oauth_data)
+      end
+      
       start_new_session_for(auth_token.user)
       redirect_to post_authenticating_url
     else
