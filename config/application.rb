@@ -24,7 +24,5 @@ module Campfire
 
     # Use SQL schema format to include search-related objects
     config.active_record.schema_format = :sql
-
-    config.middleware.insert_after ActionDispatch::Static, Rack::Deflater
   end
 end
