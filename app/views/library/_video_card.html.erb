@@ -1,0 +1,20 @@
+<article class="library__card" id="video-<%= video.vimeo_id %>">
+  <header class="library__header">
+    <h3 class="library__title"><%= video.title %></h3>
+  </header>
+
+  <div class="library__iframe" style="<%= video.aspect_style %>">
+    <iframe
+      loading="lazy"
+      src="<%= video.player_src %>"
+      allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin"
+      title="<%= video.title %>">
+    </iframe>
+  </div>
+
+  <div class="library__actions">
+    <%= download_button_for(video) %>
+  </div>
+</article>

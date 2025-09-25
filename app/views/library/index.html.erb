@@ -1,0 +1,29 @@
+<% @page_title = "Library" %>
+<% @body_class = "sidebar" %>
+
+<% content_for :nav do %>
+  <%= account_logo_tag if Current.account.logo.attached? %>
+  <%= tag.span class: "btn btn--reversed btn--faux room--current" do %>
+    <h1 class="room__contents txt-medium overflow-ellipsis">Library</h1>
+  <% end %>
+  <%= link_home %>
+<% end %>
+
+<% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
+
+<div class="library">
+  <% @sections.each do |section| %>
+    <section id="<%= section.slug %>" class="library__section">
+      <header class="library__header">
+        <h2 class="library__section-title"><%= section.title %></h2>
+      </header>
+
+      <div class="library__videos">
+        <% section.videos.each do |video| %>
+          <%= render "library/video_card", video: video %>
+        <% end %>
+      </div>
+    </section>
+
+  <% end %>
+</div>

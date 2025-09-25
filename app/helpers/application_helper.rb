@@ -47,6 +47,58 @@ module ApplicationHelper
     end
   end
 
+  def download_button_for(video)
+    dialog_heading_id = "download-video-#{video.vimeo_id}"
+    container_data = {
+      controller: "video-download",
+      video_download_downloads_url_value: library_downloads_path(video.vimeo_id),
+      video_download_download_path_value: library_download_path(video.vimeo_id),
+      video_download_title_value: video.title
+    }
+
+    tag.div(class: "library__download", data: container_data) do
+      safe_join([
+        tag.button(type: "button", class: "btn", data: { action: "video-download#open" }) do
+          image_tag("download.svg", aria: { hidden: true }) +
+          tag.span("Download", class: "for-screen-reader")
+        end,
+        tag.dialog(class: "dialog pad border shadow library__download-dialog", aria: { labelledby: dialog_heading_id }, data: { video_download_target: "dialog" }) do
+          safe_join([
+            tag.button(type: "button", class: "btn dialog__close", data: { action: "video-download#close" }) do
+              safe_join([
+                image_tag("remove.svg", aria: { hidden: true }),
+                tag.span("Close download options", class: "for-screen-reader")
+              ])
+            end,
+            tag.header(class: "library__download-header") do
+              safe_join([
+                tag.h4("Download options", id: dialog_heading_id, class: "library__download-title"),
+                tag.p("Choose a quality to download \"#{video.title}\".", class: "library__download-subtitle")
+              ])
+            end,
+            tag.div(class: "library__download-body") do
+              safe_join([
+                tag.p(class: "library__download-loading", role: "status", aria: { live: "polite" }, data: { video_download_target: "loading" }) do
+                  safe_join([
+                    tag.span("", class: "spinner", aria: { hidden: true }),
+                  ])
+                end,
+                tag.p("Unable to load download options right now.", class: "library__download-error", hidden: true, data: { video_download_target: "error" }),
+                tag.ul("", class: "library__download-list", data: { video_download_target: "list" }),
+                link_to(video.download_path, class: "library__download-fallback", hidden: true, data: { video_download_target: "fallback" }, rel: "nofollow", target: "_blank") do
+                  safe_join([
+                    tag.span("Download default quality", class: "library__download-fallback-text"),
+                    tag.span("", class: "library__download-fallback-size")
+                  ])
+                end
+              ])
+            end
+          ])
+        end
+      ])
+    end
+  end
+
   # User statistics helpers
   def user_stats_for_period(user_id, period = :all_time)
     StatsService.user_stats_for_period(user_id, period)

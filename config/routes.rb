@@ -182,7 +182,9 @@ Rails.application.routes.draw do
   get "webmanifest"    => "pwa#manifest"
   get "service-worker" => "pwa#service_worker"
 
-  get "library" => "library#show"
+  get "library" => "library#index"
+  get "library/download/:id" => "library#download", as: :library_download
+  get "library/downloads/:id" => "library#downloads", as: :library_downloads
 
   get "experts" => "experts#show"
 
