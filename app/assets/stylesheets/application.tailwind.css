@@ -1,0 +1,6 @@
+/*
+  Tailwind CSS entrypoint. The CLI builds this file into app/assets/builds/tailwind.css.
+  Run `npx @tailwindcss/cli -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/tailwind.css --watch` in development.
+*/
+
+@import "tailwindcss";
