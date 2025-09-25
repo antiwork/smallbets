@@ -16,7 +16,7 @@ class Users::ProfilesController < ApplicationController
     end
 
     def user_params
-      params.require(:user).permit(:name, :avatar, :email_address, :password, :bio, :twitter_url, :linkedin_url, :personal_url).compact
+      params.require(:user).permit(:name, :avatar, :email_address, :password, :bio, :twitter_url, :linkedin_url, :personal_url, :twitter_uid, :twitter_username).compact
     end
 
     def after_update_url

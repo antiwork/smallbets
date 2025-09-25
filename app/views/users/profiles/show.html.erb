@@ -79,11 +79,29 @@
       <div class="flex align-center gap">
         <%= translation_button(:twitter) %>
 
-        <label class="flex align-center gap flex-item-grow input input--actor">
-          <%= form.text_field :twitter_url, class: "input txt-medium ", placeholder: "Your X profile", required: false %>
-          <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24, class: "colorize--black" %>
-        </label>
+        <% if @user.twitter_uid.present? %>
+          <div class="flex align-center gap flex-item-grow input input--actor">
+            <span class="input txt-medium">Connected as @<%= @user.twitter_username %></span>
+            <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24, class: "colorize--black" %>
+          </div>
+        <% else %>
+          <label class="flex align-center gap flex-item-grow input input--actor">
+            <%= form.text_field :twitter_url, class: "input txt-medium ", placeholder: "Your X profile", required: false %>
+            <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24, class: "colorize--black" %>
+          </label>
+        <% end %>
       </div>
+
+      <% if @user.twitter_uid.blank? %>
+        <div class="margin-block">
+          <%= link_to "/auth/twitter2", method: :post,
+                      class: "btn flex align-center gap center txt-medium",
+                      data: { confirm: "Connect your X (Twitter) account?" } do %>
+            <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 20, class: "colorize--black" %>
+            <span>Connect X Account</span>
+          <% end %>
+        </div>
+      <% end %>
 
       <div class="flex align-center gap">
         <%= translation_button(:linkedin) %>

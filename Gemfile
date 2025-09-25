@@ -32,6 +32,11 @@ gem "image_processing", ">= 1.2"
 gem "sentry-ruby"
 gem "sentry-rails"
 
+# OAuth
+gem "omniauth"
+gem "omniauth-twitter2"
+gem "omniauth-rails_csrf_protection"
+
 # Other
 gem "bcrypt"
 gem "web-push"

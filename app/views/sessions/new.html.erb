@@ -14,11 +14,11 @@
       <%= form_with url: auth_tokens_url, class: "flex flex-column gap", data: { turbo: hotwire_native_app? }, html: { autocomplete: "off" } do |form| %>
         <fieldset class="flex flex-column gap center-block upad">
           <legend class="txt-large txt-align-center"><strong>Member Login</strong></legend>
-  
+
           <% if flash[:alert] %>
             <p class="txt-medium txt-negative"><%= flash[:alert] %></p>
           <% end %>
-          
+
           <div class="flex align-center gap">
             <%= translation_button(:email_address) %>
             <label class="flex align-center gap input input--actor txt-large">
@@ -37,6 +37,16 @@
           <% end %>
         </fieldset>
       <% end %>
+
+      <fieldset class="flex flex-column gap center-block upad">
+        <legend class="txt-large txt-align-center"><strong>Or sign in with</strong></legend>
+
+        <%= link_to "/auth/twitter2", method: :post, class: "btn btn--reversed flex align-center gap center txt-large",
+                    data: { confirm: "Sign in with X (Twitter)?" } do %>
+          <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24, class: "colorize--black" %>
+          <span>Continue with X</span>
+        <% end %>
+      </fieldset>
     </div>
   </div>
 
