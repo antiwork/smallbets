@@ -37,6 +37,17 @@
           <% end %>
         </fieldset>
       <% end %>
+
+      <div class="margin-block-start">
+        <fieldset class="flex flex-column gap center-block upad">
+          <legend class="txt-large txt-align-center"><strong>Or</strong></legend>
+          
+            <%= link_to "/auth/twitter2", class: "btn btn--reversed center txt-large flex align-center gap" do %>
+            <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24 %>
+            <span>Continue with X</span>
+          <% end %>
+        </fieldset>
+      </div>
     </div>
   </div>
 

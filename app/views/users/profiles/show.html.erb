@@ -121,6 +121,41 @@
 
   <fieldset style="padding-bottom: 0;">
     <legend class="gap">
+      <%= image_tag "social/twitter-outline.svg", aria: { hidden: "true" }, size: 36, class: "colorize--black" %>
+    </legend>
+  </fieldset>
+
+  <div class="margin-block pad-inline pad-block-half fill-shade border-radius" style="margin-top: 0;">
+    <menu class="flex flex-column gap-half margin-none pad">
+      <li class="flex align-center gap margin-none min-width membership-item">
+        <% if @user.oauth_connected? %>
+          Connected to <%= @user.oauth_provider_name %>
+          <% if @user.provider == 'twitter' && @user.twitter_username.present? %>
+            (@<%= @user.twitter_username %>)
+          <% end %>
+
+          <hr class="separator" aria-hidden="true">
+
+          <%= button_to "Disconnect", auth_disconnect_path, method: :delete, 
+                        class: "btn btn--negative txt-small",
+                        confirm: "Are you sure you want to disconnect your #{@user.oauth_provider_name} account?" %>
+        <% else %>
+          Connect your X account for easier sign-in
+
+          <hr class="separator" aria-hidden="true">
+
+          <%= link_to "Connect X Account", "/auth/twitter", 
+                      class: "btn txt-small",
+                      method: :post %>
+        <% end %>
+      </li>
+    </menu>
+  </div>
+
+  <hr class="margin-block-start borderless">
+
+  <fieldset style="padding-bottom: 0;">
+    <legend class="gap">
       <%= image_tag "notification-bell-everything-old.svg", aria: { hidden: "true" }, size: 36, class: "colorize--black" %>
     </legend>
   </fieldset>
