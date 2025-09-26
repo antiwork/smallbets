@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0  # Fetch all history for git operations
 
       - name: Get short SHA
-        uses: benjlevesque/short-sha@v3.0
+        uses: benjlevesque/short-sha@599815c8ee942a9616c92bcfb4f947a3b670ab0b # v3.0
         id: short-sha
         with:
           length: 7
@@ -45,7 +45,7 @@ jobs:
         run: gem install kamal
 
       - name: Set up SSH key
-        uses: webfactory/ssh-agent@v0.8.0
+        uses: webfactory/ssh-agent@d4b9b8ff72958532804b70bbe600ad43b36d5f2e # v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
