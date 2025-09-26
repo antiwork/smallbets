@@ -38,6 +38,26 @@ export default class ScrollManager {
       const scrollTop = this.#container.scrollTop
       const scrollHeight = this.#cachedScrollHeight // Use cached value
 
+      // Safari-specific: Temporarily disable scroll restoration
+      const originalScrollRestoration = history.scrollRestoration
+      if (history.scrollRestoration) {
+        history.scrollRestoration = 'manual'
+      }
+
+      // Safari-specific: Force immediate scroll position lock
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+      if (isSafari && scrollTop > 0) {
+        // Prevent Safari from jumping by setting a temporary fixed position
+        const originalOverflow = this.#container.style.overflow
+        this.#container.style.overflow = 'hidden'
+        this.#container.style.scrollBehavior = 'auto'
+        
+        // Restore after a minimal delay to prevent the jump
+        setTimeout(() => {
+          this.#container.style.overflow = originalOverflow
+        }, 0)
+      }
+
       await render()
       
       // Update cache after render
@@ -45,10 +65,29 @@ export default class ScrollManager {
 
       const newScrollTop = top ? scrollTop + (this.#container.scrollHeight - scrollHeight) : scrollTop
       
-      if (delay) {
-        requestAnimationFrame(() => this.#container.scrollTo({ top: newScrollTop, behavior: scrollBehaviour }))
-      } else {
+      // Safari-specific: Use multiple restoration attempts
+      const restoreScroll = () => {
         this.#container.scrollTo({ top: newScrollTop, behavior: scrollBehaviour })
+        
+        // Safari sometimes needs a second attempt
+        if (isSafari && Math.abs(this.#container.scrollTop - newScrollTop) > 1) {
+          requestAnimationFrame(() => {
+            this.#container.scrollTo({ top: newScrollTop, behavior: 'auto' })
+          })
+        }
+      }
+      
+      if (delay) {
+        requestAnimationFrame(restoreScroll)
+      } else {
+        restoreScroll()
+      }
+
+      // Restore scroll restoration setting
+      if (originalScrollRestoration) {
+        setTimeout(() => {
+          history.scrollRestoration = originalScrollRestoration
+        }, 100)
       }
     })
   }
