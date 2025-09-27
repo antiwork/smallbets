@@ -1,0 +1,26 @@
+<div class="sidebar__container overflow-y overflow-hide-scrollbar" style="padding: var(--inline-space);">
+  <div style="display: flex; flex-direction: column; gap: var(--block-space);">
+    <div style="height: 60px; background: var(--color-border); border-radius: 8px; opacity: 0.3; animation: pulse 1.5s ease-in-out infinite;"></div>
+    
+    <div style="display: flex; flex-direction: column; gap: calc(var(--block-space) / 2); margin-block-start: var(--block-space);">
+      <div style="height: 20px; width: 100px; background: var(--color-border); border-radius: 4px; opacity: 0.3; animation: pulse 1.5s ease-in-out infinite;"></div>
+      <% 8.times do %>
+        <div style="height: 40px; background: var(--color-border); border-radius: 6px; opacity: 0.3; animation: pulse 1.5s ease-in-out infinite; animation-delay: <%= rand(0..300) %>ms;"></div>
+      <% end %>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: calc(var(--block-space) / 2); margin-block-start: var(--block-space);">
+      <div style="height: 20px; width: 120px; background: var(--color-border); border-radius: 4px; opacity: 0.3; animation: pulse 1.5s ease-in-out infinite;"></div>
+      <% 12.times do %>
+        <div style="height: 40px; background: var(--color-border); border-radius: 6px; opacity: 0.3; animation: pulse 1.5s ease-in-out infinite; animation-delay: <%= rand(0..300) %>ms;"></div>
+      <% end %>
+    </div>
+  </div>
+
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.15; }
+    }
+  </style>
+</div>
