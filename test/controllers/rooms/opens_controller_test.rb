@@ -27,8 +27,10 @@ class Rooms::OpensControllerTest < ActionDispatch::IntegrationTest
   test "only admins or creators can update" do
     sign_in :jz
 
-    assert_turbo_stream_broadcasts :rooms, count: 0 do
-      put rooms_open_url(rooms(:hq)), params: { room: { name: "New Name" } }
+    perform_enqueued_jobs do
+      assert_turbo_stream_broadcasts :rooms, count: 0 do
+        put rooms_open_url(rooms(:hq)), params: { room: { name: "New Name" } }
+      end
     end
 
     assert_response :forbidden
@@ -36,8 +38,10 @@ class Rooms::OpensControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "update" do
-    assert_turbo_stream_broadcasts :rooms, count: 1 do
-      put rooms_open_url(rooms(:pets)), params: { room: { name: "New Name" } }
+    perform_enqueued_jobs do
+      assert_turbo_stream_broadcasts :rooms, count: 1 do
+        put rooms_open_url(rooms(:pets)), params: { room: { name: "New Name" } }
+      end
     end
 
     assert_redirected_to room_url(rooms(:pets))
