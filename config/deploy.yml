@@ -1,6 +1,6 @@
 service: campfire
 
-image: smallbets/campfire
+image: antiwork/smallbets
 
 servers:
   web:

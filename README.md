@@ -110,12 +110,12 @@ If you prefer not to use Kamal, you can deploy manually with Docker:
 
 ```bash
 # Build and run
-docker build -t smallbets/campfire .
+docker build -t antiwork/smallbets .
 docker run -p 3000:3000 \
   -e RAILS_ENV=production \
   -e SECRET_KEY_BASE=your-secret-key \
   -v /path/to/storage:/rails/storage \
-  smallbets/campfire
+  antiwork/smallbets
 ```
 
 ### Environment Variables Reference
