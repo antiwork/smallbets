@@ -1,0 +1,45 @@
+<div class="library__hero-card" id="hero-video-<%= video.vimeo_id %>"
+     data-controller="video-player"
+     data-video-player-embed-url-value="<%= video.embed_url %>"
+     data-video-player-vimeo-id-value="<%= video.vimeo_id %>">
+  <div class="library__hero-frame" style="<%= video.aspect_style %>">
+    <!-- Thumbnail Image -->
+    <div class="library__hero-poster" 
+         data-video-player-target="thumbnail"
+         data-action="click->video-player#play">
+      <% if video.thumbnail_url %>
+        <img src="<%= video.thumbnail_url %>" 
+             alt="<%= video.title %>" 
+             loading="lazy"
+             class="library__hero-poster-image">
+      <% else %>
+        <div class="library__hero-poster-fallback">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="library__hero-poster-icon">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      <% end %>
+      
+      <div class="library__hero-overlay">
+        <button class="library__hero-play-button" type="button"
+                data-action="click->video-player#play">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Video Player (hidden initially) -->
+    <div class="library__hero-player" 
+         data-video-player-target="player"
+         style="<%= video.aspect_style %>">
+    </div>
+  </div>
+  
+  <!-- Video Information -->
+  <div class="library__hero-video-info">
+    <h3 class="library__hero-video-title"><%= video.clean_title %></h3>
+    <p class="library__hero-video-author">by <%= video.author_name %></p>
+  </div>
+</div>

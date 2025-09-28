@@ -12,18 +12,111 @@
 <% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
 
 <div class="library">
-  <% @sections.each do |section| %>
-    <section id="<%= section.slug %>" class="library__section">
-      <header class="library__header">
-        <h2 class="library__section-title"><%= section.title %></h2>
-      </header>
+  <% hero_section = @sections.first %>
+  <% hero_video = hero_section&.videos&.first %>
+  
+  <% if hero_video %>
+    <section class="library__hero" 
+             data-controller="video-player"
+             data-video-player-embed-url-value="<%= hero_video.embed_url %>"
+             data-video-player-vimeo-id-value="<%= hero_video.vimeo_id %>">
+      <div class="library__hero-background">
+        <div class="library__hero-content">
+          <div class="library__hero-info">
+            <h1 class="library__hero-title">Master the Small Bets Methodology</h1>
+            <p class="library__hero-subtitle">Master the art of building profitable businesses through small, calculated experiments. Learn the reliable methodology that's helped thousands of entrepreneurs find their path to success.</p>
+            <div class="library__hero-meta">
+              <span class="library__hero-duration"><%= @stats[:total_duration] %> total</span>
+              <span class="library__hero-viewers"><%= @stats[:total_views] %></span>
+              <span class="library__hero-count"><%= @stats[:total_count] %> classes</span>
+            </div>
+          </div>
+          <div class="library__hero-video">
+            <div class="library__hero-carousel" 
+                 data-controller="video-carousel"
+                 data-video-carousel-current-index-value="0"
+                 data-action="mouseenter->video-carousel#mouseEnter mouseleave->video-carousel#mouseLeave">
+              
+              <!-- Carousel Container -->
+              <div class="library__hero-carousel-container" data-video-carousel-target="container">
+                <% slide_index = 0 %>
+                <% @sections.each do |section| %>
+                  <% section.videos.each do |video| %>
+                    <div class="library__hero-carousel-slide <%= 'library__hero-carousel-slide--active' if slide_index == 0 %>"
+                         data-video-carousel-target="slide"
+                         data-slide-index="<%= slide_index %>">
+                      <%= render "library/hero_video_card", video: video %>
+                    </div>
+                    <% slide_index += 1 %>
+                  <% end %>
+                <% end %>
+              </div>
+              
+              <!-- Carousel Controls -->
+              <div class="library__hero-carousel-controls">
+                <button class="library__hero-carousel-btn library__hero-carousel-btn--prev" 
+                        data-action="click->video-carousel#previous"
+                        data-video-carousel-target="prevBtn">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  </svg>
+                </button>
+                <button class="library__hero-carousel-btn library__hero-carousel-btn--next" 
+                        data-action="click->video-carousel#next"
+                        data-video-carousel-target="nextBtn">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- Carousel Indicators -->
+              <div class="library__hero-carousel-indicators" data-video-carousel-target="indicators">
+                <% indicator_index = 0 %>
+                <% @sections.each do |section| %>
+                  <% section.videos.each do |video| %>
+                    <button class="library__hero-carousel-indicator <%= 'library__hero-carousel-indicator--active' if indicator_index == 0 %>"
+                            data-action="click->video-carousel#goToSlide"
+                            data-slide-index="<%= indicator_index %>"
+                            data-video-carousel-target="indicator">
+                    </button>
+                    <% indicator_index += 1 %>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  <% end %>
 
-      <div class="library__videos">
-        <% section.videos.each do |video| %>
-          <%= render "library/video_card", video: video %>
+  <div class="library__sections">
+    <section class="library__section library__section--featured">
+      <header class="library__section-header">
+        <h2 class="library__section-title">Featured Classes</h2>
+      </header>
+      <div class="library__videos-grid">
+        <% @sections.first(4).each do |section| %>
+          <% section.videos.first(1).each do |video| %>
+            <%= render "library/featured_video_card", video: video, section: section %>
+          <% end %>
         <% end %>
       </div>
     </section>
 
-  <% end %>
+    <% @sections.each do |section| %>
+      <section id="<%= section.slug %>" class="library__section">
+        <header class="library__section-header">
+          <h2 class="library__section-title"><%= section.title %></h2>
+        </header>
+
+        <div class="library__videos-row">
+          <% section.videos.each do |video| %>
+            <%= render "library/video_card", video: video, section: section %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
 </div>

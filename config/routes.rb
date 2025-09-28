@@ -185,6 +185,7 @@ Rails.application.routes.draw do
   get "library" => "library#index"
   get "library/download/:id" => "library#download", as: :library_download
   get "library/downloads/:id" => "library#downloads", as: :library_downloads
+  post "library/warm_cache" => "library#warm_cache", as: :library_warm_cache
 
   get "experts" => "experts#show"
 

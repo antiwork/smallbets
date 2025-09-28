@@ -19,6 +19,43 @@ module Vimeo
       end || downloads.first
     end
 
+    def fetch_video_metadata(video_id)
+      Rails.cache.fetch("vimeo_metadata_#{video_id}", expires_in: 1.hour) do
+        response = http_client.get("/videos/#{video_id}") do |req|
+          req.params[:fields] = "duration,stats,created_time,pictures"
+          req.headers["Accept"] = "application/vnd.vimeo.*+json;version=3.4"
+          req.headers["Authorization"] = "Bearer #{access_token}"
+        end
+
+        body = JSON.parse(response.body)
+        
+        # Get the best quality thumbnail (largest size)
+        thumbnail_sizes = body.dig("pictures", "sizes") || []
+        best_thumbnail = thumbnail_sizes.max_by { |size| size["width"] || 0 }
+        
+        {
+          duration: body.dig("duration"),
+          views: body.dig("stats", "plays"),
+          likes: body.dig("stats", "likes"),
+          comments: body.dig("stats", "comments"),
+          created_time: body.dig("created_time"),
+          thumbnail_url: best_thumbnail&.dig("link"),
+          thumbnail_width: best_thumbnail&.dig("width"),
+          thumbnail_height: best_thumbnail&.dig("height")
+        }
+      end
+    rescue JSON::ParserError, Faraday::Error => e
+      Rails.logger.error "Failed to fetch Vimeo metadata for video #{video_id}: #{e.message}"
+      {
+        duration: nil,
+        views: nil,
+        likes: nil,
+        comments: nil,
+        created_time: nil,
+        thumbnail_url: nil
+      }
+    end
+
     def fetch_downloads(video_id)
       response = http_client.get("/videos/#{video_id}") do |req|
         req.params[:fields] = "download"
@@ -60,6 +97,33 @@ module Vimeo
         builder.request :url_encoded
         builder.response :raise_error
         builder.adapter Faraday.default_adapter
+      end
+    end
+
+    def format_duration(seconds)
+      return "0:00" if seconds.nil? || seconds <= 0
+
+      hours = seconds / 3600
+      minutes = (seconds % 3600) / 60
+      secs = seconds % 60
+
+      if hours > 0
+        format("%d:%02d:%02d", hours, minutes, secs)
+      else
+        format("%d:%02d", minutes, secs)
+      end
+    end
+
+    def format_view_count(count)
+      return "0 views" if count.nil? || count <= 0
+
+      case count
+      when 0...1_000
+        "#{count} views"
+      when 1_000...1_000_000
+        "#{(count / 1_000.0).round(1)}K views"
+      else
+        "#{(count / 1_000_000.0).round(1)}M views"
       end
     end
 

@@ -1,6 +1,7 @@
 class LibraryController < ApplicationController
   def index
     @sections = LibraryCatalog.sections
+    @stats = LibraryCatalog.total_stats
   end
 
   def download
@@ -21,6 +22,11 @@ class LibraryController < ApplicationController
     else
       render json: downloads
     end
+  end
+
+  def warm_cache
+    WarmVideoMetadataJob.perform_later
+    head :ok
   end
 
   private

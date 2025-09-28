@@ -1,52 +1,49 @@
-<article class="library__row-card" id="video-<%= video.vimeo_id %>" 
+<article class="library__featured-card" id="featured-video-<%= video.vimeo_id %>"
          data-controller="video-player"
          data-video-player-embed-url-value="<%= video.embed_url %>"
          data-video-player-vimeo-id-value="<%= video.vimeo_id %>">
-  <div class="library__row-thumbnail">
-    <div class="library__row-frame" style="<%= video.aspect_style %>">
+  <div class="library__featured-thumbnail">
+    <div class="library__featured-frame" style="<%= video.aspect_style %>">
       <!-- Thumbnail Image -->
-      <div class="library__row-poster" 
+      <div class="library__featured-poster" 
            data-video-player-target="thumbnail"
            data-action="click->video-player#play">
         <% if video.thumbnail_url %>
           <img src="<%= video.thumbnail_url %>" 
                alt="<%= video.title %>" 
                loading="lazy"
-               class="library__row-poster-image">
+               class="library__featured-poster-image">
         <% else %>
-          <div class="library__row-poster-fallback">
-            <svg viewBox="0 0 24 24" fill="currentColor" class="library__row-poster-icon">
+          <div class="library__featured-poster-fallback">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="library__featured-poster-icon">
               <path d="M8 5v14l11-7z"/>
             </svg>
           </div>
         <% end %>
         
-        <div class="library__row-overlay">
-          <div class="library__row-duration"><%= video.duration %></div>
-          <button class="library__row-play" type="button"
+        <div class="library__featured-overlay">
+          <div class="library__featured-duration"><%= video.duration %></div>
+          <button class="library__featured-play" type="button"
                   data-action="click->video-player#play">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M8 5v14l11-7z"/>
             </svg>
           </button>
-          <div class="library__row-actions">
-            <%= download_button_for(video) %>
-          </div>
         </div>
       </div>
       
       <!-- Video Player (hidden initially) -->
-      <div class="library__row-player" 
+      <div class="library__featured-player" 
            data-video-player-target="player"
            style="<%= video.aspect_style %>">
       </div>
     </div>
   </div>
-  <div class="library__row-info">
-    <h3 class="library__row-title"><%= video.clean_title %></h3>
-    <div class="library__row-meta">
-      <span class="library__row-author"><%= video.author_name %></span>
-      <span class="library__row-views"><%= video.view_count %></span>
+  <div class="library__featured-info">
+    <h3 class="library__featured-title"><%= video.clean_title %></h3>
+    <div class="library__featured-meta">
+      <span class="library__featured-author"><%= video.author_name %></span>
+      <span class="library__featured-views"><%= video.view_count %></span>
     </div>
   </div>
 </article>
