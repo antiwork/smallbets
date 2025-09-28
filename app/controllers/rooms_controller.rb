@@ -26,7 +26,17 @@ class RoomsController < ApplicationController
     end
 
     def set_room
-      if room = Current.user.rooms.find_by(id: params[:room_id] || params[:id])
+      identifier = params[:room_id] || params[:id] || params[:slug]
+
+      # Try by numeric id first (preserve existing behavior)
+      room = Current.user.rooms.find_by(id: identifier)
+
+      # Fallback to slug-based lookup when identifier is not a numeric id
+      if room.nil?
+        room = Current.user.rooms.find_by(slug: identifier)
+      end
+
+      if room
         @room = room
       else
         redirect_to root_url, alert: "Room not found or inaccessible"
@@ -62,7 +72,9 @@ class RoomsController < ApplicationController
     end
 
     def room_params
-      params.require(:room).permit(:name)
+      permitted = [ :name ]
+      permitted << :slug if Current.user.administrator?
+      params.require(:room).permit(*permitted)
     end
 
     def broadcast_remove_room

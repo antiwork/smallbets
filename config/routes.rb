@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  # Top-level room slug routing (must come before other catch-alls that could conflict)
+  constraints(RoomSlugConstraint.new) do
+    get "/:slug", to: "rooms#show", as: :room_slug
+  end
+
   # Redirect www.smallbets.com to smallbets.com
   constraints(host: /^www\.smallbets\.com/) do
     match "(*any)", to: redirect { |params, request|
