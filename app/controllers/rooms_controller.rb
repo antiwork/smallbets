@@ -10,6 +10,13 @@ class RoomsController < ApplicationController
   end
 
   def show
+    # Redirect to canonical slug URL when available, unless viewing a specific message
+    if params[:message_id].blank? && @room.slug.present? && params[:slug].blank?
+      target = room_slug_url(@room.slug)
+      target = target + "?" + request.query_string if request.query_string.present?
+      return redirect_to(target)
+    end
+
     @messages = Bookmark.populate_for(find_messages)
   end
 
