@@ -5,11 +5,9 @@ class OauthController < ApplicationController
     auth_info = request.env["omniauth.auth"]
     
     if signed_in?
-      # User is connecting their X account
       Current.user.update!(twitter_uid: auth_info.uid)
       redirect_to user_profile_path, notice: "X account connected successfully!"
     else
-      # User is signing in with X
       user = User.find_by(twitter_uid: auth_info.uid) ||
              User.find_by(email_address: auth_info.info.email)
       

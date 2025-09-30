@@ -34,6 +34,19 @@ To enable Twitter/X login and account linking:
    TWITTER_CLIENT_ID=your_client_id
    TWITTER_CLIENT_SECRET=your_client_secret
    ```
+### Running Tests
+
+To run the OAuth-related tests:
+
+    rails test test/controllers/oauth_controller_test.rb
+    rails test test/models/user_oauth_test.rb
+    rails test test/system/oauth_system_test.rb
+    rails test test/integration/oauth_routes_test.rb
+
+Or run all tests:
+
+    rails test
+
 The `bin/setup` script will install dependencies, prepare the database, and configure the application.
 
 ## Running in production
