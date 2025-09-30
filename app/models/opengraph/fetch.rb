@@ -1,11 +1,11 @@
-require "net/http"
+rubyrequire "net/http"
 require "restricted_http/private_network_guard"
 
 class Opengraph::Fetch
   ALLOWED_DOCUMENT_CONTENT_TYPE = "text/html"
   MAX_BODY_SIZE = 5.megabytes
   MAX_REDIRECTS = 10
-
+  
   class TooManyRedirectsError < StandardError; end
   class RedirectDeniedError < StandardError; end
 
@@ -23,19 +23,26 @@ class Opengraph::Fetch
 
   private
     def request(url, request_class, ip:)
-      MAX_REDIRECTS.times do
+      redirect_count = 0
+      
+      loop do
+        raise TooManyRedirectsError if redirect_count >= MAX_REDIRECTS
+        
         Net::HTTP.start(url.host, url.port, ipaddr: ip, use_ssl: url.scheme == "https") do |http|
-          http.request request_class.new(url) do |response|
+          request = request_class.new(url)
+          # Add User-Agent to avoid being blocked
+          request["User-Agent"] = "Mozilla/5.0 (compatible; OpengraphBot/1.0)"
+          
+          http.request(request) do |response|
             if response.is_a?(Net::HTTPRedirection)
               url, ip = resolve_redirect(response["location"])
+              redirect_count += 1
             else
-              yield response
+              return yield(response)
             end
           end
         end
       end
-
-      raise TooManyRedirectsError
     end
 
     def resolve_redirect(location)
@@ -49,10 +56,6 @@ class Opengraph::Fetch
     end
 
     def size_restricted_body(response)
-      # We've already checked the Content-Length header, to try to avoid reading
-      # the body of any large responses. But that header could be wrong or
-      # missing. To be on the safe side, we'll read the body in chunks, and bail
-      # if it runs over our size limit.
       "".tap do |body|
         response.read_body do |chunk|
           return nil if body.bytesize + chunk.bytesize > MAX_BODY_SIZE
@@ -70,7 +73,8 @@ class Opengraph::Fetch
     end
 
     def content_type_valid?(response)
-      response.content_type == ALLOWED_DOCUMENT_CONTENT_TYPE
+      # Handle content type with charset (e.g., "text/html; charset=utf-8")
+      response.content_type&.split(";")&.first&.strip == ALLOWED_DOCUMENT_CONTENT_TYPE
     end
 
     def content_length_valid?(response)
