@@ -1,4 +1,4 @@
-rubyrequire "net/http"
+require "net/http"
 require "restricted_http/private_network_guard"
 
 class Opengraph::Fetch
