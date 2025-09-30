@@ -44,6 +44,9 @@ gem "kredis"
 gem "platform_agent"
 gem "thruster"
 gem "faraday"
+gem "omniauth"
+gem "omniauth-twitter2"
+gem "omniauth-rails_csrf_protection"
 
 group :development, :test do
   gem "debug"

@@ -36,6 +36,8 @@ Rails.application.routes.draw do
     resource :validations, only: %i[new create]
   end
   get "auth_tokens/validate/:token", to: "auth_tokens/validations#create", as: :sign_in_with_token
+  get "/auth/:provider/callback", to: "oauth#callback"
+  post "/auth/:provider/disconnect", to: "oauth#disconnect"
 
   resource :account do
     scope module: "accounts" do

@@ -83,6 +83,16 @@
           <%= form.text_field :twitter_url, class: "input txt-medium ", placeholder: "Your X profile", required: false %>
           <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24, class: "colorize--black" %>
         </label>
+        
+        <% if @user.twitter_uid.present? %>
+          <%= button_to "/auth/twitter2/disconnect", method: :post, class: "btn btn--negative txt-small" do %>
+            Disconnect X
+          <% end %>
+        <% else %>
+          <%= link_to "/auth/twitter2", class: "btn btn--primary txt-small" do %>
+            Connect X
+          <% end %>
+        <% end %>
       </div>
 
       <div class="flex align-center gap">
