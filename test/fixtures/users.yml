@@ -1,4 +1,4 @@
-<% password_digest = BCrypt::Password.create("secret123456") %>
+# <% password_digest = BCrypt::Password.create("secret123456") %>
 
 david:
   name: David
@@ -23,6 +23,12 @@ kevin:
   email_address: kevin@37signals.com
   password_digest: <%= password_digest %>
   bio: Programmer
+
+twitter_user:
+  name: Twitter User
+  email_address: twitter@example.com
+  password_digest: <%= password_digest %>
+  twitter_uid: "existing_twitter_uid"
 
 bender:
   name: Bender Bot

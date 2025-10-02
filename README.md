@@ -23,6 +23,30 @@ And if you're not part of the [Small Bets](https://smallbets.com) community yet,
     bin/setup
     bin/rails server
 
+### Twitter/X OAuth Setup (Optional)
+
+To enable Twitter/X login and account linking:
+
+1. Create a Twitter Developer account at https://developer.twitter.com
+2. Create a new app and get your Client ID and Client Secret
+3. Add these to your environment:
+   ```
+   TWITTER_CLIENT_ID=your_client_id
+   TWITTER_CLIENT_SECRET=your_client_secret
+   ```
+### Running Tests
+
+To run the OAuth-related tests:
+
+    rails test test/controllers/oauth_controller_test.rb
+    rails test test/models/user_oauth_test.rb
+    rails test test/system/oauth_system_test.rb
+    rails test test/integration/oauth_routes_test.rb
+
+Or run all tests:
+
+    rails test
+
 The `bin/setup` script will install dependencies, prepare the database, and configure the application.
 
 ## Running in production
