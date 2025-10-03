@@ -31,6 +31,11 @@ Rails.application.routes.draw do
     end
   end
 
+  # OAuth routes
+  get '/auth/:provider/callback', to: 'sessions#oauth_callback'
+  get '/auth/failure', to: 'sessions#oauth_failure'
+  delete '/auth/disconnect', to: 'sessions#oauth_disconnect'
+
   resources :auth_tokens, only: %i[create]
   namespace :auth_tokens do
     resource :validations, only: %i[new create]

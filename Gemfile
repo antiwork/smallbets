@@ -69,6 +69,11 @@ gem "resend"
 gem "heapy", group: :development
 
 gem "rufus-scheduler"
+
+# OAuth
+gem "omniauth", "~> 2.0"
+gem "omniauth-twitter2", "~> 0.1"
+gem "omniauth-rails_csrf_protection", "~> 1.0"
 gem "mailkick"
 
 gem "rack-mini-profiler", "~> 4.0", require: false

@@ -81,6 +81,10 @@ class User < ApplicationRecord
     end
   end
 
+  def self.find_by_oauth(provider, uid)
+    active.non_suspended.find_by(provider: provider, uid: uid)
+  end
+
   def imported_from_gumroad_and_unclaimed?
     order_id.present? && last_authenticated_at.nil?
   end
@@ -205,6 +209,39 @@ class User < ApplicationRecord
 
   def unblock!(other_user)
     blocks_given.where(blocked: other_user).destroy_all
+  end
+
+  def connect_oauth_account(provider, uid, info = {})
+    # Check if this OAuth account is already connected to another user
+    return false if User.active.where(provider: provider, uid: uid).where.not(id: id).exists?
+    
+    # Update user with OAuth info
+    update_attributes = { provider: provider, uid: uid }
+    
+    # Update profile info from OAuth if available and current fields are empty
+    if info.present?
+      update_attributes[:twitter_username] = info['nickname'] if provider == 'twitter' && twitter_username.blank?
+      update_attributes[:name] = info['name'] if name == User::DEFAULT_NAME && info['name'].present?
+    end
+    
+    update(update_attributes)
+  end
+
+  def disconnect_oauth_account
+    update(provider: nil, uid: nil)
+  end
+
+  def oauth_connected?
+    provider.present? && uid.present?
+  end
+
+  def oauth_provider_name
+    case provider
+    when 'twitter'
+      'X (Twitter)'
+    else
+      provider&.titleize
+    end
   end
 
   private
