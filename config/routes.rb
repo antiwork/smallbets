@@ -142,6 +142,9 @@ Rails.application.routes.draw do
       resource :answer, only: %i[ create destroy ]
     end
   end
+
+  get "messages/giphy/search", to: "messages/giphy#search", as: :giphy_search
+
   scope module: "messages" do
     resources :profiles, only: %i[show], as: :mention_profile
   end

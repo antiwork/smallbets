@@ -51,7 +51,7 @@ FOREIGN KEY ("user_id")
   REFERENCES "users" ("id")
 );
 CREATE INDEX "index_webhooks_on_user_id" ON "webhooks" ("user_id");
-CREATE TABLE IF NOT EXISTS "rooms" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar DEFAULT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "type" varchar NOT NULL, "creator_id" bigint NOT NULL, "messages_count" integer DEFAULT 0, "parent_message_id" integer DEFAULT NULL, "last_active_at" datetime(6), "active" boolean DEFAULT 1, "sortable_name" varchar, CONSTRAINT "fk_rails_76a8fc443c"
+CREATE TABLE IF NOT EXISTS "rooms" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar DEFAULT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "type" varchar NOT NULL, "creator_id" bigint NOT NULL, "messages_count" integer DEFAULT 0, "parent_message_id" integer DEFAULT NULL, "last_active_at" datetime(6), "active" boolean DEFAULT 1, "sortable_name" varchar, "slug" varchar, CONSTRAINT "fk_rails_76a8fc443c"
 FOREIGN KEY ("parent_message_id")
   REFERENCES "messages" ("id")
 );
@@ -124,7 +124,9 @@ FOREIGN KEY ("blocked_id")
 CREATE INDEX "index_blocks_on_blocker_id" ON "blocks" ("blocker_id");
 CREATE INDEX "index_blocks_on_blocked_id" ON "blocks" ("blocked_id");
 CREATE UNIQUE INDEX "index_blocks_on_blocker_id_and_blocked_id" ON "blocks" ("blocker_id", "blocked_id");
+CREATE UNIQUE INDEX "index_rooms_on_slug" ON "rooms" ("slug") WHERE slug IS NOT NULL;
 INSERT INTO "schema_migrations" (version) VALUES
+('20250928120000'),
 ('20250804105525'),
 ('20250319101929'),
 ('20250313150105'),

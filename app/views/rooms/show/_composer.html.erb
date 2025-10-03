@@ -1,6 +1,9 @@
 <% content_for :footer do %>
-  <div class="composer flex align-end gap position-relative"
-      data-controller="typing-notifications" data-typing-notifications-active-class="typing-indicator--active">
+  <div
+    class="composer flex align-end gap position-relative"
+    data-controller="typing-notifications giphy"
+    data-typing-notifications-active-class="typing-indicator--active"
+  >
     <%= link_to searches_path, class: "btn flex-item-no-shrink margin-block-end composer__context-btn", style: "view-transition-name: input-switcher" do %>
       <%= image_tag "search.svg", size: 20, aria: { hidden: "true" } %>
       <span class="for-screen-reader">Search</span>
@@ -10,34 +13,75 @@
       <%= composer_form_tag(room) do |form| %>
         <fieldset data-composer-target="fields" contents>
           <div class="flex flex-column">
-            <div class="composer__filelist flex flex--align-center gap flex-wrap" data-composer-target="fileList"></div>
+            <div
+              class="composer__filelist flex flex--align-center gap flex-wrap"
+              data-composer-target="fileList"
+            ></div>
 
-            <div class="flex composer__input input input--actor fill-white min-width" style="--input-border-radius: 1.3rem">
+            <div
+              class="
+                flex composer__input input input--actor fill-white min-width
+              "
+              style="--input-border-radius: 1.3rem"
+            >
               <div class="flex align-end gap full-width">
-                <%= image_tag "messages-outlined.svg", size: 22, aria: { hidden: "true" }, class: "composer__input-hint colorize--black", style: "view-transition-name: input-btn;" %>
+                <%= image_tag "messages-outlined.svg",
+                size: 22,
+                aria: {
+                  hidden: "true",
+                },
+                class: "composer__input-hint colorize--black",
+                style: "view-transition-name: input-btn;" %>
 
                 <div class="flex flex-column flex-item-grow min-width gap">
                   <%= form.rich_text_area :body,
-                        rows: 1,
-                        class: "input",
-                        style: "order: -1",
-                        aria: { multiline: "true", label: "Write a message" },
-                        data: {
-                          controller: "rich-autocomplete",
-                          action: rich_text_data_actions,
-                          rich_autocomplete_url_value: autocompletable_users_path(room_id: room.id),
-                          permitted_attachment_types: "application/vnd.actiontext.opengraph-embed",
-                          composer_target: "text" } %>
+                                      rows: 1,
+                                      class: "input",
+                                      style: "order: -1",
+                                      aria: {
+                                        multiline: "true",
+                                        label: "Write a message",
+                                      },
+                                      data: {
+                                        controller: "rich-autocomplete",
+                                        action: rich_text_data_actions,
+                                        rich_autocomplete_url_value:
+                                          autocompletable_users_path(room_id: room.id),
+                                        permitted_attachment_types:
+                                          "application/vnd.actiontext.opengraph-embed",
+                                        composer_target: "text",
+                                      } %>
                 </div>
 
-                <label class="btn btn--borderless txt-small flex-item-no-shrink composer__attachment-btn input--file">
-                  <%= image_tag "attachment.svg", size: 22, class: "colorize--black", aria: { hidden: "true" } %>
-                  <input type="file" data-action="composer#filePicked" multiple />
+                <label
+                  class="
+                    btn btn--borderless txt-small flex-item-no-shrink composer__attachment-btn
+                    input--file
+                  "
+                >
+                  <%= image_tag "attachment.svg",
+                  size: 22,
+                  class: "colorize--black",
+                  aria: {
+                    hidden: "true",
+                  } %>
+                  <input type="file" data-action="composer#filePicked" multiple/>
                   <span class="for-screen-reader">Attach a file</span>
                 </label>
 
-                <button class="btn btn--borderless txt-small flex-item-no-shrink composer__rich-text-btn" type="button" data-action="composer#toggleToolbar">
-                  <%= image_tag "text-options.svg", size: 20, class: "colorize--black", aria: { hidden: "true" } %>
+                <button
+                  class="
+                    btn btn--borderless txt-small flex-item-no-shrink composer__rich-text-btn
+                  "
+                  type="button"
+                  data-action="composer#toggleToolbar"
+                >
+                  <%= image_tag "text-options.svg",
+                  size: 20,
+                  class: "colorize--black",
+                  aria: {
+                    hidden: "true",
+                  } %>
                   <span class="for-screen-reader">Rich text</span>
                 </button>
 
@@ -51,8 +95,14 @@
           </div>
         </fieldset>
 
-        <div class="typing-indicator gap txt-small align-center flex-inline" data-typing-notifications-target="indicator">
-          <div class="typing-indicator__author spinner" data-typing-notifications-target="author"></div>
+        <div
+          class="typing-indicator gap txt-small align-center flex-inline"
+          data-typing-notifications-target="indicator"
+        >
+          <div
+            class="typing-indicator__author spinner"
+            data-typing-notifications-target="author"
+          ></div>
         </div>
 
         <%= form.hidden_field :client_message_id, data: { composer_target: "clientid" } %>
