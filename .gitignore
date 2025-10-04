@@ -20,3 +20,5 @@ dump.rdb
 .github/.env
 
 .DS_Store
+
+/config/master.key

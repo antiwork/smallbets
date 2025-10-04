@@ -1,0 +1,43 @@
+<div
+  id="giphy_preview"
+  data-controller="giphy"
+  class="message message--me message--formatted giphy-preview"
+  data-sort-value="<%= Time.now.to_i * 1000 %>"
+>
+  <div class="avatar message__avatar">
+    <summary class="btn avatar">
+      <span title="Giphy" class="btn avatar"><div
+          class="avatar-monogram avatar-monogram--3"
+          aria-label="Giphy"
+          title="Giphy"
+        >G</div></span>
+    </summary>
+  </div>
+
+  <div class="message__body">
+    <div class="message__body-content">
+      <div class="message__meta">
+        <h3 class="message__heading">
+          <span class="message__author"><strong>Giphy</strong></span>
+        </h3>
+      </div>
+      <div class="message__presentation">
+        <%= image_tag gif_url, alt: query, style: "max-width: 300px; max-height: 200px;" %>
+        <div class="giphy-controls" style="margin-top: 10px;">
+          <button class="btn btn--small" data-action="giphy#prev">
+            <%= image_tag("arrow-left.svg", aria: { hidden: "true" }, size: 20) %>
+          </button>
+          <button
+            class="btn btn--small"
+            data-action="giphy#send"
+            data-giphy-url-param="<%= gif_url %>"
+          >Send</button>
+          <button class="btn btn--small btn--negative" data-action="giphy#cancel">Cancel</button>
+          <button class="btn btn--small" data-action="giphy#next">
+            <%= image_tag("arrow-right.svg", aria: { hidden: "true" }, size: 20) %>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
