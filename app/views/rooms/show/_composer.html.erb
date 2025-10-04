@@ -3,6 +3,7 @@
     class="composer flex align-end gap position-relative"
     data-controller="typing-notifications giphy"
     data-typing-notifications-active-class="typing-indicator--active"
+    data-giphy-room-id-value="<%= room.id %>"
   >
     <%= link_to searches_path, class: "btn flex-item-no-shrink margin-block-end composer__context-btn", style: "view-transition-name: input-switcher" do %>
       <%= image_tag "search.svg", size: 20, aria: { hidden: "true" } %>

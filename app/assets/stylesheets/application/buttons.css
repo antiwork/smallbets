@@ -8,7 +8,8 @@
   align-items: center;
   background-color: var(--btn-background, var(--color-text-reversed));
   border-radius: var(--btn-border-radius, 2em);
-  border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--color-border-darker));
+  border: var(--btn-border-size, 1px) solid
+    var(--btn-border-color, var(--color-border-darker));
   color: var(--btn-color, var(--color-text));
   cursor: pointer;
   display: inline-flex;
@@ -81,7 +82,9 @@
     list-style: none;
 
     &::marker,
-    &::-webkit-details-marker { display: none; }
+    &::-webkit-details-marker {
+      display: none;
+    }
   }
 
   img {
@@ -104,8 +107,8 @@
     }
   }
 
-  [disabled] &[type=submit],
-  &[type=submit]:disabled {
+  [disabled] &[type="submit"],
+  &[type="submit"]:disabled {
     cursor: not-allowed;
     filter: grayscale(100%) contrast(0.5);
     opacity: 0.5;
@@ -117,7 +120,8 @@
 .btn.everything,
 .btn.mentions,
 .btn.invisible {
-  border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--color-border-darker));
+  border: var(--btn-border-size, 1px) solid
+    var(--btn-border-color, var(--color-border-darker));
 }
 
 /* Remove borders only for involvement buttons in the sidebar */
@@ -128,6 +132,10 @@
 }
 
 /* Variants */
+.btn--small {
+  --btn-size: 1em;
+  font-size: 14px;
+}
 .btn--reversed {
   --btn-background: var(--color-text);
   --btn-color: var(--color-text-reversed);
@@ -190,7 +198,8 @@ button {
   }
 }
 
-[aria-busy] .btn:disabled, .busy {
+[aria-busy] .btn:disabled,
+.busy {
   position: relative;
 
   > * {
@@ -198,21 +207,21 @@ button {
   }
 
   &::after {
-     --mask: no-repeat radial-gradient(#000 68%,#0000 71%);
-     --size: 1.25em;
-  
-     -webkit-mask: var(--mask), var(--mask), var(--mask);
-     -webkit-mask-size: 28% 45%;
-     animation: submitting 1s infinite linear;
-     aspect-ratio: 8/5;
-     background: currentColor;
-     content: "";
-     inline-size: var(--size);
-     inset: 50% var(--busy-inset, 50%);
-     margin-block: calc((var(--size) / 3) * -1);
-     margin-inline: calc((var(--size) / 2) * -1);
-     position: absolute;
-   }
+    --mask: no-repeat radial-gradient(#000 68%, #0000 71%);
+    --size: 1.25em;
+
+    -webkit-mask: var(--mask), var(--mask), var(--mask);
+    -webkit-mask-size: 28% 45%;
+    animation: submitting 1s infinite linear;
+    aspect-ratio: 8/5;
+    background: currentColor;
+    content: "";
+    inline-size: var(--size);
+    inset: 50% var(--busy-inset, 50%);
+    margin-block: calc((var(--size) / 3) * -1);
+    margin-inline: calc((var(--size) / 2) * -1);
+    position: absolute;
+  }
 }
 
 /* Make the notification warning button visible by default for testing */
@@ -284,3 +293,4 @@ a.btn[data-room-id] img {
   white-space: nowrap;
   border: 0;
 }
+

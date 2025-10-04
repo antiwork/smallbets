@@ -144,6 +144,8 @@ Rails.application.routes.draw do
   end
 
   get "messages/giphy/search", to: "messages/giphy#search", as: :giphy_search
+  get "messages/giphy/navigate", to: "messages/giphy#navigate", as: :giphy_navigate
+  get "messages/giphy/remove", to: "messages/giphy#remove", as: :giphy_remove
 
   scope module: "messages" do
     resources :profiles, only: %i[show], as: :mention_profile
