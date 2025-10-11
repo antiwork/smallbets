@@ -1,5 +1,8 @@
 <article class="library__card" id="video-<%= video.vimeo_id %>">
   <header class="library__header">
+    <p class="library__meta">
+      <span class="library__category"><%= video.library_category.name %></span>
+    </p>
     <h3 class="library__title"><%= video.title %></h3>
   </header>
 
@@ -17,4 +20,5 @@
   <div class="library__actions">
     <%= download_button_for(video) %>
   </div>
+  <p class="library__description"><%= video.description %></p>
 </article>

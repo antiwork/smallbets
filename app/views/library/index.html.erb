@@ -13,7 +13,7 @@
 
 <div class="library">
   <% @sections.each do |section| %>
-    <section id="<%= section.slug %>" class="library__section">
+    <section id="<%= section.slug %>" class="library__section" data-library-category="<%= section.library_sessions.first&.library_category&.slug %>">
       <header class="library__header">
         <h2 class="library__section-title"><%= section.title %> - <%= section.creator %></h2>
       </header>
