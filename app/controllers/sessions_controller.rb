@@ -7,6 +7,17 @@ class SessionsController < ApplicationController
   def new
   end
 
+  def create
+    user = User.active.find_by(email_address: params[:email_address])
+
+    if user&.authenticate(params[:password])
+      start_new_session_for(user)
+      redirect_to chat_url
+    else
+      render_rejection :unauthorized
+    end
+  end
+
   def destroy
     remove_push_subscription
     reset_authentication
