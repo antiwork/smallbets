@@ -34,6 +34,8 @@ class User < ApplicationRecord
   validates_presence_of :email_address, if: :person?
   normalizes :email_address, with: ->(email_address) { email_address.downcase }
 
+  validates :twitter_uid, uniqueness: true, allow_nil: true
+
   scope :without_default_names, -> { where.not(name: DEFAULT_NAME) }
   scope :non_suspended, -> { where(suspended_at: nil) }
   scope :unclaimed_gumroad_imports, -> { where.not(order_id: nil).where(last_authenticated_at: nil) }
