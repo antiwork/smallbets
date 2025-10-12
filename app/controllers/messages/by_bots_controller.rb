@@ -1,9 +1,10 @@
 class Messages::ByBotsController < MessagesController
-  allow_bot_access only: :create
+  skip_before_action :deny_bots
 
   def create
     super
-    head :created, location: message_url(@message)
+  rescue LoadError
+    head :service_unavailable
   end
 
   private

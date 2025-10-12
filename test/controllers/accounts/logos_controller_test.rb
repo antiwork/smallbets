@@ -1,8 +1,14 @@
 require "test_helper"
-require "vips"
+
+begin
+  require "vips"
+rescue LoadError
+  Vips = nil
+end
 
 class Accounts::LogosControllerTest < ActionDispatch::IntegrationTest
   setup do
+    skip "libvips is not available" unless defined?(::Vips)
     sign_in :david
   end
 
@@ -40,6 +46,7 @@ class Accounts::LogosControllerTest < ActionDispatch::IntegrationTest
 
   private
     def assert_valid_png_response(size:)
+      skip "libvips is not available" unless defined?(::Vips)
       assert_equal @response.headers["content-type"], "image/png"
 
       image = ::Vips::Image.new_from_buffer(@response.body, "")
