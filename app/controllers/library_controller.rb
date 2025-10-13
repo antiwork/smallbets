@@ -1,5 +1,7 @@
-class LibraryController < ApplicationController
+class LibraryController < AuthenticatedController
   def index
+    return render inertia: 'Library/Index', props: LibraryCatalog.inertia_props(user: Current.user) if inertia_request?
+
     @sections = LibraryCatalog.sections
   end
 

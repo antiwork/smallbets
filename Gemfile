@@ -73,3 +73,7 @@ gem "mailkick"
 
 gem "rack-mini-profiler", "~> 4.0", require: false
 gem "stackprof", "~> 0.2"
+
+gem "inertia_rails", "~> 3.11"
+
+gem "vite_rails", "~> 3.0"

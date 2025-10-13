@@ -1,5 +1,6 @@
 class LibrarySession < ApplicationRecord
   belongs_to :library_class
+  has_many :library_watch_histories, dependent: :destroy
 
   validates :vimeo_id, presence: true
   validates :padding, presence: true, numericality: { greater_than: 0 }
