@@ -8,28 +8,29 @@ type ResolvedComponent = {
   layout?: (page: ReactNode) => ReactNode
 }
 
-const inertiaMount = document.getElementById('app')
+function bootInertiaApp() {
+  const mount = document.getElementById('app') as HTMLElement | null
 
-const pagePayload = inertiaMount?.dataset.page
+  if (!mount) {
+    return
+  }
 
-if (!pagePayload) {
-  console.debug('[Inertia] Skipping bootstrap: missing data-page payload')
-} else {
+  if (mount.dataset.inertiaMounted === 'true') {
+    return
+  }
+
+  const pagePayload = mount.dataset.page
+
+  if (!pagePayload) {
+    console.debug('[Inertia] Skipping bootstrap: missing data-page payload')
+    return
+  }
+
   const initialPage = JSON.parse(pagePayload)
 
   createInertiaApp({
-    id: inertiaMount.id,
+    id: mount.id,
     page: initialPage,
-    // Set default page title
-    // see https://inertia-rails.dev/guide/title-and-meta
-    //
-    // title: title => title ? `${title} - App` : 'App',
-
-    // Disable progress bar
-    //
-    // see https://inertia-rails.dev/guide/progress-indicators
-    // progress: false,
-
     resolve: (name) => {
       const pages = import.meta.glob<ResolvedComponent>('../pages/**/*.tsx', {
         eager: true,
@@ -39,25 +40,39 @@ if (!pagePayload) {
         console.error(`Missing Inertia page component: '${name}.tsx'`)
       }
 
-      // To use a default layout, import the Layout component
-      // and use the following line.
-      // see https://inertia-rails.dev/guide/pages#default-layouts
-      //
-      // page.default.layout ||= (page) => createElement(Layout, null, page)
-
       return page
     },
-
     setup({ el, App, props }) {
-      if (el) {
-        createRoot(el).render(createElement(App, props))
-      } else {
+      if (!el) {
         console.error(
           'Missing root element.\n\n' +
             'If you see this error, it probably means you load Inertia.js on non-Inertia pages.\n' +
             'Consider moving <%= vite_typescript_tag "inertia" %> to the Inertia-specific layout instead.',
         )
+        return
       }
+
+      const root = createRoot(el)
+      root.render(createElement(App, props))
+      mount.dataset.inertiaMounted = 'true'
+
+      const handleBeforeCache = () => {
+        root.unmount()
+        delete mount.dataset.inertiaMounted
+        document.removeEventListener('turbo:before-cache', handleBeforeCache)
+      }
+
+      document.addEventListener('turbo:before-cache', handleBeforeCache)
     },
+  }).catch((error) => {
+    console.error('[Inertia] Failed to bootstrap page', error)
   })
 }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootInertiaApp)
+} else {
+  bootInertiaApp()
+}
+
+document.addEventListener('turbo:load', bootInertiaApp)

@@ -73,6 +73,10 @@ body {
   }
 }
 
+#main-content > #app {
+  overflow: auto;
+}
+
 #sidebar {
   grid-area: sidebar;
   position: relative;

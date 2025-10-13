@@ -1,12 +1,12 @@
 class LibraryCatalog
   class << self
     def sections
-      LibraryClass.includes(:library_categories, :library_sessions).all
+      LibraryClass.includes(:library_categories, library_sessions: :library_watch_histories).all
     end
 
     def inertia_props(user:)
       classes = sections
-      histories = user ? LibraryWatchHistory.where(user: user).order(updated_at: :desc) : LibraryWatchHistory.none
+      histories = preload_histories(user:)
       history_by_session_id = histories.index_by(&:library_session_id)
 
       session_payload_lookup = {}
@@ -42,6 +42,15 @@ class LibraryCatalog
     end
 
     private
+
+    def preload_histories(user:)
+      return LibraryWatchHistory.none unless user
+
+      LibraryWatchHistory
+        .where(user: user)
+        .includes(:library_session)
+        .order(updated_at: :desc)
+    end
 
     def build_session_payload(session, categories:, history: nil)
       {
