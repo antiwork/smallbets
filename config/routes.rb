@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  get 'inertia-example', to: 'inertia_example#index'
   # Top-level room slug routing (must come before other catch-alls that could conflict)
   constraints(RoomSlugConstraint.new) do
     get "/:slug", to: "rooms#show", as: :room_slug
@@ -192,7 +191,7 @@ Rails.application.routes.draw do
   get "library/download/:id" => "library#download", as: :library_download
   get "library/downloads/:id" => "library#downloads", as: :library_downloads
   resources :library_sessions, only: [] do
-    resource :watch_history, only: [ :show, :create, :update ], controller: "library/watch_histories"
+    resource :watch_history, only: [ :create, :update ], controller: "library/watch_histories"
   end
 
   get "experts" => "experts#show"
