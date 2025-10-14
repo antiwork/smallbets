@@ -108,14 +108,18 @@ export default function LibraryIndex({
 
   return (
     <div className="min-h-screen bg-black py-12">
-      <div className="space-y-12 pb-16">
+      <div className="pb-16" style={{ marginTop: "3vw" }}>
         <Head title="Library" />
 
         <LibraryHero continueWatching={continueWatching} />
 
-        <section className="space-y-12 pl-8">
+        <section className="pl-8" style={{ marginTop: "3vw" }}>
           {categoryGroups.map((group) => (
-            <div key={group.category.slug} className="space-y-6">
+            <div
+              className="flex flex-col"
+              key={group.category.slug}
+              style={{ marginBottom: "3vw", gap: "1.5vw" }}
+            >
               <SectionHeader title={group.category.name} />
               <SessionGrid sessions={group.sessions} />
             </div>

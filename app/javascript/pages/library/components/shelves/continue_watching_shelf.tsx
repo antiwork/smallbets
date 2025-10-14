@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 
-import VimeoPlayer from "../player/vimeo_player"
+import VideoCard from "../video_card"
 
 interface ContinueWatchingShelfProps {
   sessions: LibrarySessionPayload[]
@@ -34,22 +34,6 @@ interface LibraryWatchPayload {
   completed: boolean
 }
 
-function formatTimeRemaining(
-  playedSeconds: number,
-  durationSeconds?: number | null,
-): string {
-  if (!durationSeconds) return ""
-
-  const remaining = Math.max(0, durationSeconds - playedSeconds)
-  const hours = Math.floor(remaining / 3600)
-  const minutes = Math.floor((remaining % 3600) / 60)
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m left`
-  }
-  return `${minutes}m left`
-}
-
 export default function ContinueWatchingShelf({
   sessions,
 }: ContinueWatchingShelfProps) {
@@ -60,12 +44,25 @@ export default function ContinueWatchingShelf({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <h2 className="text-xl font-medium tracking-wider capitalize">
+    <div className="flex flex-col" style={{ gap: "1.5vw" }}>
+      <h2
+        className="font-medium tracking-wider text-white capitalize"
+        style={{
+          fontSize: "1.4vw",
+          lineHeight: "1.25vw",
+        }}
+      >
         Continue Watching
       </h2>
 
-      <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-2">
+      <div
+        className="scrollbar-hide flex overflow-x-auto overflow-y-visible"
+        style={{
+          gap: "0.4vw",
+          paddingBottom: "0.4vw",
+          paddingRight: "4vw",
+        }}
+      >
         {items.map((session) => (
           <ContinueWatchingCard key={session.id} session={session} />
         ))}
@@ -75,25 +72,5 @@ export default function ContinueWatchingShelf({
 }
 
 function ContinueWatchingCard({ session }: { session: LibrarySessionPayload }) {
-  const progress = session.watch?.playedSeconds ?? 0
-  const duration = session.watch?.durationSeconds ?? 0
-  const timeRemaining = formatTimeRemaining(progress, duration)
-
-  return (
-    <a
-      href={`#session-${session.id}`}
-      className="group flex w-80 shrink-0 flex-col gap-2"
-    >
-      <div className="relative aspect-video w-full overflow-hidden rounded-md">
-        <VimeoPlayer session={session} />
-      </div>
-
-      <div className="flex flex-col">
-        <h3 className="text-sm font-medium text-white">{session.title}</h3>
-        {timeRemaining && (
-          <p className="text-xs text-gray-400">{timeRemaining}</p>
-        )}
-      </div>
-    </a>
-  )
+  return <VideoCard session={session} showProgress />
 }
