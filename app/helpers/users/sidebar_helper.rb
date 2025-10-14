@@ -7,7 +7,6 @@ module Users::SidebarHelper
 
   def sidebar_turbo_frame_tag(src: nil, &)
     turbo_frame_tag :user_sidebar, src: src, target: "_top", data: {
-      turbo_permanent: true,
       controller: "rooms-list read-rooms turbo-frame",
       rooms_list_unread_class: "unread",
       rooms_list_badge_class: "badge",

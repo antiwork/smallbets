@@ -1,0 +1,10 @@
+<%# Populate layout slots for initial Inertia renders (direct loads) %>
+<% if defined?(nav) && nav.present? && !content_for?(:nav) %>
+  <% content_for :nav, raw(nav) %>
+<% end %>
+
+<% if defined?(sidebar) && sidebar.present? && !content_for?(:sidebar) %>
+  <% content_for :sidebar, raw(sidebar) %>
+<% end %>
+
+<div id="app" data-page="<%= page.to_json %>"></div>
