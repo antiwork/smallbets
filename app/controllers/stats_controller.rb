@@ -324,25 +324,34 @@ class StatsController < ApplicationController
   def rooms
     @page_title = "Room Stats"
 
+    rooms_message_count_subquery = <<~SQL
+      (
+        SELECT COUNT(DISTINCT messages.id) FROM messages
+        LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'
+        LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id
+        WHERE messages.active = true AND (messages.room_id = rooms.id OR parent_messages.room_id = rooms.id)
+      ) AS message_count
+    SQL
+
     # Get all open rooms ordered by message count
-    @rooms = Room.select("rooms.*, COUNT(messages.id) AS message_count")
-                .joins(:messages)
-                .where("messages.active = true")
-                .where(type: "Rooms::Open")
-                .group("rooms.id")
-                .order("message_count DESC, rooms.created_at ASC")
-                .includes(:creator) # Include creator to avoid N+1 queries
+    @rooms = Room.select("rooms.*", rooms_message_count_subquery)
+                 .where(type: "Rooms::Open")
+                 .group("rooms.id")
+                 .order("message_count DESC, rooms.created_at ASC")
+                 .includes(:creator) # Include creator to avoid N+1 queries
 
     # For each room, find the top talker
     @top_talkers = {}
     @rooms.each do |room|
-      top_talker = User.select("users.id, users.name, COUNT(messages.id) AS message_count")
-                      .joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
-                      .where("messages.room_id = ?", room.id)
-                      .where("users.active = true AND users.suspended_at IS NULL")
-                      .group("users.id, users.name")
-                      .order("message_count DESC")
-                      .first
+      top_talker = User.select("users.id, users.name, COUNT(DISTINCT messages.id) AS message_count")
+                       .joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
+                       .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+                       .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+                       .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+                       .where("users.active = true AND users.suspended_at IS NULL")
+                       .group("users.id, users.name")
+                       .order("message_count DESC")
+                       .first
 
       @top_talkers[room.id] = top_talker if top_talker
     end
