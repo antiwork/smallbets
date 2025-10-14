@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo } from "react"
 
-import VimeoPlayer from '../player/vimeo_player'
+import VimeoPlayer from "../player/vimeo_player"
 
 interface ContinueWatchingShelfProps {
   sessions: LibrarySessionPayload[]
@@ -34,8 +34,11 @@ interface LibraryWatchPayload {
   completed: boolean
 }
 
-function formatTimeRemaining(playedSeconds: number, durationSeconds?: number | null): string {
-  if (!durationSeconds) return ''
+function formatTimeRemaining(
+  playedSeconds: number,
+  durationSeconds?: number | null,
+): string {
+  if (!durationSeconds) return ""
 
   const remaining = Math.max(0, durationSeconds - playedSeconds)
   const hours = Math.floor(remaining / 3600)
@@ -47,7 +50,9 @@ function formatTimeRemaining(playedSeconds: number, durationSeconds?: number | n
   return `${minutes}m left`
 }
 
-export default function ContinueWatchingShelf({ sessions }: ContinueWatchingShelfProps) {
+export default function ContinueWatchingShelf({
+  sessions,
+}: ContinueWatchingShelfProps) {
   const items = useMemo(() => sessions.slice(0, 6), [sessions])
 
   if (items.length === 0) {
@@ -56,9 +61,11 @@ export default function ContinueWatchingShelf({ sessions }: ContinueWatchingShel
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-xl font-medium tracking-wider capitalize">Continue Watching</h2>
+      <h2 className="text-xl font-medium tracking-wider capitalize">
+        Continue Watching
+      </h2>
 
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-2">
         {items.map((session) => (
           <ContinueWatchingCard key={session.id} session={session} />
         ))}
@@ -73,14 +80,19 @@ function ContinueWatchingCard({ session }: { session: LibrarySessionPayload }) {
   const timeRemaining = formatTimeRemaining(progress, duration)
 
   return (
-    <a href={`#session-${session.id}`} className="group flex w-80 shrink-0 flex-col gap-2">
-      <div className="relative w-full overflow-hidden rounded-md" style={{ paddingBottom: `${session.padding}%` }}>
+    <a
+      href={`#session-${session.id}`}
+      className="group flex w-80 shrink-0 flex-col gap-2"
+    >
+      <div className="relative aspect-video w-full overflow-hidden rounded-md">
         <VimeoPlayer session={session} />
       </div>
 
       <div className="flex flex-col">
         <h3 className="text-sm font-medium text-white">{session.title}</h3>
-        {timeRemaining && <p className="text-xs text-gray-400">{timeRemaining}</p>}
+        {timeRemaining && (
+          <p className="text-xs text-gray-400">{timeRemaining}</p>
+        )}
       </div>
     </a>
   )

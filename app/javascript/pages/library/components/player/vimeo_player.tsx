@@ -1,15 +1,8 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MutableRefObject,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { postWatchHistory, type WatchPayload } from './watch_history'
+import { postWatchHistory, type WatchPayload } from "./watch_history"
 
-const ACTIVATION_ROOT_MARGIN = '200px'
+const ACTIVATION_ROOT_MARGIN = "200px"
 const POSTER_SIZES = [1280, 960, 640, 320]
 
 interface VimeoPlayerProps {
@@ -36,14 +29,18 @@ interface LibraryWatchPayload {
   completed: boolean
 }
 
-type VimeoMessage =
-  | { event: 'ready' }
-  | { event: 'play' }
-  | { event: 'pause' }
-  | { event: 'timeupdate'; data: { seconds: number; duration: number } }
-  | { event: 'ended' }
+interface WritableRef<T> {
+  current: T
+}
 
-const TRACKED_EVENTS = ['play', 'pause', 'timeupdate', 'ended'] as const
+type VimeoMessage =
+  | { event: "ready" }
+  | { event: "play" }
+  | { event: "pause" }
+  | { event: "timeupdate"; data: { seconds: number; duration: number } }
+  | { event: "ended" }
+
+const TRACKED_EVENTS = ["play", "pause", "timeupdate", "ended"] as const
 
 export default function VimeoPlayer({ session }: VimeoPlayerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -54,11 +51,11 @@ export default function VimeoPlayer({ session }: VimeoPlayerProps) {
 
   useEffect(() => {
     if (isActivated) return
-    if (typeof window === 'undefined') return
+    if (typeof window === "undefined") return
     const element = containerRef.current
     if (!element) return
 
-    if (!('IntersectionObserver' in window)) {
+    if (!("IntersectionObserver" in window)) {
       setIsActivated(true)
       return
     }
@@ -126,7 +123,7 @@ export default function VimeoPlayer({ session }: VimeoPlayerProps) {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0"
+      className="absolute inset-0 bg-black"
       onMouseEnter={handlePointerEnter}
       onMouseLeave={handlePointerLeave}
       onFocusCapture={handlePointerEnter}
@@ -139,7 +136,7 @@ export default function VimeoPlayer({ session }: VimeoPlayerProps) {
           type="button"
           aria-label={`Play ${session.title}`}
           onClick={handleActivate}
-          className="group relative flex size-full items-center justify-center overflow-hidden bg-slate-900 text-white"
+          className="group relative flex size-full items-center justify-center overflow-hidden bg-black text-white"
         >
           {posterImage ? (
             <img
@@ -147,7 +144,7 @@ export default function VimeoPlayer({ session }: VimeoPlayerProps) {
               alt={session.title}
               decoding="async"
               loading="lazy"
-              className="absolute inset-0 size-full object-cover"
+              className="absolute inset-0 size-full object-contain"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800" />
@@ -175,7 +172,7 @@ interface ActiveVimeoPlayerProps {
 function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [isReady, setIsReady] = useState(false)
-  const [status, setStatus] = useState<PlaybackStatus>({ state: 'idle' })
+  const [status, setStatus] = useState<PlaybackStatus>({ state: "idle" })
   const progressRef = useRef<WatchPayload | null>(session.watch ?? null)
   const fallbackOriginRef = useRef<string>(new URL(session.playerSrc).origin)
   const vimeoOriginRef = useRef<string | null>(null)
@@ -194,15 +191,21 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
 
   const handleVimeoMessage = useCallback(
     (message: VimeoMessage) => {
-      setStatus((current) => (current.state === 'error' ? current : { state: 'idle' }))
+      setStatus((current) =>
+        current.state === "error" ? current : { state: "idle" },
+      )
 
       switch (message.event) {
-        case 'ready': {
-          subscribeToEvents(frameRef.current, vimeoOriginRef, fallbackOriginRef.current)
+        case "ready": {
+          subscribeToEvents(
+            frameRef.current,
+            vimeoOriginRef,
+            fallbackOriginRef.current,
+          )
           setIsReady(true)
           break
         }
-        case 'timeupdate': {
+        case "timeupdate": {
           const next: WatchPayload = {
             playedSeconds: message.data.seconds,
             durationSeconds: message.data.duration,
@@ -213,8 +216,11 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
           void persistProgress(watchPath, next, setStatus)
           break
         }
-        case 'ended': {
-          const duration = progressRef.current?.durationSeconds ?? progressRef.current?.playedSeconds ?? 0
+        case "ended": {
+          const duration =
+            progressRef.current?.durationSeconds ??
+            progressRef.current?.playedSeconds ??
+            0
           const next: WatchPayload = {
             playedSeconds: duration,
             durationSeconds: duration,
@@ -238,7 +244,10 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
     if (!frame) return
 
     const handleMessage = (event: MessageEvent) => {
-      if (!isVimeoEvent(event, frame, vimeoOriginRef, fallbackOriginRef.current)) return
+      if (
+        !isVimeoEvent(event, frame, vimeoOriginRef, fallbackOriginRef.current)
+      )
+        return
 
       const payload = normalizeData(event.data)
       if (!payload) return
@@ -246,14 +255,19 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
       handleVimeoMessage(payload)
     }
 
-    window.addEventListener('message', handleMessage)
-    postToVimeo(frame, vimeoOriginRef, { method: 'ping' }, {
-      allowWildcard: true,
-      fallbackOrigin: fallbackOriginRef.current,
-    })
+    window.addEventListener("message", handleMessage)
+    postToVimeo(
+      frame,
+      vimeoOriginRef,
+      { method: "ping" },
+      {
+        allowWildcard: true,
+        fallbackOrigin: fallbackOriginRef.current,
+      },
+    )
 
     return () => {
-      window.removeEventListener('message', handleMessage)
+      window.removeEventListener("message", handleMessage)
     }
   }, [handleVimeoMessage])
 
@@ -262,7 +276,7 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
     if (!isReady || resumeAt == null || !frameRef.current) return
 
     postToVimeo(frameRef.current, vimeoOriginRef, {
-      method: 'setCurrentTime',
+      method: "setCurrentTime",
       value: resumeAt,
     })
   }, [isReady])
@@ -271,24 +285,23 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
     if (!isReady || !frameRef.current) return
 
     postToVimeo(frameRef.current, vimeoOriginRef, {
-      method: shouldPlay ? 'play' : 'pause',
+      method: shouldPlay ? "play" : "pause",
     })
   }, [isReady, shouldPlay])
 
   return (
-    <>
+    <div className="relative size-full bg-black">
       <iframe
         ref={frameRef}
         title={session.title}
-        src={session.playerSrc}
-        className="size-full"
+        src={session.playerSrc + "&controls=0"}
+        className="absolute inset-0 size-full"
         allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-        allowFullScreen
         loading="lazy"
         referrerPolicy="strict-origin-when-cross-origin"
       />
       <StatusIndicator status={status} />
-    </>
+    </div>
   )
 }
 
@@ -297,8 +310,8 @@ function usePosterUrl(session: LibrarySessionPayload): string | undefined {
     if (session.thumbnailUrl) return session.thumbnailUrl
     try {
       const url = new URL(session.playerSrc)
-      const idParts = url.pathname.split('/').filter(Boolean)
-      const last = idParts.at(-1)
+      const idParts = url.pathname.split("/").filter(Boolean)
+      const last = idParts[idParts.length - 1]
       if (!last) return undefined
       return `https://i.vimeocdn.com/video/${last}_${POSTER_SIZES[2]}.webp`
     } catch (_error) {
@@ -310,7 +323,7 @@ function usePosterUrl(session: LibrarySessionPayload): string | undefined {
 function isVimeoEvent(
   event: MessageEvent,
   frame: HTMLIFrameElement,
-  originRef: MutableRefObject<string | null>,
+  originRef: WritableRef<string | null>,
   fallbackOrigin: string,
 ): boolean {
   if (event.source !== frame.contentWindow) return false
@@ -325,11 +338,11 @@ function isVimeoEvent(
 
 function normalizeData(data: unknown): VimeoMessage | null {
   try {
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       return JSON.parse(data) as VimeoMessage
     }
 
-    if (typeof data === 'object' && data !== null) {
+    if (typeof data === "object" && data !== null) {
       return data as VimeoMessage
     }
   } catch (_error) {
@@ -346,7 +359,7 @@ interface PostOptions {
 
 function postToVimeo(
   frame: HTMLIFrameElement,
-  originRef: MutableRefObject<string | null>,
+  originRef: WritableRef<string | null>,
   payload: Record<string, unknown>,
   options: PostOptions = {},
 ) {
@@ -355,10 +368,16 @@ function postToVimeo(
   const targetOrigin = resolveOrigin(originRef, options.fallbackOrigin)
   if (!targetOrigin) return
 
-  frame.contentWindow.postMessage(payload, options.allowWildcard ? '*' : targetOrigin)
+  frame.contentWindow.postMessage(
+    payload,
+    options.allowWildcard ? "*" : targetOrigin,
+  )
 }
 
-function resolveOrigin(originRef: MutableRefObject<string | null>, fallbackOrigin?: string): string | null {
+function resolveOrigin(
+  originRef: WritableRef<string | null>,
+  fallbackOrigin?: string,
+): string | null {
   if (originRef.current) return originRef.current
   if (fallbackOrigin) return fallbackOrigin
   return null
@@ -366,7 +385,7 @@ function resolveOrigin(originRef: MutableRefObject<string | null>, fallbackOrigi
 
 function subscribeToEvents(
   frame: HTMLIFrameElement | null,
-  originRef: MutableRefObject<string | null>,
+  originRef: WritableRef<string | null>,
   fallbackOrigin: string,
 ) {
   if (!frame?.contentWindow) return
@@ -376,7 +395,7 @@ function subscribeToEvents(
       frame,
       originRef,
       {
-        method: 'addEventListener',
+        method: "addEventListener",
         value: event,
       },
       { fallbackOrigin },
@@ -385,36 +404,43 @@ function subscribeToEvents(
 }
 
 type PlaybackStatus =
-  | { state: 'idle' }
-  | { state: 'saving' }
-  | { state: 'error'; message: string }
+  | { state: "idle" }
+  | { state: "saving" }
+  | { state: "error"; message: string }
 
-async function persistProgress(url: string, payload: LibraryWatchPayload, setStatus: (status: PlaybackStatus) => void) {
-  setStatus({ state: 'saving' })
+async function persistProgress(
+  url: string,
+  payload: LibraryWatchPayload,
+  setStatus: (status: PlaybackStatus) => void,
+) {
+  setStatus({ state: "saving" })
 
   const result = await postWatchHistory(url, payload)
 
   if (!result.ok) {
-    setStatus({ state: 'error', message: result.message ?? 'Unable to save progress' })
+    setStatus({
+      state: "error",
+      message: result.message ?? "Unable to save progress",
+    })
     return
   }
 
-  setStatus({ state: 'idle' })
+  setStatus({ state: "idle" })
 }
 
 function StatusIndicator({ status }: { status: PlaybackStatus }) {
-  if (status.state === 'idle') return null
+  if (status.state === "idle") return null
 
-  if (status.state === 'error') {
+  if (status.state === "error") {
     return (
-      <div className="pointer-events-none absolute bottom-3 right-3 rounded-xl bg-red-900/90 px-3 py-2 text-xs font-medium text-white shadow">
+      <div className="pointer-events-none absolute right-3 bottom-3 rounded-xl bg-red-900/90 px-3 py-2 text-xs font-medium text-white shadow">
         {status.message}
       </div>
     )
   }
 
   return (
-    <div className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-slate-900/80 px-3 py-1 text-xs font-medium text-white shadow">
+    <div className="pointer-events-none absolute right-3 bottom-3 rounded-full bg-slate-900/80 px-3 py-1 text-xs font-medium text-white shadow">
       Saving…
     </div>
   )

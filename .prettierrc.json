@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js"],
+      "options": {
+        "semi": false,
+        "singleQuote": false
+      }
+    }
+  ]
+}

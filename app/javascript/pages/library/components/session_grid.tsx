@@ -1,4 +1,4 @@
-import VideoCard from './video_card'
+import VideoCard from "./video_card"
 
 interface SessionGridProps {
   sessions: LibrarySessionPayload[]
@@ -38,7 +38,7 @@ export default function SessionGrid({ sessions }: SessionGridProps) {
   }
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-2">
       {sessions.map((session) => (
         <VideoCard key={session.id} session={session} />
       ))}

@@ -1,4 +1,4 @@
-import ContinueWatchingShelf from './shelves/continue_watching_shelf'
+import ContinueWatchingShelf from "./shelves/continue_watching_shelf"
 
 interface LibraryHeroProps {
   continueWatching: LibrarySessionPayload[]

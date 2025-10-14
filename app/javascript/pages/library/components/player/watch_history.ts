@@ -10,16 +10,19 @@ interface WatchHistoryResult {
   message?: string
 }
 
-export async function postWatchHistory(url: string, payload: WatchPayload): Promise<WatchHistoryResult> {
+export async function postWatchHistory(
+  url: string,
+  payload: WatchPayload,
+): Promise<WatchHistoryResult> {
   try {
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': getCsrfToken(),
+        "Content-Type": "application/json",
+        "X-CSRF-Token": getCsrfToken(),
       },
       body: JSON.stringify({ watch: payload }),
-      credentials: 'same-origin',
+      credentials: "same-origin",
     })
 
     if (!response.ok) {
@@ -31,23 +34,24 @@ export async function postWatchHistory(url: string, payload: WatchPayload): Prom
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : 'Unable to save progress',
+      message:
+        error instanceof Error ? error.message : "Unable to save progress",
     }
   }
 }
 
 function getCsrfToken() {
   const meta = document.querySelector('meta[name="csrf-token"]')
-  return meta?.getAttribute('content') ?? ''
+  return meta?.getAttribute("content") ?? ""
 }
 
 async function extractErrorMessage(response: Response): Promise<string> {
   try {
     const json = await response.json()
-    if (typeof json?.error === 'string') return json.error
+    if (typeof json?.error === "string") return json.error
   } catch (_) {
     // no-op; fall back to status text
   }
 
-  return response.statusText || 'Unable to save progress'
+  return response.statusText || "Unable to save progress"
 }

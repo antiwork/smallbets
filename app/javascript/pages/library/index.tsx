@@ -1,9 +1,9 @@
-import { Head } from '@inertiajs/react'
-import { useEffect, useMemo } from 'react'
+import { Head } from "@inertiajs/react"
+import { useEffect, useMemo } from "react"
 
-import LibraryHero from './components/library_hero'
-import SectionHeader from './components/layout/section_header'
-import SessionGrid from './components/session_grid'
+import LibraryHero from "./components/library_hero"
+import SectionHeader from "./components/layout/section_header"
+import SessionGrid from "./components/session_grid"
 
 interface LibraryPageProps {
   continueWatching: LibrarySessionPayload[]
@@ -60,7 +60,11 @@ interface CategoryGroup {
   sessions: LibrarySessionPayload[]
 }
 
-export default function LibraryIndex({ continueWatching, sections, layout }: LibraryPageProps) {
+export default function LibraryIndex({
+  continueWatching,
+  sections,
+  layout,
+}: LibraryPageProps) {
   useEffect(() => {
     if (!layout) return
 
@@ -69,12 +73,12 @@ export default function LibraryIndex({ continueWatching, sections, layout }: Lib
     }
 
     if (layout.nav) {
-      const nav = document.getElementById('nav')
+      const nav = document.getElementById("nav")
       if (nav) nav.innerHTML = layout.nav
     }
 
     if (layout.sidebar) {
-      const sidebar = document.getElementById('sidebar')
+      const sidebar = document.getElementById("sidebar")
       if (sidebar) sidebar.innerHTML = layout.sidebar
     }
   }, [layout?.bodyClass, layout?.nav, layout?.sidebar])

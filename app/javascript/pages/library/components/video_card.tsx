@@ -1,4 +1,4 @@
-import VimeoPlayer from './player/vimeo_player'
+import VimeoPlayer from "./player/vimeo_player"
 
 interface VideoCardProps {
   session: LibrarySessionPayload
@@ -34,8 +34,11 @@ interface LibraryWatchPayload {
 
 export default function VideoCard({ session }: VideoCardProps) {
   return (
-    <article id={`session-${session.id}`} className="group flex w-80 shrink-0 flex-col gap-2">
-      <div className="relative w-full overflow-hidden rounded-md" style={{ paddingBottom: `${session.padding}%` }}>
+    <article
+      id={`session-${session.id}`}
+      className="group relative flex w-80 shrink-0 flex-col gap-2"
+    >
+      <div className="relative aspect-video w-full overflow-hidden rounded-md">
         <VimeoPlayer session={session} />
       </div>
 
