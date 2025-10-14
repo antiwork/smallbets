@@ -11,11 +11,8 @@ export default class extends Controller {
   }
 
   connect() {
-    if (!this.hasFrameTarget) return
-
     this.boundMessageHandler = event => this.#handleMessage(event)
     window.addEventListener("message", this.boundMessageHandler)
-
     this.#postMessage({ method: "ping" })
   }
 
@@ -24,7 +21,6 @@ export default class extends Controller {
       window.removeEventListener("message", this.boundMessageHandler)
     }
   }
-
   #handleMessage(event) {
     if (!this.#isVimeoEvent(event)) return
 

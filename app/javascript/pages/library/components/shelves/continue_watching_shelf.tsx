@@ -55,8 +55,8 @@ export default function ContinueWatchingShelf({ sessions }: ContinueWatchingShel
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-white">Continue Watching</h2>
+    <div className="flex flex-col gap-6">
+      <h2 className="text-xl font-medium tracking-wider capitalize">Continue Watching</h2>
 
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {items.map((session) => (

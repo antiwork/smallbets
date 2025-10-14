@@ -34,7 +34,7 @@ interface LibraryWatchPayload {
 
 export default function LibraryHero({ continueWatching }: LibraryHeroProps) {
   return (
-    <section className="space-y-6 px-12 py-8">
+    <section className="pt-12 pl-8">
       <ContinueWatchingShelf sessions={continueWatching} />
     </section>
   )

@@ -103,16 +103,16 @@ export default function LibraryIndex({ continueWatching, sections, layout }: Lib
   }, [sections])
 
   return (
-    <div className="library min-h-screen bg-black">
+    <div className="min-h-screen bg-black py-12">
       <div className="space-y-12 pb-16">
         <Head title="Library" />
 
         <LibraryHero continueWatching={continueWatching} />
 
-        <section className="space-y-12 px-12">
+        <section className="space-y-12 pl-8">
           {categoryGroups.map((group) => (
             <div key={group.category.slug} className="space-y-6">
-              <SectionHeader eyebrow="" title={group.category.name} />
+              <SectionHeader title={group.category.name} />
               <SessionGrid sessions={group.sessions} />
             </div>
           ))}
