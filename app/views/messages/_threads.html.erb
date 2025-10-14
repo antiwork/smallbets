@@ -1,0 +1,29 @@
+<% threads = message.threads.to_a.select { |t| (t.messages_count || t.messages.active.count) > 0 } %>
+<div id="<%= dom_id(message, :threads) %>" class="threads flex align-center gap full-width" style="--column-gap: 0.4ch; --row-gap: 0" data-controller="local-time">
+  <% threads.each do |thread| %>
+    <% # Get users who have posted in the thread, ordered by their first message timestamp %>
+    <% participant_users = thread.messages.active
+                                 .group(:creator_id)
+                                 .select("messages.creator_id, MIN(messages.created_at) as first_message_at")
+                                 .order("first_message_at ASC")
+                                 .limit(5)
+                                 .map(&:creator_id) %>
+    <% participants = User.where(id: participant_users).index_by(&:id) %>
+    <% ordered_participants = participant_users.map { |id| participants[id] }.compact %>
+    <% reply_count = thread.messages_count || thread.messages.active.count %>
+
+    <%= link_to room_path(thread), class: "thread__link flex-inline align-center gap", data: { turbo_frame: "_top", updated_at: thread.last_active_at.iso8601 } do %>
+      <div class="thread__avatars flex-inline gap">
+        <% ordered_participants.each do |user| %>
+          <figure class="avatar thread__avatar flex-item-no-shrink" data-stop-propagation="true">
+            <%= render 'users/popup', user: user %>
+          </figure>
+        <% end %>
+      </div>
+      <%= pluralize(reply_count, 'reply', 'replies') %>
+      <% if reply_count > 0 %>
+        <span class="txt-muted">Last reply <%= local_datetime_tag thread.last_active_at, style: :relative %></span>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

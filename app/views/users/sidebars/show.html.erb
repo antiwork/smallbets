@@ -80,6 +80,12 @@
         <span class="sidebar__tool-label">Mentions</span>
       <% end %>
 
+      <%= link_to threads_inbox_path, class: "btn sidebar__tool" do %>
+        <%= image_tag "threads.svg", size: 20, aria: { hidden: "true" } %>
+        <span class="for-screen-reader">Threads</span>
+        <span class="sidebar__tool-label">Threads</span>
+      <% end %>
+
       <%= link_to bookmarks_inbox_path, class: "btn sidebar__tool" do %>
         <%= image_tag "bookmark.svg", size: 20, aria: { hidden: "true" } %>
         <span class="for-screen-reader">Bookmarks</span>

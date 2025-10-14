@@ -153,6 +153,16 @@ class Room < ApplicationRecord
     end
   end
 
+  def display_name(for_user: nil)
+    if direct?
+      users.without(for_user).pluck(:name).to_sentence.presence || for_user&.name
+    elsif thread?
+      "🧵 #{parent_message&.room&.name}"
+    else
+      name
+    end
+  end
+
   private
     def set_sortable_name
       self.sortable_name = name.to_s.gsub(/[[:^ascii:]\p{So}]/, "").strip.downcase

@@ -26,6 +26,8 @@ And if you're not part of the [Small Bets](https://smallbets.com) community yet,
 
 The `bin/setup` script will install dependencies, prepare the database, build Tailwind CSS, and configure the application.
 
+If you're actively developing with Tailwind CSS and need continuous builds, run `bin/tailwind-build --watch` in a separate terminal.
+
 ## Running in production
 
 Small Bets uses [Kamal](https://kamal-deploy.org/docs/installation/) for deployment. A modern tool that provides zero-downtime deployments with Docker.

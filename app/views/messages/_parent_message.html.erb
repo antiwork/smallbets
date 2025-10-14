@@ -1,0 +1,56 @@
+<%# locals: (message:, thread:) -%>
+<%= message_tag message do %>
+  <div class="message-separator message__loading-indicator">
+    <span class="busy txt-muted"></span>
+  </div>
+
+  <h2 class="message-separator message__day-separator message__day-separator--parent"><%= local_datetime_tag message.created_at, style: :date %></h2>
+
+  <div class="avatar message__avatar">
+    <%= render 'users/popup', user: message.creator %>
+  </div>
+
+  <turbo-frame id="<%= dom_id(message, :edit) %>">
+    <div class="message__body">
+      <div class="message__body-content">
+        <div class="message__meta">
+          <h3 class="message__heading">
+            <span class="message__author" title="<%= message.creator.title %>">
+              <strong data-reply-target="author"><%= message.creator.name %></strong>
+            </span>
+            <%= link_to message_timestamp(message, class: "message__timestamp"), room_at_message_path(message.room, message), target: "_top",
+                  class: "message__permalink" %>
+            <span class="message__meta-block message__room message__original-room message__original-room--with-in">
+              <span class="message__room-in">in</span>
+              <%= link_to room_display_name(message.room, for_user: nil), room_at_message_path(message.room, message), target: "_top", class: "message__room-link", data: { reply_target: "link" } %>
+            </span>
+            <%= render "messages/answered_by", message: %>
+          </h3>
+          <% unless message.active? %>
+            <%# Hide actions menu for deleted messages %>
+          <% else %>
+            <%= render "messages/actions", message:, current_room: thread %>
+          <% end %>
+        </div>
+        <% if message.active? %>
+          <%= render "messages/presentation", message: %>
+          <%# Don't show thread link since we're already inside it %>
+          <%= render "messages/boosts/boosts", message: %>
+        <% else %>
+          <div class="trix-content">
+            <div class="txt-muted">[Message deleted]</div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </turbo-frame>
+
+  <% reply_count = thread.messages_count || thread.messages.count %>
+  <h2 id="<%= dom_id(thread, :replies_separator) %>" class="message-separator message__replies-separator">
+    <span id="<%= dom_id(thread, :replies_separator) %>_count" class="message__replies-count"><%= pluralize(reply_count, 'reply', 'replies') %></span>
+  </h2>
+
+  <div class="message-separator message__loading-indicator">
+    <span class="busy txt-muted"></span>
+  </div>
+<% end %>

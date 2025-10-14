@@ -392,13 +392,8 @@
               <tr>
                 <td>Version</td>
                 <td class="txt-right">
-                  <% if Current.user&.administrator? %>
-                    <%= link_to "https://github.com/smallbets/campfire/commit/#{ENV["APP_VERSION"]}", target: "_blank", style: "text-decoration: none; display: inline-flex; align-items: center; justify-content: flex-end; width: 100%;" do %>
-                      <%= image_tag "crown.svg", size: 16, aria: { hidden: "true" }, class: "flex-item-no-shrink colorize--black", style: "margin-right: 4px;" %>
-                      <span><%= ENV["APP_VERSION"] %></span>
-                    <% end %>
-                  <% else %>
-                    <%= ENV["APP_VERSION"] %>
+                  <%= link_to "https://github.com/antiwork/smallbets/commit/#{ENV["APP_VERSION"]}", target: "_blank", style: "text-decoration: none; display: inline-flex; align-items: center; justify-content: flex-end; width: 100%;" do %>
+                    <span><%= ENV["APP_VERSION"] %></span>
                   <% end %>
                 </td>
               </tr>

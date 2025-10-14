@@ -2,6 +2,13 @@
 <%# locals: (message:, current_room: nil) -%>
 
 <div class="message__actions" data-controller="soft-keyboard">
+  <% unless message.room.direct? || current_room&.thread? || message.room.thread? %>
+    <%= link_to new_rooms_thread_path(parent_message_id: message.id), class: "btn message__action-btn message__options-btn message__reply-btn", data: { turbo_frame: "_top" } do %>
+      <%= image_tag "reply.svg", size: 20, class: "colorize--black", aria: { hidden: "true" } %>
+      <span class="for-screen-reader">Reply</span>
+    <% end %>
+  <% end %>
+
   <%= tag.details class: "position-relative",
       data: { controller: "popup", action: "keydown.esc->popup#close toggle->popup#toggle click@document->popup#closeOnClickOutside", popup_orientation_top_class: "popup-orientation-top" } do %>
     <summary class="btn message__action-btn message__options-btn options-btn">
@@ -30,6 +37,34 @@
       </div>
 
       <div class="border-top margin-block-start-half pad-block-start-half">
+        <% if message.content_type.attachment? %>
+          <%= link_to rails_blob_path(message.attachment, disposition: "attachment", only_path: true), class: "btn message__action-btn full-width hide-in-ios-pwa" do %>
+            <span>Download</span>
+          <% end %>
+
+          <%= tag.button class: "btn message__action-btn full-width",
+              data: { controller: "web-share", action: "web-share#share", web_share_files_value: rails_blob_path(message.attachment, only_path: true), web_share_title_value: message.attachment.filename.to_s } do %>
+            <span>Share</span>
+          <% end %>
+        <% else %>
+          <% unless message.room.direct? || current_room&.thread? || message.room.thread? %>
+            <%= link_to new_rooms_thread_path(parent_message_id: message.id), class: "btn message__action-btn full-width", data: { turbo_frame: "_top" } do %>
+              <span>Reply</span>
+            <% end %>
+          <% end %>
+
+          <% if current_room.present? %>
+            <%= tag.button class: "btn message__action-btn full-width", data: { action: "reply#reply" } do %>
+              <span>Quote</span>
+            <% end %>
+          <% else %>
+            <%= link_to room_at_message_url(message.room, message, reply: true), class: "btn message__action-btn full-width",
+                        target: "_top" do %>
+              <span>Quote</span>
+            <% end %>
+          <% end %>
+        <% end %>
+
         <% unless message.content_type.attachment? %>
           <%= link_to edit_message_in_room_path(current_room, message), class: "btn message__action-btn full-width message__edit-btn",
                       data: { turbo_frame: dom_id(message, :edit) }, aria: { hidden: true } do %>
@@ -47,28 +82,6 @@
         <% end %>
 
         <%= render "messages/actions/bookmark", message: message %>
-        
-        <% if message.content_type.attachment? %>
-          <%= link_to rails_blob_path(message.attachment, disposition: "attachment", only_path: true), class: "btn message__action-btn full-width hide-in-ios-pwa" do %>
-            <span>Download</span>
-          <% end %>
-
-          <%= tag.button class: "btn message__action-btn full-width",
-              data: { controller: "web-share", action: "web-share#share", web_share_files_value: rails_blob_path(message.attachment, only_path: true), web_share_title_value: message.attachment.filename.to_s } do %>
-            <span>Share</span>
-          <% end %>
-        <% else %>
-          <% if current_room.present? %>
-            <%= tag.button class: "btn message__action-btn full-width", data: { action: "reply#reply" } do %>
-              <span>Quote</span>
-            <% end %>
-          <% else %>
-            <%= link_to room_at_message_url(message.room, message, reply: true), class: "btn message__action-btn full-width",
-                        target: "_top" do %>
-              <span>Quote</span>
-            <% end %>
-          <% end %>
-        <% end %>
 
         <% if current_room.present? %>
           <%= button_to room_message_unreads_path(current_room, message), class: "btn message__action-btn full-width" do %>
