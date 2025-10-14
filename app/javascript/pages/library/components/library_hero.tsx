@@ -34,10 +34,8 @@ interface LibraryWatchPayload {
 
 export default function LibraryHero({ continueWatching }: LibraryHeroProps) {
   return (
-    <section className="relative overflow-hidden">
-      <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 py-12 text-white sm:px-6 lg:px-8">
-        <ContinueWatchingShelf sessions={continueWatching} />
-      </div>
+    <section className="space-y-6 px-12 py-8">
+      <ContinueWatchingShelf sessions={continueWatching} />
     </section>
   )
 }

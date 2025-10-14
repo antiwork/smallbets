@@ -34,15 +34,11 @@ interface LibraryWatchPayload {
 
 export default function SessionGrid({ sessions }: SessionGridProps) {
   if (sessions.length === 0) {
-    return (
-      <p className="mx-auto max-w-5xl rounded-lg border border-dashed border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-600 shadow-sm">
-        No sessions yet. Check back soon!
-      </p>
-    )
+    return null
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {sessions.map((session) => (
         <VideoCard key={session.id} session={session} />
       ))}

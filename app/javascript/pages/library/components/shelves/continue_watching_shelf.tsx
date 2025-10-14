@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { cn } from '../../../../lib/utils'
+import VimeoPlayer from '../player/vimeo_player'
 
 interface ContinueWatchingShelfProps {
   sessions: LibrarySessionPayload[]
@@ -34,6 +34,19 @@ interface LibraryWatchPayload {
   completed: boolean
 }
 
+function formatTimeRemaining(playedSeconds: number, durationSeconds?: number | null): string {
+  if (!durationSeconds) return ''
+
+  const remaining = Math.max(0, durationSeconds - playedSeconds)
+  const hours = Math.floor(remaining / 3600)
+  const minutes = Math.floor((remaining % 3600) / 60)
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m left`
+  }
+  return `${minutes}m left`
+}
+
 export default function ContinueWatchingShelf({ sessions }: ContinueWatchingShelfProps) {
   const items = useMemo(() => sessions.slice(0, 6), [sessions])
 
@@ -42,14 +55,10 @@ export default function ContinueWatchingShelf({ sessions }: ContinueWatchingShel
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-200/80">
-          Continue watching
-        </h2>
-      </div>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold text-white">Continue Watching</h2>
 
-      <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {items.map((session) => (
           <ContinueWatchingCard key={session.id} session={session} />
         ))}
@@ -61,40 +70,18 @@ export default function ContinueWatchingShelf({ sessions }: ContinueWatchingShel
 function ContinueWatchingCard({ session }: { session: LibrarySessionPayload }) {
   const progress = session.watch?.playedSeconds ?? 0
   const duration = session.watch?.durationSeconds ?? 0
-  const ratio = duration > 0 ? Math.min(progress / duration, 1) : 0
+  const timeRemaining = formatTimeRemaining(progress, duration)
 
   return (
-    <a
-      href={`#session-${session.id}`}
-      className="group relative flex w-64 shrink-0 snap-start overflow-hidden rounded-2xl bg-white/5"
-    >
-      <div className="absolute inset-0" />
-      <div className="relative flex flex-col gap-3 p-4">
-        <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-200/80">
-          <span className="inline-flex size-6 items-center justify-center rounded-full bg-white/10 align-middle">
-            <svg viewBox="0 0 24 24" className="size-3.5" fill="currentColor" aria-hidden>
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </span>
-          {session.categories[0]?.name ?? 'Class'}
-        </span>
-        <div className="space-y-1">
-          <h3 className="text-base font-semibold text-white/90">{session.title}</h3>
-          <p className="text-xs text-white/70 line-clamp-2">{session.description}</p>
-        </div>
-        <Progress value={ratio} />
+    <a href={`#session-${session.id}`} className="group flex w-80 shrink-0 flex-col gap-2">
+      <div className="relative w-full overflow-hidden rounded-md" style={{ paddingBottom: `${session.padding}%` }}>
+        <VimeoPlayer session={session} />
+      </div>
+
+      <div className="flex flex-col">
+        <h3 className="text-sm font-medium text-white">{session.title}</h3>
+        {timeRemaining && <p className="text-xs text-gray-400">{timeRemaining}</p>}
       </div>
     </a>
-  )
-}
-
-function Progress({ value }: { value: number }) {
-  return (
-    <div className="h-1.5 rounded-full bg-white/10">
-      <div
-        className={cn('h-1.5 rounded-full bg-white transition-all duration-300', value === 1 && 'bg-emerald-400')}
-        style={{ width: `${Math.max(value, 0) * 100}%` }}
-      />
-    </div>
   )
 }
