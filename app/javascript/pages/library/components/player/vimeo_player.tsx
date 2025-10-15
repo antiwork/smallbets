@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { postWatchHistory, type WatchPayload } from "./watch_history"
 
@@ -29,6 +37,18 @@ interface LibraryWatchPayload {
   completed: boolean
 }
 
+interface FullscreenDocument extends Document {
+  webkitFullscreenElement?: Element | null
+}
+
+interface FullscreenElement extends HTMLElement {
+  webkitRequestFullscreen?: () => Promise<void> | void
+}
+
+export interface VimeoPlayerHandle {
+  enterFullscreen: () => void
+}
+
 interface WritableRef<T> {
   current: T
 }
@@ -42,139 +62,226 @@ type VimeoMessage =
 
 const TRACKED_EVENTS = ["play", "pause", "timeupdate", "ended"] as const
 
-export default function VimeoPlayer({ session }: VimeoPlayerProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const [isActivated, setIsActivated] = useState(false)
-  const [shouldPlay, setShouldPlay] = useState(false)
-  const hoverTimerRef = useRef<number | null>(null)
-  const hasAutoplayedRef = useRef(false)
+const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
+  function VimeoPlayer({ session }: VimeoPlayerProps, ref) {
+    const containerRef = useRef<HTMLDivElement | null>(null)
+    const [isActivated, setIsActivated] = useState(false)
+    const [shouldPlay, setShouldPlay] = useState(false)
+    const [showControls, setShowControls] = useState(false)
+    const hoverTimerRef = useRef<number | null>(null)
+    const hasAutoplayedRef = useRef(false)
 
-  useEffect(() => {
-    if (isActivated) return
-    if (typeof window === "undefined") return
-    const element = containerRef.current
-    if (!element) return
+    const playerSrc = useMemo(() => {
+      try {
+        const url = new URL(session.playerSrc)
+        url.searchParams.set("controls", showControls ? "1" : "0")
+        return url.toString()
+      } catch (_error) {
+        return session.playerSrc
+      }
+    }, [session.playerSrc, showControls])
 
-    if (!("IntersectionObserver" in window)) {
+    useEffect(() => {
+      if (isActivated) return
+      if (typeof window === "undefined") return
+      const element = containerRef.current
+      if (!element) return
+
+      if (!("IntersectionObserver" in window)) {
+        setIsActivated(true)
+        return
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            setIsActivated(true)
+            observer.disconnect()
+          }
+        },
+        { rootMargin: ACTIVATION_ROOT_MARGIN },
+      )
+
+      observer.observe(element)
+
+      return () => {
+        observer.disconnect()
+      }
+    }, [isActivated])
+
+    const handleActivate = useCallback(() => {
+      if (isActivated) return
       setIsActivated(true)
-      return
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setIsActivated(true)
-          observer.disconnect()
-        }
-      },
-      { rootMargin: ACTIVATION_ROOT_MARGIN },
-    )
-
-    observer.observe(element)
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [isActivated])
-
-  const handleActivate = useCallback(() => {
-    if (isActivated) return
-    setIsActivated(true)
-    setShouldPlay(true)
-    hasAutoplayedRef.current = true
-  }, [isActivated])
-
-  const handlePointerEnter = useCallback(() => {
-    if (!isActivated) {
-      setIsActivated(true)
-    }
-    if (hoverTimerRef.current) {
-      window.clearTimeout(hoverTimerRef.current)
-    }
-    if (hasAutoplayedRef.current) {
       setShouldPlay(true)
-      return
-    }
-    hoverTimerRef.current = window.setTimeout(() => {
       hasAutoplayedRef.current = true
-      hoverTimerRef.current = null
-      setShouldPlay(true)
-    }, 1500)
-  }, [isActivated])
+    }, [isActivated])
 
-  const handlePointerLeave = useCallback(() => {
-    if (hoverTimerRef.current) {
-      window.clearTimeout(hoverTimerRef.current)
-      hoverTimerRef.current = null
-    }
-    setShouldPlay(false)
-  }, [])
-
-  useEffect(() => {
-    return () => {
+    const handlePointerEnter = useCallback(() => {
+      if (!isActivated) {
+        setIsActivated(true)
+      }
       if (hoverTimerRef.current) {
         window.clearTimeout(hoverTimerRef.current)
       }
-    }
-  }, [])
+      if (hasAutoplayedRef.current) {
+        setShouldPlay(true)
+        return
+      }
+      hoverTimerRef.current = window.setTimeout(() => {
+        hasAutoplayedRef.current = true
+        hoverTimerRef.current = null
+        setShouldPlay(true)
+      }, 1500)
+    }, [isActivated])
 
-  const posterImage = usePosterUrl(session)
+    const handlePointerLeave = useCallback(() => {
+      if (hoverTimerRef.current) {
+        window.clearTimeout(hoverTimerRef.current)
+        hoverTimerRef.current = null
+      }
+      setShouldPlay(false)
+    }, [])
 
-  return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0 bg-black"
-      onMouseEnter={handlePointerEnter}
-      onMouseLeave={handlePointerLeave}
-      onFocusCapture={handlePointerEnter}
-      onBlurCapture={handlePointerLeave}
-    >
-      {isActivated ? (
-        <ActiveVimeoPlayer session={session} shouldPlay={shouldPlay} />
-      ) : (
-        <button
-          type="button"
-          aria-label={`Play ${session.title}`}
-          onClick={handleActivate}
-          className="group relative flex size-full items-center justify-center overflow-hidden bg-black text-white"
-        >
-          {posterImage ? (
-            <img
-              src={posterImage}
-              alt={session.title}
-              decoding="async"
-              loading="lazy"
-              className="absolute inset-0 size-full object-contain"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800" />
-          )}
-          <div className="relative flex size-14 items-center justify-center rounded-full bg-slate-900/80 transition group-hover:bg-slate-900">
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              className="ms-1 size-6 fill-current"
-            >
-              <path d="M8 5.14v14l11-7-11-7z" />
-            </svg>
-          </div>
-        </button>
-      )}
-    </div>
-  )
-}
+    useEffect(() => {
+      return () => {
+        if (hoverTimerRef.current) {
+          window.clearTimeout(hoverTimerRef.current)
+        }
+      }
+    }, [])
+
+    useEffect(() => {
+      setShowControls(false)
+    }, [session.id])
+
+    useEffect(() => {
+      const doc = document as FullscreenDocument
+
+      const handleFullscreenChange = () => {
+        const fullscreenElement =
+          doc.fullscreenElement ?? doc.webkitFullscreenElement ?? null
+        setShowControls(fullscreenElement === containerRef.current)
+      }
+
+      document.addEventListener("fullscreenchange", handleFullscreenChange)
+      document.addEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange,
+      )
+
+      return () => {
+        document.removeEventListener("fullscreenchange", handleFullscreenChange)
+        document.removeEventListener(
+          "webkitfullscreenchange",
+          handleFullscreenChange,
+        )
+      }
+    }, [])
+
+    const requestFullscreen = useCallback(() => {
+      const element = containerRef.current as FullscreenElement | null
+      if (!element) return
+
+      if (element.requestFullscreen) {
+        void element.requestFullscreen().catch(() => undefined)
+        return
+      }
+
+      if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen()
+      }
+    }, [])
+
+    const enterFullscreen = useCallback(() => {
+      if (!isActivated) {
+        setIsActivated(true)
+        setShouldPlay(true)
+        hasAutoplayedRef.current = true
+      }
+      requestFullscreen()
+    }, [isActivated, requestFullscreen])
+
+    useImperativeHandle(ref, () => ({
+      enterFullscreen,
+    }))
+
+    const posterImage = usePosterUrl(session)
+
+    return (
+      <div
+        ref={containerRef}
+        className="absolute inset-0 cursor-pointer bg-black"
+        onMouseEnter={handlePointerEnter}
+        onMouseLeave={handlePointerLeave}
+        onFocusCapture={handlePointerEnter}
+        onBlurCapture={handlePointerLeave}
+      >
+        {isActivated ? (
+          <ActiveVimeoPlayer
+            session={session}
+            shouldPlay={shouldPlay}
+            playerSrc={playerSrc}
+          />
+        ) : (
+          <button
+            type="button"
+            aria-label={`Play ${session.title}`}
+            onClick={handleActivate}
+            className="group relative flex size-full items-center justify-center overflow-hidden bg-black text-white"
+          >
+            {posterImage ? (
+              <img
+                src={posterImage}
+                alt={session.title}
+                decoding="async"
+                loading="lazy"
+                className="absolute inset-0 size-full object-contain"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800" />
+            )}
+            <div className="relative flex size-14 items-center justify-center rounded-full bg-slate-900/80 transition group-hover:bg-slate-900">
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="ms-1 size-6 fill-current"
+              >
+                <path d="M8 5.14v14l11-7-11-7z" />
+              </svg>
+            </div>
+          </button>
+        )}
+        {!showControls && (
+          <button
+            type="button"
+            aria-label={`Open ${session.title} in full screen`}
+            onClick={enterFullscreen}
+            className="absolute inset-0 z-10 cursor-pointer opacity-0"
+          />
+        )}
+      </div>
+    )
+  },
+)
+
+export default VimeoPlayer
 
 interface ActiveVimeoPlayerProps {
   session: LibrarySessionPayload
   shouldPlay: boolean
+  playerSrc: string
 }
 
-function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
+function ActiveVimeoPlayer({
+  session,
+  shouldPlay,
+  playerSrc,
+}: ActiveVimeoPlayerProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [status, setStatus] = useState<PlaybackStatus>({ state: "idle" })
   const progressRef = useRef<WatchPayload | null>(session.watch ?? null)
-  const fallbackOriginRef = useRef<string>(new URL(session.playerSrc).origin)
+  const fallbackOriginRef = useRef<string>(new URL(playerSrc).origin)
   const vimeoOriginRef = useRef<string | null>(null)
 
   const watchPath = session.watchHistoryPath
@@ -184,10 +291,10 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
   }, [session.watch])
 
   useEffect(() => {
-    fallbackOriginRef.current = new URL(session.playerSrc).origin
+    fallbackOriginRef.current = new URL(playerSrc).origin
     vimeoOriginRef.current = null
     setIsReady(false)
-  }, [session.playerSrc])
+  }, [playerSrc])
 
   const handleVimeoMessage = useCallback(
     (message: VimeoMessage) => {
@@ -269,7 +376,7 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
     return () => {
       window.removeEventListener("message", handleMessage)
     }
-  }, [handleVimeoMessage])
+  }, [handleVimeoMessage, playerSrc])
 
   useEffect(() => {
     const resumeAt = progressRef.current?.playedSeconds
@@ -294,7 +401,7 @@ function ActiveVimeoPlayer({ session, shouldPlay }: ActiveVimeoPlayerProps) {
       <iframe
         ref={frameRef}
         title={session.title}
-        src={session.playerSrc + "&controls=0"}
+        src={playerSrc}
         className="absolute inset-0 size-full"
         allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
         loading="lazy"
