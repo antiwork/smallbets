@@ -25,15 +25,24 @@ body {
 }
 
 .avatar > img {
-  box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px, rgb(0, 0, 0) 0px 0px 0px 1px, rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+  box-shadow:
+    rgb(255, 255, 255) 0px 0px 0px 0px,
+    rgb(0, 0, 0) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px;
 }
 
 .avatar--icon img {
-  box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px, rgb(0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+  box-shadow:
+    rgb(255, 255, 255) 0px 0px 0px 0px,
+    rgb(0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px;
 }
 
 .account-logo > img {
-  box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px, rgb(0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px !important;
+  box-shadow:
+    rgb(255, 255, 255) 0px 0px 0px 0px,
+    rgb(0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px !important;
 }
 
 #nav:has(.room--current) .account-logo {
@@ -43,6 +52,26 @@ body {
 @media (min-width: 100ch) {
   #nav:has(.room--current) .account-logo {
     display: block;
+  }
+}
+
+/* Library: match small-screen nav padding to the rest of the app */
+@media (max-width: 120ch) {
+  body.library-collapsed #nav {
+    padding-block: var(--block-space-half);
+
+    /* replicate subtle top fade used with sidebar pages */
+    &::before {
+      background: linear-gradient(
+        180deg,
+        oklch(var(--lch-white)) 20%,
+        oklch(var(--lch-white) / 0) 100%
+      );
+      content: "";
+      inset: 0;
+      position: absolute;
+      z-index: -1;
+    }
   }
 }
 
@@ -130,7 +159,8 @@ body {
 }
 
 .message--emoji:not(:has(.composer--edit)).message--me .message__body-content {
-  padding: var(--content-padding-block) 0 var(--content-padding-block) var(--content-padding-inline);
+  padding: var(--content-padding-block) 0 var(--content-padding-block)
+    var(--content-padding-inline);
   text-align: left;
 }
 
@@ -140,4 +170,4 @@ body {
 
 .message__actions-menu .quick-boosts {
   --btn-size: 2.65em;
-} 
+}
