@@ -33,7 +33,7 @@
   }
 }
 
-[data-trix-content-type~='application/vnd.campfire.mention'] {
+[data-trix-content-type~="application/vnd.campfire.mention"] {
   display: inline-flex;
   margin: 0;
   padding: 0;
@@ -56,7 +56,9 @@
   font-weight: 600;
   line-height: var(--avatar-size);
   margin: 0;
-  padding-inline-start: calc(var(--avatar-size) + var(--inline-space) / 3) !important;
+  padding-inline-start: calc(
+    var(--avatar-size) + var(--inline-space) / 3
+  ) !important;
   position: relative;
 
   .avatar {
@@ -71,7 +73,7 @@
     overflow: clip;
     position: absolute;
   }
-  
+
   details.avatar {
     overflow: visible;
     letter-spacing: normal;
@@ -81,7 +83,7 @@
       position: relative;
       margin: auto;
     }
-    
+
     .btn {
       padding: var(--btn-padding, 0.5em 1.1em);
     }
@@ -143,7 +145,18 @@ suggestion-option {
   --input-padding: 0.3em 0;
 
   @media (min-width: 120ch) {
-    max-inline-size: calc(var(--sidebar-width) - (var(--btn-size) * 2) - (var(--column-gap) * 2) - (var(--sidebar-inline-space) * 2));
+    /* In Library overlay, --sidebar-width is 0; avoid collapsing width */
+    body.library-collapsed & {
+      max-inline-size: 100% !important;
+      inline-size: 100%;
+    }
+    /* Default pages keep previous calculation */
+    body:not(.library-collapsed) & {
+      max-inline-size: calc(
+        var(--sidebar-width) - (var(--btn-size) * 2) - (var(--column-gap) * 2) -
+          (var(--sidebar-inline-space) * 2)
+      );
+    }
   }
 }
 

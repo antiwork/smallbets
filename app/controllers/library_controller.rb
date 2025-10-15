@@ -1,7 +1,7 @@
 class LibraryController < AuthenticatedController
   def index
     @page_title = "Library"
-    @body_class = "sidebar"
+    @body_class = "library-collapsed"
 
     # Ensure sidebar memberships are available for initial render
     set_sidebar_memberships
