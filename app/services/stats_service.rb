@@ -332,6 +332,11 @@ class StatsService
     {
       total_users: User.where(active: true, suspended_at: nil).count,
       total_messages: Message.count,
+      total_threads: Room.active
+                         .where(type: "Rooms::Thread")
+                         .joins(:messages)
+                         .where("messages.active = ?", true)
+                         .distinct.count,
       total_boosts: Boost.count,
       total_posters: User.active.joins(messages: :room)
                          .where("rooms.type != ?", "Rooms::Direct")
@@ -342,9 +347,16 @@ class StatsService
 
   # Get top rooms by message count
   def self.top_rooms_by_message_count(limit = 10)
-    Room.select("rooms.*, COUNT(messages.id) AS message_count")
-        .joins(:messages)
-        .where("messages.active = true")
+    rooms_message_count_subquery = <<~SQL
+      (
+        SELECT COUNT(DISTINCT messages.id) FROM messages
+        LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'
+        LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id
+        WHERE messages.active = true AND (messages.room_id = rooms.id OR parent_messages.room_id = rooms.id)
+      ) AS message_count
+    SQL
+
+    Room.select("rooms.*", rooms_message_count_subquery)
         .where(type: "Rooms::Open") # Only include open rooms
         .group("rooms.id")
         .order("message_count DESC, rooms.created_at ASC")

@@ -2,10 +2,12 @@
   <%= turbo_stream_from :rooms %>
   <%= turbo_stream_from Current.user, :rooms %>
 
-  <div class="sidebar__container overflow-y overflow-hide-scrollbar"
-      data-controller="badge-dot maintain-scroll debounce-updates"
-      data-badge-dot-unread-class="badge"
-      data-action="rooms-list:unread@window->badge-dot#update rooms-list:read@window->badge-dot#update rooms-list:addBadge@window->badge-dot#update turbo:submit-start->turbo-frame#unpermanize turbo:before-render@document->maintain-scroll#beforeRender">
+  <div data-controller="mentions-indicator"
+       data-action="rooms-list:unread@window->mentions-indicator#update rooms-list:read@window->mentions-indicator#update rooms-list:addBadge@window->mentions-indicator#update">
+    <div class="sidebar__container overflow-y overflow-hide-scrollbar"
+        data-controller="badge-dot maintain-scroll debounce-updates"
+        data-badge-dot-unread-class="badge"
+        data-action="rooms-list:unread@window->badge-dot#update rooms-list:read@window->badge-dot#update rooms-list:addBadge@window->badge-dot#update turbo:submit-start->turbo-frame#unpermanize turbo:before-render@document->maintain-scroll#beforeRender">
     <turbo-frame id="direct_rooms_control" target="_top">
       <div class="directs gap overflow-x overflow-hide-scrollbar">
         <%= link_to new_rooms_direct_path, class: "direct direct__new", data: { turbo_frame: "_self" } do %>
@@ -74,7 +76,7 @@
 
   <div class="sidebar__tools d-hotwire-native-none">
     <div class="sidebar__tool-container">
-      <%= link_to inbox_path, class: "btn sidebar__tool" do %>
+      <%= link_to inbox_path, class: "btn sidebar__tool", data: { mentions_indicator_target: "icon" } do %>
         <%= image_tag "mentions.svg", size: 20, aria: { hidden: "true" } %>
         <span class="for-screen-reader">Mentions</span>
         <span class="sidebar__tool-label">Mentions</span>
@@ -133,5 +135,6 @@
         <span class="for-screen-reader"><%= Current.user.name %></span>
       <% end %>
     </div>
+  </div>
   </div>
 <% end %>

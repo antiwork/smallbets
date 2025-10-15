@@ -76,6 +76,21 @@
   img {
     margin: 0;
   }
+
+  &.has-unread-mentions::after {
+    --size: 1em;
+
+    aspect-ratio: 1;
+    background-color: var(--color-negative);
+    block-size: var(--size);
+    border-radius: calc(var(--size) * 2);
+    content: "";
+    flex-shrink: 0;
+    inline-size: var(--size);
+    position: absolute;
+    inset-block-start: calc(var(--size) / -4);
+    inset-inline-end: calc(var(--size) / -4);
+  }
 }
 
 .sidebar__tool-label {
