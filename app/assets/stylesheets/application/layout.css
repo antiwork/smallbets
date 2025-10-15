@@ -50,6 +50,11 @@ body.library-collapsed #sidebar.open {
   transform: translate(0);
 }
 
+/* When the Library sidebar overlay is open, block interactions with underlying content */
+body.library-collapsed:has(#sidebar.open) #main-content {
+  pointer-events: none;
+}
+
 #app-logo {
   display: none;
 
