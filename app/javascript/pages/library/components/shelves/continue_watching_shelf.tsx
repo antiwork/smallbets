@@ -44,25 +44,12 @@ export default function ContinueWatchingShelf({
   }
 
   return (
-    <div className="flex flex-col" style={{ gap: "1.5vw" }}>
-      <h2
-        className="font-medium tracking-wider text-white capitalize"
-        style={{
-          fontSize: "1.4vw",
-          lineHeight: "1.25vw",
-        }}
-      >
+    <div className="flex flex-col gap-[1.5vw]">
+      <h2 className="text-[1.4vw] leading-[1.25vw] font-medium tracking-wider text-white capitalize">
         Continue Watching
       </h2>
 
-      <div
-        className="scrollbar-hide flex overflow-x-auto overflow-y-visible"
-        style={{
-          gap: "0.4vw",
-          paddingBottom: "0.4vw",
-          paddingRight: "4vw",
-        }}
-      >
+      <div className="scrollbar-hide flex gap-[0.4vw] overflow-x-auto overflow-y-visible pr-[4vw] pb-[0.4vw]">
         {items.map((session) => (
           <ContinueWatchingCard key={session.id} session={session} />
         ))}

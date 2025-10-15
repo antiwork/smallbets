@@ -63,27 +63,14 @@ export default function VideoCard({
   return (
     <article
       id={`session-${session.id}`}
-      className="group relative flex shrink-0 flex-col"
-      style={{
-        width: "21.5vw",
-        gap: "0.4vw",
-      }}
+      className="group relative flex w-[21.5vw] shrink-0 flex-col gap-[0.4vw]"
     >
-      <div
-        className="relative w-full overflow-hidden"
-        style={{
-          borderRadius: "0.2vw",
-          paddingBottom: "12.1vw",
-        }}
-      >
+      <div className="relative w-full overflow-hidden rounded-[0.2vw] pb-[12.1vw]">
         <div className="absolute inset-0">
           <VimeoPlayer session={session} />
         </div>
         {showProgress && progressPercentage > 0 && (
-          <div
-            className="absolute right-0 bottom-0 left-0 bg-gray-600"
-            style={{ height: "0.3vw" }}
-          >
+          <div className="absolute right-0 bottom-0 left-0 h-[0.3vw] bg-gray-600">
             <div
               className="h-full bg-red-600"
               style={{
@@ -95,24 +82,11 @@ export default function VideoCard({
       </div>
 
       <div className="flex flex-col">
-        <h3
-          className="font-medium text-white capitalize"
-          style={{
-            fontSize: "1.1vw",
-            lineHeight: "1.3vw",
-          }}
-        >
+        <h3 className="text-[1.1vw] leading-[1.3w] font-medium text-white capitalize">
           {session.title}
         </h3>
         {timeRemaining && (
-          <p
-            className="text-gray-400"
-            style={{
-              fontSize: "0.9vw",
-              lineHeight: "1.1vw",
-              marginTop: "0.2vw",
-            }}
-          >
+          <p className="mt-[0.2vw] text-[0.9vw] leading-[1.1vw] text-gray-400">
             {timeRemaining}
           </p>
         )}

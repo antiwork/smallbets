@@ -39,14 +39,7 @@ export default function SessionGrid({ sessions }: SessionGridProps) {
 
   return (
     <div className="relative">
-      <div
-        className="scrollbar-hide flex overflow-x-auto overflow-y-visible"
-        style={{
-          gap: "0.8vw",
-          paddingBottom: "0.4vw",
-          paddingRight: "4vw",
-        }}
-      >
+      <div className="scrollbar-hide flex gap-[0.8vw] overflow-x-auto overflow-y-visible pr-[4vw] pb-[0.4vw]">
         {sessions.map((session) => (
           <VideoCard key={session.id} session={session} />
         ))}
