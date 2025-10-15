@@ -196,10 +196,22 @@
 @media (min-width: 120ch) {
   body.library-collapsed .sidebar__toggle {
     display: block;
+    animation: hamburger-scale-in 250ms ease-out;
     /* when sidebar is open on desktop, keep the toggle visible inside panel */
     .open & {
       display: none;
     }
+  }
+}
+
+@keyframes hamburger-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
