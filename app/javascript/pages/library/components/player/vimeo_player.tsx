@@ -8,7 +8,11 @@ import {
   useState,
 } from "react"
 
-import { postWatchHistory, type WatchPayload } from "./watch_history"
+import {
+  postWatchHistory,
+  type WatchPayload,
+  type WatchRequestOptions,
+} from "./watch_history"
 
 const ACTIVATION_ROOT_MARGIN = "200px"
 const POSTER_SIZES = [1280, 960, 640, 320]
@@ -56,11 +60,23 @@ interface WritableRef<T> {
 type VimeoMessage =
   | { event: "ready" }
   | { event: "play" }
-  | { event: "pause" }
+  | { event: "pause"; data?: PlaybackMetrics }
+  | { event: "seeked"; data: PlaybackMetrics }
   | { event: "timeupdate"; data: { seconds: number; duration: number } }
   | { event: "ended" }
 
-const TRACKED_EVENTS = ["play", "pause", "timeupdate", "ended"] as const
+interface PlaybackMetrics {
+  seconds: number
+  duration: number
+}
+
+const TRACKED_EVENTS = [
+  "play",
+  "pause",
+  "timeupdate",
+  "seeked",
+  "ended",
+] as const
 
 const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
   function VimeoPlayer({ session }: VimeoPlayerProps, ref) {
@@ -68,6 +84,7 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     const [isActivated, setIsActivated] = useState(false)
     const [shouldPlay, setShouldPlay] = useState(false)
     const [showControls, setShowControls] = useState(false)
+    const [resetPreviewSignal, setResetPreviewSignal] = useState(0)
     const hoverTimerRef = useRef<number | null>(null)
     const hasAutoplayedRef = useRef(false)
 
@@ -140,7 +157,10 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
         hoverTimerRef.current = null
       }
       setShouldPlay(false)
-    }, [])
+      if (isActivated) {
+        setResetPreviewSignal((value) => value + 1)
+      }
+    }, [isActivated])
 
     useEffect(() => {
       return () => {
@@ -221,6 +241,8 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
             session={session}
             shouldPlay={shouldPlay}
             playerSrc={playerSrc}
+            isFullscreen={showControls}
+            resetPreviewSignal={resetPreviewSignal}
           />
         ) : (
           <button
@@ -270,12 +292,16 @@ interface ActiveVimeoPlayerProps {
   session: LibrarySessionPayload
   shouldPlay: boolean
   playerSrc: string
+  isFullscreen: boolean
+  resetPreviewSignal: number
 }
 
 function ActiveVimeoPlayer({
   session,
   shouldPlay,
   playerSrc,
+  isFullscreen,
+  resetPreviewSignal,
 }: ActiveVimeoPlayerProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [isReady, setIsReady] = useState(false)
@@ -283,11 +309,38 @@ function ActiveVimeoPlayer({
   const progressRef = useRef<WatchPayload | null>(session.watch ?? null)
   const fallbackOriginRef = useRef<string>(new URL(playerSrc).origin)
   const vimeoOriginRef = useRef<string | null>(null)
+  const fullscreenStateRef = useRef(isFullscreen)
+  const previousFullscreenRef = useRef(isFullscreen)
+  const pendingPreviewResetRef = useRef(false)
+  const lastPreviewResetSignalRef = useRef(resetPreviewSignal)
+  const hasPersistedHistoryRef = useRef((session.watch?.playedSeconds ?? 0) > 0)
 
   const watchPath = session.watchHistoryPath
 
+  const markHistoryPersisted = useCallback(() => {
+    hasPersistedHistoryRef.current = true
+  }, [])
+
+  const throttler = useMemo(
+    () =>
+      createProgressThrottler(10_000, (payload, options) => {
+        void persistProgress(watchPath, payload, setStatus, options).then(
+          (success) => {
+            if (success) {
+              markHistoryPersisted()
+            }
+          },
+        )
+      }),
+    [markHistoryPersisted, watchPath],
+  )
+
   useEffect(() => {
     progressRef.current = session.watch ?? null
+  }, [session.watch])
+
+  useEffect(() => {
+    hasPersistedHistoryRef.current = (session.watch?.playedSeconds ?? 0) > 0
   }, [session.watch])
 
   useEffect(() => {
@@ -295,6 +348,52 @@ function ActiveVimeoPlayer({
     vimeoOriginRef.current = null
     setIsReady(false)
   }, [playerSrc])
+
+  useEffect(() => {
+    fullscreenStateRef.current = isFullscreen
+  }, [isFullscreen])
+
+  const resetPreviewPlayback = useCallback(() => {
+    const frame = frameRef.current
+    if (!frame) return
+
+    postToVimeo(
+      frame,
+      vimeoOriginRef,
+      { method: "pause" },
+      { fallbackOrigin: fallbackOriginRef.current },
+    )
+    postToVimeo(
+      frame,
+      vimeoOriginRef,
+      { method: "setCurrentTime", value: 0 },
+      { fallbackOrigin: fallbackOriginRef.current },
+    )
+
+    pendingPreviewResetRef.current = false
+  }, [])
+
+  useEffect(() => {
+    if (
+      resetPreviewSignal === lastPreviewResetSignalRef.current &&
+      !pendingPreviewResetRef.current
+    ) {
+      return
+    }
+
+    if (fullscreenStateRef.current) return
+    if (hasPersistedHistoryRef.current) return
+
+    if (resetPreviewSignal !== lastPreviewResetSignalRef.current) {
+      lastPreviewResetSignalRef.current = resetPreviewSignal
+      progressRef.current = null
+      pendingPreviewResetRef.current = true
+    }
+
+    if (isReady && pendingPreviewResetRef.current) {
+      resetPreviewPlayback()
+    }
+  }, [resetPreviewSignal, isReady, resetPreviewPlayback])
 
   const handleVimeoMessage = useCallback(
     (message: VimeoMessage) => {
@@ -320,7 +419,38 @@ function ActiveVimeoPlayer({
             lastWatchedAt: new Date().toISOString(),
           }
           progressRef.current = next
-          void persistProgress(watchPath, next, setStatus)
+          if (fullscreenStateRef.current) {
+            throttler.queue(next)
+          }
+          break
+        }
+        case "seeked": {
+          const next: WatchPayload = {
+            playedSeconds: message.data.seconds,
+            durationSeconds: message.data.duration,
+            completed: false,
+            lastWatchedAt: new Date().toISOString(),
+          }
+          progressRef.current = next
+          if (fullscreenStateRef.current) {
+            throttler.flush(next)
+          }
+          break
+        }
+        case "pause": {
+          const metrics = message.data
+          if (metrics) {
+            const next: WatchPayload = {
+              playedSeconds: metrics.seconds,
+              durationSeconds: metrics.duration,
+              completed: false,
+              lastWatchedAt: new Date().toISOString(),
+            }
+            progressRef.current = next
+          }
+          if (fullscreenStateRef.current) {
+            throttler.flush(progressRef.current ?? undefined)
+          }
           break
         }
         case "ended": {
@@ -335,7 +465,9 @@ function ActiveVimeoPlayer({
             lastWatchedAt: new Date().toISOString(),
           }
           progressRef.current = next
-          void persistProgress(watchPath, next, setStatus)
+          if (fullscreenStateRef.current) {
+            throttler.flush(next)
+          }
           break
         }
         default: {
@@ -343,7 +475,7 @@ function ActiveVimeoPlayer({
         }
       }
     },
-    [watchPath],
+    [throttler],
   )
 
   useEffect(() => {
@@ -377,6 +509,52 @@ function ActiveVimeoPlayer({
       window.removeEventListener("message", handleMessage)
     }
   }, [handleVimeoMessage, playerSrc])
+
+  useEffect(() => {
+    if (previousFullscreenRef.current && !isFullscreen) {
+      throttler.flush(progressRef.current ?? undefined, { keepalive: true })
+    }
+    previousFullscreenRef.current = isFullscreen
+  }, [isFullscreen, throttler])
+
+  useEffect(() => {
+    function flushWithKeepalive(): void {
+      if (!fullscreenStateRef.current) return
+      throttler.flush(progressRef.current ?? undefined, { keepalive: true })
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "hidden") return
+      flushWithKeepalive()
+    }
+
+    const handlePageHide = () => {
+      flushWithKeepalive()
+    }
+
+    const handleBeforeUnload = () => {
+      flushWithKeepalive()
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("pagehide", handlePageHide)
+    window.addEventListener("beforeunload", handleBeforeUnload)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("pagehide", handlePageHide)
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+    }
+  }, [throttler])
+
+  useEffect(() => {
+    return () => {
+      if (fullscreenStateRef.current) {
+        throttler.flush(progressRef.current ?? undefined, { keepalive: true })
+      }
+      throttler.cancel()
+    }
+  }, [throttler])
 
   useEffect(() => {
     const resumeAt = progressRef.current?.playedSeconds
@@ -519,20 +697,22 @@ async function persistProgress(
   url: string,
   payload: LibraryWatchPayload,
   setStatus: (status: PlaybackStatus) => void,
+  options: WatchRequestOptions = {},
 ) {
   setStatus({ state: "saving" })
 
-  const result = await postWatchHistory(url, payload)
+  const result = await postWatchHistory(url, payload, options)
 
   if (!result.ok) {
     setStatus({
       state: "error",
       message: result.message ?? "Unable to save progress",
     })
-    return
+    return false
   }
 
   setStatus({ state: "idle" })
+  return true
 }
 
 function StatusIndicator({ status }: { status: PlaybackStatus }) {
@@ -551,4 +731,50 @@ function StatusIndicator({ status }: { status: PlaybackStatus }) {
       Saving…
     </div>
   )
+}
+
+interface ProgressThrottler {
+  queue: (payload: WatchPayload) => void
+  flush: (payload?: WatchPayload, options?: WatchRequestOptions) => void
+  cancel: () => void
+}
+
+function createProgressThrottler(
+  intervalMs: number,
+  persist: (payload: WatchPayload, options?: WatchRequestOptions) => void,
+): ProgressThrottler {
+  let timer: number | null = null
+  let pending: WatchPayload | null = null
+
+  function clearTimer(): void {
+    if (timer === null) return
+    window.clearTimeout(timer)
+    timer = null
+  }
+
+  return {
+    queue(payload) {
+      pending = payload
+      if (timer !== null) return
+
+      timer = window.setTimeout(() => {
+        if (pending) {
+          persist(pending)
+        }
+        pending = null
+        timer = null
+      }, intervalMs)
+    },
+    flush(payload, options) {
+      const next = payload ?? pending
+      pending = null
+      clearTimer()
+      if (!next) return
+      persist(next, options)
+    },
+    cancel() {
+      pending = null
+      clearTimer()
+    },
+  }
 }

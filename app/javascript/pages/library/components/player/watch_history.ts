@@ -10,9 +10,14 @@ interface WatchHistoryResult {
   message?: string
 }
 
+export interface WatchRequestOptions {
+  keepalive?: boolean
+}
+
 export async function postWatchHistory(
   url: string,
   payload: WatchPayload,
+  options: WatchRequestOptions = {},
 ): Promise<WatchHistoryResult> {
   try {
     const response = await fetch(url, {
@@ -23,6 +28,7 @@ export async function postWatchHistory(
       },
       body: JSON.stringify({ watch: payload }),
       credentials: "same-origin",
+      keepalive: options.keepalive === true,
     })
 
     if (!response.ok) {
