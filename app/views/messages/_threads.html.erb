@@ -11,6 +11,7 @@
     <% participants = User.where(id: participant_users).index_by(&:id) %>
     <% ordered_participants = participant_users.map { |id| participants[id] }.compact %>
     <% reply_count = thread.messages_count || thread.messages.active.count %>
+    <% has_unread = Current.user.present? && message.thread_has_unread_for?(Current.user, thread) %>
 
     <%= link_to room_path(thread), class: "thread__link flex-inline align-center gap", data: { turbo_frame: "_top", updated_at: thread.last_active_at.iso8601 } do %>
       <div class="thread__avatars flex-inline gap">
@@ -22,7 +23,7 @@
       </div>
       <%= pluralize(reply_count, 'reply', 'replies') %>
       <% if reply_count > 0 %>
-        <span class="txt-muted">Last reply <%= local_datetime_tag thread.last_active_at, style: :relative %></span>
+        <span class="txt-muted" style="<%= 'font-weight: 800; color: var(--color-text);' if has_unread %>">Last reply <%= local_datetime_tag thread.last_active_at, style: :relative %></span>
       <% end %>
     <% end %>
   <% end %>
