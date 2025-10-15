@@ -72,7 +72,7 @@ export default function VideoCard({
         {showProgress && progressPercentage > 0 && (
           <div className="absolute right-0 bottom-0 left-0 h-[0.3vw] bg-gray-600">
             <div
-              className="h-full bg-red-600"
+              className="h-full bg-[#00ADEF]"
               style={{
                 width: `${Math.min(progressPercentage, 100)}%`,
               }}
