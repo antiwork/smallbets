@@ -90,6 +90,10 @@
       </footer>
     </main>
 
+    <template id="sidebar-slot" hidden>
+      <%= yield :sidebar %>
+    </template>
+
     <aside id="sidebar" data-controller="toggle-class" data-toggle-class-toggle-class="open" data-turbo-permanent="true">
       <%= yield :sidebar %>
     </aside>
