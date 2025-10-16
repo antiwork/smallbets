@@ -51,6 +51,8 @@ interface FullscreenElement extends HTMLElement {
 
 export interface VimeoPlayerHandle {
   enterFullscreen: () => void
+  startPreview: () => void
+  stopPreview: () => void
 }
 
 interface WritableRef<T> {
@@ -92,6 +94,7 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       try {
         const url = new URL(session.playerSrc)
         url.searchParams.set("controls", showControls ? "1" : "0")
+        url.searchParams.set("fullscreen", "0")
         return url.toString()
       } catch (_error) {
         return session.playerSrc
@@ -180,7 +183,15 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       const handleFullscreenChange = () => {
         const fullscreenElement =
           doc.fullscreenElement ?? doc.webkitFullscreenElement ?? null
-        setShowControls(fullscreenElement === containerRef.current)
+        const container = containerRef.current
+        if (!fullscreenElement || !container) {
+          setShowControls(false)
+          return
+        }
+        setShowControls(
+          fullscreenElement === container ||
+            container.contains(fullscreenElement),
+        )
       }
 
       document.addEventListener("fullscreenchange", handleFullscreenChange)
@@ -223,6 +234,8 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
 
     useImperativeHandle(ref, () => ({
       enterFullscreen,
+      startPreview: handlePointerEnter,
+      stopPreview: handlePointerLeave,
     }))
 
     const posterImage = usePosterUrl(session)
@@ -230,7 +243,7 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     return (
       <div
         ref={containerRef}
-        className="absolute inset-0 cursor-pointer bg-black"
+        className="vimeo-fullscreen absolute inset-0 cursor-pointer bg-black"
         onMouseEnter={handlePointerEnter}
         onMouseLeave={handlePointerLeave}
         onFocusCapture={handlePointerEnter}
@@ -363,15 +376,16 @@ function ActiveVimeoPlayer({
       { method: "pause" },
       { fallbackOrigin: fallbackOriginRef.current },
     )
+    const resumeAt = session.watch?.playedSeconds ?? 0
     postToVimeo(
       frame,
       vimeoOriginRef,
-      { method: "setCurrentTime", value: 0 },
+      { method: "setCurrentTime", value: resumeAt },
       { fallbackOrigin: fallbackOriginRef.current },
     )
 
     pendingPreviewResetRef.current = false
-  }, [])
+  }, [session.watch?.playedSeconds])
 
   useEffect(() => {
     if (
@@ -382,11 +396,9 @@ function ActiveVimeoPlayer({
     }
 
     if (fullscreenStateRef.current) return
-    if (hasPersistedHistoryRef.current) return
 
     if (resetPreviewSignal !== lastPreviewResetSignalRef.current) {
       lastPreviewResetSignalRef.current = resetPreviewSignal
-      progressRef.current = null
       pendingPreviewResetRef.current = true
     }
 
@@ -576,15 +588,28 @@ function ActiveVimeoPlayer({
 
   return (
     <div className="relative size-full bg-black">
-      <iframe
-        ref={frameRef}
-        title={session.title}
-        src={playerSrc}
-        className="absolute inset-0 size-full"
-        allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-        loading="lazy"
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
+      <div
+        className={
+          isFullscreen
+            ? "absolute inset-0 flex items-center justify-center"
+            : "absolute inset-0"
+        }
+      >
+        <iframe
+          ref={frameRef}
+          title={session.title}
+          src={playerSrc}
+          className={
+            isFullscreen
+              ? "vimeo-embed h-auto max-h-[100vh] w-[100vw]"
+              : "vimeo-embed size-full"
+          }
+          style={isFullscreen ? { aspectRatio: "16 / 9" } : undefined}
+          allow="autoplay; picture-in-picture; clipboard-write"
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+        />
+      </div>
       <StatusIndicator status={status} />
     </div>
   )

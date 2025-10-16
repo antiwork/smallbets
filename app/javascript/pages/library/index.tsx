@@ -116,7 +116,7 @@ export default function LibraryIndex({
         <section className="mt-[3vw] pl-3">
           {categoryGroups.map((group) => (
             <div
-              className="mb-[3vw] flex flex-col gap-[1.5vw]"
+              className="mb-[3vw] flex flex-col gap-[1vw]"
               key={group.category.slug}
             >
               <SectionHeader title={group.category.name} />

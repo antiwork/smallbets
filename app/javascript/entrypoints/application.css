@@ -2,3 +2,37 @@
 
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
+
+/* Ensure black background when the Vimeo container is fullscreen */
+.vimeo-fullscreen:fullscreen {
+  background-color: #000;
+}
+
+.vimeo-fullscreen:-webkit-full-screen {
+  background-color: #000;
+}
+
+.vimeo-fullscreen:fullscreen::backdrop {
+  background-color: #000;
+}
+
+.vimeo-fullscreen:-webkit-full-screen::backdrop {
+  background-color: #000;
+}
+
+/* Ensure black background if the iframe itself is fullscreen */
+.vimeo-embed:fullscreen {
+  background-color: #000;
+}
+
+.vimeo-embed:-webkit-full-screen {
+  background-color: #000;
+}
+
+.vimeo-embed:fullscreen::backdrop {
+  background-color: #000;
+}
+
+.vimeo-embed:-webkit-full-screen::backdrop {
+  background-color: #000;
+}
