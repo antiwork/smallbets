@@ -19,6 +19,8 @@ const POSTER_SIZES = [1280, 960, 640, 320]
 
 interface VimeoPlayerProps {
   session: LibrarySessionPayload
+  watchOverride?: LibraryWatchPayload | null
+  onWatchUpdate?: (watch: LibraryWatchPayload) => void
 }
 
 interface LibrarySessionPayload {
@@ -81,7 +83,10 @@ const TRACKED_EVENTS = [
 ] as const
 
 const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
-  function VimeoPlayer({ session }: VimeoPlayerProps, ref) {
+  function VimeoPlayer(
+    { session, watchOverride, onWatchUpdate }: VimeoPlayerProps,
+    ref,
+  ) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const [isActivated, setIsActivated] = useState(false)
     const [shouldPlay, setShouldPlay] = useState(false)
@@ -256,6 +261,8 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
             playerSrc={playerSrc}
             isFullscreen={showControls}
             resetPreviewSignal={resetPreviewSignal}
+            watchOverride={watchOverride}
+            onWatchUpdate={onWatchUpdate}
           />
         ) : (
           <button
@@ -307,6 +314,8 @@ interface ActiveVimeoPlayerProps {
   playerSrc: string
   isFullscreen: boolean
   resetPreviewSignal: number
+  watchOverride?: LibraryWatchPayload | null
+  onWatchUpdate?: (watch: LibraryWatchPayload) => void
 }
 
 function ActiveVimeoPlayer({
@@ -315,11 +324,15 @@ function ActiveVimeoPlayer({
   playerSrc,
   isFullscreen,
   resetPreviewSignal,
+  watchOverride,
+  onWatchUpdate,
 }: ActiveVimeoPlayerProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [status, setStatus] = useState<PlaybackStatus>({ state: "idle" })
-  const progressRef = useRef<WatchPayload | null>(session.watch ?? null)
+  const progressRef = useRef<WatchPayload | null>(
+    watchOverride ?? session.watch ?? null,
+  )
   const fallbackOriginRef = useRef<string>(new URL(playerSrc).origin)
   const vimeoOriginRef = useRef<string | null>(null)
   const fullscreenStateRef = useRef(isFullscreen)
@@ -341,16 +354,17 @@ function ActiveVimeoPlayer({
           (success) => {
             if (success) {
               markHistoryPersisted()
+              if (onWatchUpdate) onWatchUpdate(payload)
             }
           },
         )
       }),
-    [markHistoryPersisted, watchPath],
+    [markHistoryPersisted, watchPath, onWatchUpdate],
   )
 
   useEffect(() => {
-    progressRef.current = session.watch ?? null
-  }, [session.watch])
+    progressRef.current = watchOverride ?? session.watch ?? null
+  }, [watchOverride, session.watch])
 
   useEffect(() => {
     hasPersistedHistoryRef.current = (session.watch?.playedSeconds ?? 0) > 0
@@ -376,7 +390,7 @@ function ActiveVimeoPlayer({
       { method: "pause" },
       { fallbackOrigin: fallbackOriginRef.current },
     )
-    const resumeAt = session.watch?.playedSeconds ?? 0
+    const resumeAt = progressRef.current?.playedSeconds ?? 0
     postToVimeo(
       frame,
       vimeoOriginRef,

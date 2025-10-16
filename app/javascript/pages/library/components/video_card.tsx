@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useMemo, useRef, useState } from "react"
 import VimeoPlayer, { type VimeoPlayerHandle } from "./player/vimeo_player"
 
 interface VideoCardProps {
@@ -55,12 +55,16 @@ export default function VideoCard({
   showProgress = false,
 }: VideoCardProps) {
   const playerRef = useRef<VimeoPlayerHandle>(null)
-  const progress = session.watch?.playedSeconds ?? 0
-  const duration = session.watch?.durationSeconds ?? 0
+  const [watchOverride, setWatchOverride] =
+    useState<LibraryWatchPayload | null>(session.watch ?? null)
+
+  const progress = (watchOverride ?? session.watch)?.playedSeconds ?? 0
+  const duration = (watchOverride ?? session.watch)?.durationSeconds ?? 0
   const progressPercentage = duration > 0 ? (progress / duration) * 100 : 0
-  const timeRemaining = showProgress
-    ? formatTimeRemaining(progress, duration)
-    : ""
+  const timeRemaining = useMemo(
+    () => (showProgress ? formatTimeRemaining(progress, duration) : ""),
+    [showProgress, progress, duration],
+  )
 
   const handleTitleClick = () => {
     playerRef.current?.enterFullscreen()
@@ -80,7 +84,12 @@ export default function VideoCard({
       >
         <div className="relative order-1 aspect-[16/9] w-full rounded-[0.2vw] shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
           <div className="absolute inset-0 overflow-hidden rounded-[0.2vw]">
-            <VimeoPlayer ref={playerRef} session={session} />
+            <VimeoPlayer
+              ref={playerRef}
+              session={session}
+              watchOverride={watchOverride}
+              onWatchUpdate={setWatchOverride}
+            />
           </div>
           {showProgress && progressPercentage > 0 && (
             <div className="absolute right-0 bottom-0 left-0 h-[0.3vw] bg-gray-600">
