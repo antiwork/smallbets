@@ -22,22 +22,26 @@ function isSidebarAllowedOnPage() {
 }
 
 function syncSidebarFromSlot() {
-  if (isInertiaPage()) return
-
   const { sidebar, slot } = getSidebarElements()
   if (!sidebar || !slot) return
 
-  const html = slot.innerHTML.trim()
-
-  // No sidebar on this page: clear and close
-  if (html.length === 0 || !isSidebarAllowedOnPage()) {
+  // If this page doesn't allow a sidebar, ensure it's cleared/closed
+  if (!isSidebarAllowedOnPage()) {
     sidebar.innerHTML = ""
     sidebar.classList.remove("open")
     return
   }
 
-  // Replace content only if different to avoid unnecessary reflows
-  if (sidebar.innerHTML !== html) sidebar.innerHTML = html
+  // Do not interfere with Inertia pages; Library manages the sidebar itself
+  if (isInertiaPage()) return
+
+  // If we already have the standard sidebar turbo-frame mounted, keep it
+  // This preserves Turbo-permanent behavior and avoids re-rendering
+  if (sidebar.querySelector("#user_sidebar")) return
+
+  // Populate from slot only when empty/missing
+  const html = slot.innerHTML.trim()
+  if (html.length > 0) sidebar.innerHTML = html
 }
 
 // Initial sync on DOM ready or when Turbo loads a new page
