@@ -63,9 +63,9 @@ export default function VideoCard({
   return (
     <article
       id={`session-${session.id}`}
-      className="group relative flex w-[21.5vw] shrink-0 flex-col gap-[0.4vw]"
+      className="group relative flex w-[var(--shelf-card-w,21.5vw)] shrink-0 flex-col gap-[0.4vw]"
     >
-      <div className="relative w-full overflow-hidden rounded-[0.2vw] pb-[12.1vw]">
+      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[0.2vw]">
         <div className="absolute inset-0">
           <VimeoPlayer session={session} />
         </div>
@@ -82,11 +82,11 @@ export default function VideoCard({
       </div>
 
       <div className="flex flex-col">
-        <h3 className="text-[1.1vw] leading-[1.3w] font-medium text-white capitalize">
+        <h3 className="text-[clamp(0.875rem,0.875vw,1.125rem)] leading-tight font-medium text-white capitalize">
           {session.title}
         </h3>
         {timeRemaining && (
-          <p className="mt-[0.2vw] text-[0.9vw] leading-[1.1vw] text-gray-400">
+          <p className="mt-[0.2vw] text-[clamp(0.75rem,0.9vw,0.9375rem)] leading-tight text-gray-400">
             {timeRemaining}
           </p>
         )}

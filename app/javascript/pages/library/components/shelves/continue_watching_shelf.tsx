@@ -37,7 +37,7 @@ interface LibraryWatchPayload {
 export default function ContinueWatchingShelf({
   sessions,
 }: ContinueWatchingShelfProps) {
-  const items = useMemo(() => sessions.slice(0, 6), [sessions])
+  const items = useMemo(() => sessions, [sessions])
 
   if (items.length === 0) {
     return null
@@ -45,11 +45,11 @@ export default function ContinueWatchingShelf({
 
   return (
     <div className="flex flex-col gap-[1.5vw]">
-      <h2 className="text-[1.4vw] leading-[1.25vw] font-medium tracking-wider text-white capitalize">
+      <h2 className="text-[clamp(1rem,1.2vw,1.5rem)] leading-tight font-medium tracking-wider text-white capitalize">
         Continue Watching
       </h2>
 
-      <div className="scrollbar-hide flex gap-[0.4vw] overflow-x-auto overflow-y-visible pr-[4vw] pb-[0.4vw]">
+      <div className="scrollbar-hide flex gap-[0.4vw] overflow-x-auto overflow-y-visible pr-0 pb-[0.4vw] [--shelf-card-w:calc((100%_-_var(--shelf-gap)_*_(var(--shelf-items)))/(var(--shelf-items)_+_var(--shelf-peek)))] [--shelf-gap:0.4vw] [--shelf-items:2] [--shelf-peek:0.25] md:[--shelf-items:3] lg:[--shelf-items:4] xl:[--shelf-items:5] 2xl:[--shelf-items:6]">
         {items.map((session) => (
           <ContinueWatchingCard key={session.id} session={session} />
         ))}
