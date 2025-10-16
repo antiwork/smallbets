@@ -22,6 +22,9 @@ import {
 
 const ACTIVATION_ROOT_MARGIN = "200px"
 const POSTER_SIZES = [1280, 960, 640, 320]
+const AUTOPLAY_PREVIEW_DELAY_MS = 1000
+const MUTE_OVERLAY_HOLD_MS = 2500
+const PROGRESS_THROTTLE_MS = 10_000
 
 interface VimeoPlayerProps {
   session: LibrarySessionPayload
@@ -163,7 +166,7 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
         hasAutoplayedRef.current = true
         hoverTimerRef.current = null
         setShouldPlay(true)
-      }, 1500)
+      }, AUTOPLAY_PREVIEW_DELAY_MS)
     }, [isActivated])
 
     const handlePointerLeave = useCallback(() => {
@@ -350,7 +353,6 @@ function ActiveVimeoPlayer({
   const pendingPreviewResetRef = useRef(false)
   const lastPreviewResetSignalRef = useRef(resetPreviewSignal)
   const hasPersistedHistoryRef = useRef((session.watch?.playedSeconds ?? 0) > 0)
-  const BG_HOLD_MS = 2500
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const [isBgVisible, setIsBgVisible] = useState(false)
   const bgHoldTimerRef = useRef<number | null>(null)
@@ -367,7 +369,7 @@ function ActiveVimeoPlayer({
 
   const throttler = useMemo(
     () =>
-      createProgressThrottler(10_000, (payload, options) => {
+      createProgressThrottler(PROGRESS_THROTTLE_MS, (payload, options) => {
         void persistProgress(watchPath, payload, setStatus, options).then(
           (success) => {
             if (success) {
@@ -652,7 +654,7 @@ function ActiveVimeoPlayer({
       bgHoldTimerRef.current = window.setTimeout(() => {
         setIsBgVisible(false)
         bgHoldTimerRef.current = null
-      }, BG_HOLD_MS)
+      }, MUTE_OVERLAY_HOLD_MS)
     }
 
     return () => {
@@ -681,7 +683,7 @@ function ActiveVimeoPlayer({
     bgHoldTimerRef.current = window.setTimeout(() => {
       setIsBgVisible(false)
       bgHoldTimerRef.current = null
-    }, BG_HOLD_MS)
+    }, MUTE_OVERLAY_HOLD_MS)
   }, [shouldPlay, isFullscreen])
 
   const syncVolume = useCallback(
