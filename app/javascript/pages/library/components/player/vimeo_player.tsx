@@ -98,7 +98,6 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     const [shouldPlay, setShouldPlay] = useState(false)
     const [showControls, setShowControls] = useState(false)
     const [resetPreviewSignal, setResetPreviewSignal] = useState(0)
-    const [isHovered, setIsHovered] = useState(false)
     const hoverTimerRef = useRef<number | null>(null)
     const hasAutoplayedRef = useRef(false)
 
@@ -150,7 +149,6 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     }, [isActivated])
 
     const handlePointerEnter = useCallback(() => {
-      setIsHovered(true)
       if (!isActivated) {
         setIsActivated(true)
       }
@@ -169,7 +167,6 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     }, [isActivated])
 
     const handlePointerLeave = useCallback(() => {
-      setIsHovered(false)
       if (hoverTimerRef.current) {
         window.clearTimeout(hoverTimerRef.current)
         hoverTimerRef.current = null
@@ -271,7 +268,6 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
             playerSrc={playerSrc}
             isFullscreen={showControls}
             resetPreviewSignal={resetPreviewSignal}
-            isHovered={isHovered}
             watchOverride={watchOverride}
             onWatchUpdate={onWatchUpdate}
           />
@@ -325,7 +321,6 @@ interface ActiveVimeoPlayerProps {
   playerSrc: string
   isFullscreen: boolean
   resetPreviewSignal: number
-  isHovered: boolean
   watchOverride?: LibraryWatchPayload | null
   onWatchUpdate?: (watch: LibraryWatchPayload) => void
 }
@@ -336,7 +331,6 @@ function ActiveVimeoPlayer({
   playerSrc,
   isFullscreen,
   resetPreviewSignal,
-  isHovered,
   watchOverride,
   onWatchUpdate,
 }: ActiveVimeoPlayerProps) {
@@ -638,7 +632,8 @@ function ActiveVimeoPlayer({
       return
     }
 
-    if (!isHovered) {
+    // Only show once autoplay (preview) actually begins
+    if (!shouldPlay) {
       setIsBgVisible(false)
       if (bgHoldTimerRef.current) {
         window.clearTimeout(bgHoldTimerRef.current)
@@ -647,7 +642,7 @@ function ActiveVimeoPlayer({
       return
     }
 
-    // Button just appeared due to hover
+    // Button just appeared because autoplay started
     setIsBgVisible(true)
 
     if (!isButtonHovered) {
@@ -666,7 +661,7 @@ function ActiveVimeoPlayer({
         bgHoldTimerRef.current = null
       }
     }
-  }, [isHovered, isFullscreen, isButtonHovered])
+  }, [shouldPlay, isFullscreen, isButtonHovered])
 
   const handleButtonEnter = useCallback(() => {
     setIsButtonHovered(true)
@@ -679,7 +674,7 @@ function ActiveVimeoPlayer({
 
   const handleButtonLeave = useCallback(() => {
     setIsButtonHovered(false)
-    if (!isHovered || isFullscreen) return
+    if (!shouldPlay || isFullscreen) return
     if (bgHoldTimerRef.current) {
       window.clearTimeout(bgHoldTimerRef.current)
     }
@@ -687,7 +682,7 @@ function ActiveVimeoPlayer({
       setIsBgVisible(false)
       bgHoldTimerRef.current = null
     }, BG_HOLD_MS)
-  }, [isHovered, isFullscreen])
+  }, [shouldPlay, isFullscreen])
 
   const syncVolume = useCallback(
     (frame: HTMLIFrameElement | null) => {
@@ -757,7 +752,7 @@ function ActiveVimeoPlayer({
           referrerPolicy="strict-origin-when-cross-origin"
         />
       </div>
-      {!isFullscreen && isHovered && (
+      {!isFullscreen && shouldPlay && (
         <button
           type="button"
           aria-pressed={autoplaySoundEnabled}
