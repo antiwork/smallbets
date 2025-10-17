@@ -1,5 +1,7 @@
 import {
   forwardRef,
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -9,8 +11,12 @@ import {
 } from "react"
 import type { LibrarySessionPayload, LibraryWatchPayload } from "../../../types"
 import type { VimeoPlayerHandle } from "./types"
-import { VimeoEmbed } from "./vimeo-embed"
+const LazyVimeoEmbed = lazy(async () =>
+  import("./vimeo-embed").then((m) => ({ default: m.VimeoEmbed })),
+)
 import { ACTIVATION_ROOT_MARGIN, AUTOPLAY_PREVIEW_DELAY_MS } from "./constants"
+import { preconnectVimeoOnce } from "../../../helpers/preconnect"
+import { acquireMountSlot } from "./mount-queue"
 
 interface VimeoPlayerProps {
   session: LibrarySessionPayload
@@ -33,11 +39,24 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
   ) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const [isActivated, setIsActivated] = useState(false)
+    const [canMount, setCanMount] = useState(false)
     const [shouldPlay, setShouldPlay] = useState(false)
     const [showControls, setShowControls] = useState(false)
     const [resetPreviewSignal, setResetPreviewSignal] = useState(0)
     const hoverTimerRef = useRef<number | null>(null)
     const hasAutoplayedRef = useRef(false)
+    const releaseMountRef = useRef<null | (() => void)>(null)
+
+    function isDataSaverEnabled(): boolean {
+      try {
+        const conn = (
+          navigator as unknown as { connection?: { saveData?: boolean } }
+        ).connection
+        return Boolean(conn && conn.saveData)
+      } catch (_e) {
+        return false
+      }
+    }
 
     const playerSrc = useMemo(() => {
       try {
@@ -57,30 +76,39 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       const element = containerRef.current
       if (!element) return
       if (!("IntersectionObserver" in window)) {
-        setIsActivated(true)
+        if (!isDataSaverEnabled()) setIsActivated(true)
         return
       }
+      // Dynamic rootMargin based on connection quality
+      let rootMargin = ACTIVATION_ROOT_MARGIN
+      try {
+        const et = (
+          navigator as unknown as { connection?: { effectiveType?: string } }
+        )?.connection?.effectiveType as string | undefined
+        if (et && (et.includes("2g") || et.includes("3g"))) {
+          rootMargin = "800px"
+        }
+      } catch (_e) {
+        // noop
+      }
+
       const observer = new IntersectionObserver(
         (entries) => {
           if (entries.some((entry) => entry.isIntersecting)) {
-            setIsActivated(true)
+            if (!isDataSaverEnabled()) setIsActivated(true)
+            preconnectVimeoOnce()
+            void import("./vimeo-embed")
             observer.disconnect()
           }
         },
-        { rootMargin: ACTIVATION_ROOT_MARGIN },
+        { rootMargin },
       )
       observer.observe(element)
       return () => observer.disconnect()
     }, [isActivated])
 
-    const handleActivate = useCallback(() => {
-      if (isActivated) return
-      setIsActivated(true)
-      setShouldPlay(true)
-      hasAutoplayedRef.current = true
-    }, [isActivated])
-
     const handlePointerEnter = useCallback(() => {
+      if (isDataSaverEnabled()) return
       if (!isActivated) setIsActivated(true)
       if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current)
       if (hasAutoplayedRef.current) {
@@ -92,6 +120,8 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
         hoverTimerRef.current = null
         setShouldPlay(true)
       }, AUTOPLAY_PREVIEW_DELAY_MS)
+      preconnectVimeoOnce()
+      void import("./vimeo-embed")
     }, [isActivated])
 
     const handlePointerLeave = useCallback(() => {
@@ -147,41 +177,71 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       stopPreview: handlePointerLeave,
     }))
 
+    // Concurrency gating for mounting the iframe
+    useEffect(() => {
+      let cancelled = false
+      if (isActivated && !canMount) {
+        void acquireMountSlot().then((release) => {
+          if (cancelled) {
+            release()
+            return
+          }
+          releaseMountRef.current = release
+          setCanMount(true)
+        })
+      }
+      return () => {
+        cancelled = true
+      }
+    }, [isActivated, canMount])
+
+    useEffect(() => {
+      return () => {
+        if (releaseMountRef.current) {
+          releaseMountRef.current()
+          releaseMountRef.current = null
+        }
+      }
+    }, [])
+
     return (
       <div
         ref={containerRef}
         className="vimeo-fullscreen absolute inset-0 bg-black"
       >
-        {isActivated ? (
-          <VimeoEmbed
-            session={session}
-            shouldPlay={shouldPlay}
-            playerSrc={playerSrc}
-            isFullscreen={showControls}
-            resetPreviewSignal={resetPreviewSignal}
-            watchOverride={watchOverride}
-            onWatchUpdate={onWatchUpdate}
-            backIcon={backIcon}
-            onExitFullscreen={() => setShowControls(false)}
-            persistPreview={persistPreview}
-          />
-        ) : (
-          <button
-            type="button"
-            aria-label={`Play ${session.title}`}
-            onClick={handleActivate}
-            className="group relative flex size-full items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white"
-          >
-            <div className="relative flex size-14 items-center justify-center rounded-full bg-slate-900/80 transition group-hover:bg-slate-900">
-              <svg
+        {isActivated && canMount ? (
+          <Suspense
+            fallback={
+              <div
                 aria-hidden
-                viewBox="0 0 24 24"
-                className="ms-1 size-6 fill-current"
-              >
-                <path d="M8 5.14v14l11-7-11-7z" />
-              </svg>
-            </div>
-          </button>
+                className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
+              />
+            }
+          >
+            <LazyVimeoEmbed
+              session={session}
+              shouldPlay={shouldPlay}
+              playerSrc={playerSrc}
+              isFullscreen={showControls}
+              resetPreviewSignal={resetPreviewSignal}
+              watchOverride={watchOverride}
+              onWatchUpdate={onWatchUpdate}
+              backIcon={backIcon}
+              onExitFullscreen={() => setShowControls(false)}
+              persistPreview={persistPreview}
+              onFrameLoad={() => {
+                if (releaseMountRef.current) {
+                  releaseMountRef.current()
+                  releaseMountRef.current = null
+                }
+              }}
+            />
+          </Suspense>
+        ) : (
+          <div
+            aria-hidden
+            className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
+          />
         )}
       </div>
     )

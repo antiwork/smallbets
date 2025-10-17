@@ -5,7 +5,7 @@ import {
   subscribeToAutoplaySound,
 } from "../autoplay_audio_pref"
 import type { LibrarySessionPayload, LibraryWatchPayload } from "../../../types"
-import type { WatchPayload, WatchRequestOptions } from "../watch_history"
+import type { WatchPayload } from "../watch_history"
 import { FullscreenInfoBar } from "./fullscreen-info-bar"
 import { persistProgress } from "./progress"
 import { createProgressThrottler } from "./progress-throttler"
@@ -29,6 +29,7 @@ export interface VimeoEmbedProps {
   backIcon?: string
   onExitFullscreen?: () => void
   persistPreview?: boolean
+  onFrameLoad?: () => void
 }
 
 export function VimeoEmbed({
@@ -42,6 +43,7 @@ export function VimeoEmbed({
   backIcon,
   onExitFullscreen,
   persistPreview,
+  onFrameLoad,
 }: VimeoEmbedProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [isReady, setIsReady] = useState(false)
@@ -62,7 +64,6 @@ export function VimeoEmbed({
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const [isBgVisible, setIsBgVisible] = useState(false)
   const bgHoldTimerRef = useRef<number | null>(null)
-  const overlayVisible = isBgVisible || isButtonHovered
 
   const watchPath = session.watchHistoryPath
 
@@ -98,6 +99,11 @@ export function VimeoEmbed({
     vimeoOriginRef.current = null
     setIsReady(false)
   }, [playerSrc])
+
+  // Reset readiness when toggling fullscreen so skeleton shows until ready
+  useEffect(() => {
+    setIsReady(false)
+  }, [isFullscreen])
 
   useEffect(() => {
     fullscreenStateRef.current = isFullscreen
@@ -146,6 +152,16 @@ export function VimeoEmbed({
             fallbackOriginRef.current,
           )
           setIsReady(true)
+          try {
+            performance.mark(`vimeo:ready:${session.id}`)
+            performance.measure(
+              `vimeo:activation→ready:${session.id}`,
+              `vimeo:activate:${session.id}`,
+              `vimeo:ready:${session.id}`,
+            )
+          } catch (_e) {
+            // ignore
+          }
           break
         }
         case "timeupdate": {
@@ -230,7 +246,7 @@ export function VimeoEmbed({
       { allowWildcard: true, fallbackOrigin: fallbackOriginRef.current },
     )
     return () => window.removeEventListener("message", handleMessage)
-  }, [handleVimeoMessage, playerSrc])
+  }, [handleVimeoMessage, playerSrc, isFullscreen])
 
   useEffect(() => {
     if (previousFullscreenRef.current && !isFullscreen) {
@@ -376,6 +392,18 @@ export function VimeoEmbed({
 
   return (
     <div className="relative size-full bg-black">
+      {!isReady &&
+        (isFullscreen ? (
+          <div
+            aria-hidden
+            className="fixed inset-0 z-[1001] flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
+          />
+        ) : (
+          <div
+            aria-hidden
+            className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
+          />
+        ))}
       {!isFullscreen ? (
         <div className="absolute inset-0">
           <iframe
@@ -383,9 +411,10 @@ export function VimeoEmbed({
             title={session.title}
             src={playerSrc}
             className="vimeo-embed size-full"
-            allow="picture-in-picture; clipboard-write"
+            allow="autoplay; picture-in-picture; clipboard-write"
             loading="lazy"
             referrerPolicy="strict-origin-when-cross-origin"
+            onLoad={onFrameLoad}
           />
         </div>
       ) : (
@@ -424,9 +453,10 @@ export function VimeoEmbed({
               className="vimeo-embed h-auto max-h-[calc(100vh-var(--bar-h))] w-[100vw]"
               style={{ aspectRatio: "16 / 9" }}
               allow="fullscreen; autoplay; picture-in-picture; clipboard-write"
-              loading="lazy"
+              loading="eager"
               allowFullScreen={true}
               referrerPolicy="strict-origin-when-cross-origin"
+              onLoad={onFrameLoad}
             />
           </div>
           <FullscreenInfoBar

@@ -44,6 +44,34 @@ export default function VideoCard({
     [showProgress, progress, duration],
   )
 
+  function isDataSaverEnabled(): boolean {
+    try {
+      const conn = (
+        navigator as unknown as { connection?: { saveData?: boolean } }
+      ).connection
+      return Boolean(conn && conn.saveData)
+    } catch (_e) {
+      return false
+    }
+  }
+
+  const prefetchWatchPage = () => {
+    if (isDataSaverEnabled()) return
+    const href = `/library/${session.id}`
+    const anyRouter = router as unknown as {
+      prefetch?: (
+        url: string,
+        visit?: Record<string, unknown>,
+        opts?: { cacheFor?: string | number; cacheTags?: string | string[] },
+      ) => void
+    }
+    anyRouter.prefetch?.(
+      href,
+      { method: "get", preserveScroll: true },
+      { cacheFor: "30s", cacheTags: "library-watch" },
+    )
+  }
+
   const handleTitleClick = () => {
     router.visit(`/library/${session.id}`, {
       preserveScroll: true,
@@ -57,7 +85,10 @@ export default function VideoCard({
     >
       <div
         className="group relative flex flex-col gap-3"
-        onMouseEnter={() => playerRef.current?.startPreview()}
+        onMouseEnter={() => {
+          playerRef.current?.startPreview()
+          prefetchWatchPage()
+        }}
         onMouseLeave={() => playerRef.current?.stopPreview()}
       >
         <div className="relative order-1 aspect-[16/9] w-full rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
@@ -97,6 +128,7 @@ export default function VideoCard({
         <button
           type="button"
           aria-label={`Open ${session.title}`}
+          onMouseDown={prefetchWatchPage}
           onClick={handleTitleClick}
           className="absolute inset-0 z-10 cursor-pointer appearance-none border-0 bg-transparent shadow-none ring-0 outline-none hover:shadow-none! hover:ring-0 hover:outline-none focus:shadow-none focus:ring-0 focus:outline-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:outline-none"
         />
