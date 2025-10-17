@@ -83,8 +83,8 @@ export default function VideoCard({
         onFocusCapture={() => playerRef.current?.startPreview()}
         onBlurCapture={() => playerRef.current?.stopPreview()}
       >
-        <div className="relative order-1 aspect-[16/9] w-full rounded-[0.2vw] shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
-          <div className="absolute inset-0 overflow-hidden rounded-[0.2vw]">
+        <div className="relative order-1 aspect-[16/9] w-full rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
+          <div className="absolute inset-0 overflow-hidden rounded">
             <VimeoPlayer
               ref={playerRef}
               session={session}
