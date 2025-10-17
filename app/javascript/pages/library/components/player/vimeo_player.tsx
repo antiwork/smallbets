@@ -708,6 +708,9 @@ function ActiveVimeoPlayer({
 
   return (
     <div className="relative size-full bg-black">
+      {!isReady && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800"></div>
+      )}
       {isFullscreen ? (
         <div
           className="fixed inset-0 z-[999] flex flex-col bg-black"
