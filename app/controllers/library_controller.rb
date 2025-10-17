@@ -96,7 +96,7 @@ class LibraryController < AuthenticatedController
         view_context.tag.span(class: "btn btn--reversed btn--faux room--current") do
           view_context.tag.h1("Library", class: "room__contents txt-medium overflow-ellipsis")
         end,
-        view_context.link_home
+        view_context.link_back
       ].compact
     ).to_s
   end

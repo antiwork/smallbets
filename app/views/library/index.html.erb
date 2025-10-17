@@ -6,7 +6,7 @@
   <%= tag.span class: "btn btn--reversed btn--faux room--current" do %>
     <h1 class="room__contents txt-medium overflow-ellipsis">Library</h1>
   <% end %>
-  <%= link_home %>
+  <%= link_back %>
 <% end %>
 
 <% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
