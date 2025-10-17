@@ -61,6 +61,7 @@ class LibraryCatalog
         padding: session.padding,
         vimeoId: session.vimeo_id,
         vimeoHash: session.vimeo_hash,
+        creator: session.library_class.creator,
         playerSrc: session.player_src,
         downloadPath: session.download_path,
         position: session.position,

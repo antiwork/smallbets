@@ -28,6 +28,7 @@ interface LibrarySessionPayload {
   padding: number
   vimeoId: string
   vimeoHash?: string
+  creator: string
   playerSrc: string
   downloadPath: string
   position: number

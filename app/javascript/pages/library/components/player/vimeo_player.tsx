@@ -13,6 +13,13 @@ import {
   setAutoplaySoundEnabled,
   subscribeToAutoplaySound,
 } from "./autoplay_audio_pref"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 import {
   postWatchHistory,
@@ -26,6 +33,18 @@ const AUTOPLAY_PREVIEW_DELAY_MS = 1000
 const MUTE_OVERLAY_HOLD_MS = 2500
 const PROGRESS_THROTTLE_MS = 10_000
 
+interface DownloadEntry {
+  quality?: string
+  link?: string
+  width?: number
+  height?: number
+  size?: number
+  size_short?: string
+  type?: string
+}
+
+const downloadsCache: Map<string, DownloadEntry[]> = new Map()
+
 interface VimeoPlayerProps {
   session: LibrarySessionPayload
   watchOverride?: LibraryWatchPayload | null
@@ -37,10 +56,12 @@ interface LibrarySessionPayload {
   title: string
   description: string
   padding: number
+  creator: string
   thumbnailUrl?: string | null
   vimeoId: string
   vimeoHash?: string
   playerSrc: string
+  downloadPath: string
   watchHistoryPath: string
   watch?: LibraryWatchPayload | null
 }
@@ -50,14 +71,6 @@ interface LibraryWatchPayload {
   durationSeconds?: number | null
   lastWatchedAt?: string | null
   completed: boolean
-}
-
-interface FullscreenDocument extends Document {
-  webkitFullscreenElement?: Element | null
-}
-
-interface FullscreenElement extends HTMLElement {
-  webkitRequestFullscreen?: () => Promise<void> | void
 }
 
 export interface VimeoPlayerHandle {
@@ -192,51 +205,27 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       setShowControls(false)
     }, [session.id])
 
+    // Close on Escape when in full-window mode
     useEffect(() => {
-      const doc = document as FullscreenDocument
-
-      const handleFullscreenChange = () => {
-        const fullscreenElement =
-          doc.fullscreenElement ?? doc.webkitFullscreenElement ?? null
-        const container = containerRef.current
-        if (!fullscreenElement || !container) {
-          setShowControls(false)
-          return
-        }
-        setShowControls(
-          fullscreenElement === container ||
-            container.contains(fullscreenElement),
-        )
+      if (!showControls) return
+      const handleKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setShowControls(false)
       }
+      document.addEventListener("keydown", handleKey)
+      return () => document.removeEventListener("keydown", handleKey)
+    }, [showControls])
 
-      document.addEventListener("fullscreenchange", handleFullscreenChange)
-      document.addEventListener(
-        "webkitfullscreenchange",
-        handleFullscreenChange,
-      )
-
+    // Lock scroll while full-window is active and restore on close/unmount
+    useEffect(() => {
+      if (showControls) {
+        document.body.style.overflow = "hidden"
+      } else {
+        document.body.style.overflow = ""
+      }
       return () => {
-        document.removeEventListener("fullscreenchange", handleFullscreenChange)
-        document.removeEventListener(
-          "webkitfullscreenchange",
-          handleFullscreenChange,
-        )
+        document.body.style.overflow = ""
       }
-    }, [])
-
-    const requestFullscreen = useCallback(() => {
-      const element = containerRef.current as FullscreenElement | null
-      if (!element) return
-
-      if (element.requestFullscreen) {
-        void element.requestFullscreen().catch(() => undefined)
-        return
-      }
-
-      if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen()
-      }
-    }, [])
+    }, [showControls])
 
     const enterFullscreen = useCallback(() => {
       if (!isActivated) {
@@ -244,8 +233,9 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
         setShouldPlay(true)
         hasAutoplayedRef.current = true
       }
-      requestFullscreen()
-    }, [isActivated, requestFullscreen])
+      setShowControls(true)
+      document.body.style.overflow = "hidden"
+    }, [isActivated])
 
     useImperativeHandle(ref, () => ({
       enterFullscreen,
@@ -258,7 +248,7 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     return (
       <div
         ref={containerRef}
-        className="vimeo-fullscreen absolute inset-0 cursor-pointer bg-black"
+        className="vimeo-fullscreen absolute inset-0 bg-black"
         onMouseEnter={handlePointerEnter}
         onMouseLeave={handlePointerLeave}
         onFocusCapture={handlePointerEnter}
@@ -732,28 +722,43 @@ function ActiveVimeoPlayer({
 
   return (
     <div className="relative size-full bg-black">
-      <div
-        className={
-          isFullscreen
-            ? "absolute inset-0 flex items-center justify-center"
-            : "absolute inset-0"
-        }
-      >
-        <iframe
-          ref={frameRef}
-          title={session.title}
-          src={playerSrc}
-          className={
-            isFullscreen
-              ? "vimeo-embed h-auto max-h-[100vh] w-[100vw]"
-              : "vimeo-embed size-full"
-          }
-          style={isFullscreen ? { aspectRatio: "16 / 9" } : undefined}
-          allow="autoplay; picture-in-picture; clipboard-write"
-          loading="lazy"
-          referrerPolicy="strict-origin-when-cross-origin"
-        />
-      </div>
+      {isFullscreen ? (
+        <div
+          className="fixed inset-0 z-[999] flex flex-col bg-black"
+          style={{ ["--bar-h" as any]: "72px" }}
+        >
+          <div className="flex flex-1 items-center justify-center">
+            <iframe
+              ref={frameRef}
+              title={session.title}
+              src={playerSrc}
+              className="vimeo-embed h-auto max-h-[calc(100vh-var(--bar-h))] w-[100vw]"
+              style={{ aspectRatio: "16 / 9" }}
+              allow="autoplay; picture-in-picture; clipboard-write"
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
+          <FullscreenInfoBar
+            title={session.title}
+            creator={session.creator}
+            vimeoId={session.vimeoId}
+            downloadPath={session.downloadPath}
+          />
+        </div>
+      ) : (
+        <div className="absolute inset-0">
+          <iframe
+            ref={frameRef}
+            title={session.title}
+            src={playerSrc}
+            className="vimeo-embed size-full"
+            allow="autoplay; picture-in-picture; clipboard-write"
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        </div>
+      )}
       {!isFullscreen && shouldPlay && (
         <button
           type="button"
@@ -813,6 +818,191 @@ function ActiveVimeoPlayer({
         </button>
       )}
       <StatusIndicator status={status} />
+    </div>
+  )
+}
+
+interface FullscreenInfoBarProps {
+  title: string
+  creator: string
+  vimeoId: string
+  downloadPath?: string
+  defaultHref?: string
+}
+
+function FullscreenInfoBar({
+  title,
+  creator,
+  vimeoId,
+  downloadPath,
+}: FullscreenInfoBarProps) {
+  return (
+    <div className="flex h-[var(--bar-h)] items-center justify-between border-t border-white/10 bg-black/95 px-4 pb-[calc(env(safe-area-inset-bottom))] text-white md:px-6">
+      <div className="min-w-0 pr-3">
+        <div className="truncate text-[clamp(0.95rem,1.2vw,1.25rem)] font-medium">
+          {title}
+        </div>
+        <div className="truncate text-[clamp(0.8rem,0.95vw,1rem)] text-gray-300">
+          {creator}
+        </div>
+      </div>
+      <DownloadMenu
+        vimeoId={vimeoId}
+        downloadPath={downloadPath}
+        title={title}
+      />
+    </div>
+  )
+}
+
+interface DownloadMenuProps {
+  vimeoId: string
+  downloadPath?: string
+  title: string
+}
+
+function DownloadMenu({ vimeoId, downloadPath, title }: DownloadMenuProps) {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [entries, setEntries] = useState<DownloadEntry[]>([])
+  const portalRef = useRef<HTMLDivElement | null>(null)
+
+  // Type guard for API entries
+  const isDownloadEntry = useCallback((d: unknown): d is DownloadEntry => {
+    return (
+      !!d &&
+      typeof d === "object" &&
+      ("quality" in (d as Record<string, unknown>) ||
+        "link" in (d as Record<string, unknown>))
+    )
+  }, [])
+
+  // Prefetch on mount (when the fullscreen overlay appears)
+  useEffect(() => {
+    if (entries.length > 0 || loading || error) return
+
+    const cached = downloadsCache.get(vimeoId)
+    if (cached) {
+      setEntries(cached)
+      return
+    }
+
+    setLoading(true)
+    fetch(`/library/downloads/${vimeoId}`, {
+      headers: { Accept: "application/json" },
+    })
+      .then((r) =>
+        r.ok ? r.json() : Promise.reject(new Error(String(r.status))),
+      )
+      .then((json: unknown) => {
+        const list = Array.isArray(json)
+          ? (json.filter(isDownloadEntry) as DownloadEntry[])
+          : []
+        downloadsCache.set(vimeoId, list)
+        setEntries(list)
+        setError(list.length === 0 ? "No options" : null)
+      })
+      .catch(() => setError("Unable to load"))
+      .finally(() => setLoading(false))
+  }, [vimeoId, entries.length, loading, error, isDownloadEntry])
+
+  function hrefFor(download: DownloadEntry): string | null {
+    if (download.quality) {
+      const url = new URL(
+        `/library/download/${vimeoId}`,
+        window.location.origin,
+      )
+      url.searchParams.set("quality", download.quality)
+      return url.toString()
+    }
+    return download.link || downloadPath || null
+  }
+
+  function qualityLabel(download: DownloadEntry): string {
+    if (download.quality) return String(download.quality).toUpperCase()
+    if (download.type) return String(download.type).toUpperCase()
+    return `Download (${title})`
+  }
+
+  function details(download: DownloadEntry): string {
+    const parts: string[] = []
+    const w = download.width
+    const h = download.height
+    if (w && h) parts.push(`${w}×${h}`)
+    const short = download.size_short
+    const size = Number(download.size)
+    if (short) parts.push(short)
+    else if (Number.isFinite(size) && size > 0) {
+      const units = ["B", "KB", "MB", "GB", "TB"]
+      let value = size
+      let i = 0
+      while (value >= 1024 && i < units.length - 1) {
+        value /= 1024
+        i += 1
+      }
+      parts.push(`${value.toFixed(value >= 10 ? 0 : 1)} ${units[i]}`)
+    }
+    return parts.join(" • ")
+  }
+
+  return (
+    <div className="relative z-50 shrink-0" ref={portalRef}>
+      <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="secondary" className="border border-[#555]">
+            Download
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          container={portalRef.current}
+          side="top"
+          align="end"
+          sideOffset={8}
+          className="w-64 border border-white/10 bg-black/95 text-white shadow-lg"
+        >
+          {loading && (
+            <div className="px-2 py-1.5 text-sm select-none">Loading…</div>
+          )}
+          {error && (
+            <a
+              href={downloadPath || undefined}
+              target="_blank"
+              rel="nofollow noopener"
+              className="block px-2 py-1.5 text-sm"
+            >
+              Error loading download options
+            </a>
+          )}
+          {!loading &&
+            !error &&
+            entries.map((d, idx) => {
+              const href = hrefFor(d)
+              return (
+                <DropdownMenuItem
+                  key={idx}
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    if (!href) return
+                    try {
+                      window.open(href, "_blank", "noopener,noreferrer")
+                    } catch {
+                      // ignore
+                    }
+                    setOpen(false)
+                  }}
+                >
+                  <div className="flex w-full cursor-pointer items-center justify-between gap-2">
+                    <span className="text-sm">{qualityLabel(d)}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {details(d)}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              )
+            })}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }
