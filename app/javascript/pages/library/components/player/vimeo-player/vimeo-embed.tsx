@@ -430,7 +430,7 @@ export function VimeoEmbed({
             type="button"
             onClick={onExitFullscreen}
             aria-label="Go Back"
-            className="absolute top-4 left-4 z-[1000] flex size-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity hover:bg-black/80"
+            className="absolute top-4 left-4 z-[1000] flex size-10 items-center justify-center rounded-full bg-black/60! text-white backdrop-blur-sm transition-opacity hover:bg-black/80!"
           >
             {backIcon && (
               <span
