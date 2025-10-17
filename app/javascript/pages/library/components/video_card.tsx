@@ -1,41 +1,13 @@
 import { useMemo, useRef, useState } from "react"
 import VimeoPlayer, { type VimeoPlayerHandle } from "./player/vimeo_player"
 import { router } from "@inertiajs/react"
+import type { LibrarySessionPayload, LibraryWatchPayload } from "../types"
 
 interface VideoCardProps {
   session: LibrarySessionPayload
   showProgress?: boolean
   backIcon?: string
   persistPreview?: boolean
-}
-
-interface LibrarySessionPayload {
-  id: number
-  title: string
-  description: string
-  categories: LibraryCategoryPayload[]
-  padding: number
-  vimeoId: string
-  vimeoHash?: string
-  creator: string
-  playerSrc: string
-  downloadPath: string
-  position: number
-  watchHistoryPath: string
-  watch?: LibraryWatchPayload | null
-}
-
-interface LibraryCategoryPayload {
-  id: number
-  name: string
-  slug: string
-}
-
-interface LibraryWatchPayload {
-  playedSeconds: number
-  durationSeconds?: number | null
-  lastWatchedAt?: string | null
-  completed: boolean
 }
 
 function formatTimeRemaining(

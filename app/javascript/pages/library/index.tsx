@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react"
 import LibraryHero from "./components/library_hero"
 import SectionHeader from "./components/layout/section_header"
 import SessionGrid from "./components/session_grid"
+import type { LibrarySessionPayload, LibraryCategoryPayload } from "./types"
 
 interface LibraryPageProps {
   continueWatching: LibrarySessionPayload[]
@@ -23,35 +24,6 @@ interface LibrarySectionPayload {
   creator: string
   categories: LibraryCategoryPayload[]
   sessions: LibrarySessionPayload[]
-}
-
-interface LibrarySessionPayload {
-  id: number
-  title: string
-  description: string
-  categories: LibraryCategoryPayload[]
-  padding: number
-  vimeoId: string
-  vimeoHash?: string
-  creator: string
-  playerSrc: string
-  downloadPath: string
-  position: number
-  watchHistoryPath: string
-  watch?: LibraryWatchPayload | null
-}
-
-interface LibraryCategoryPayload {
-  id: number
-  name: string
-  slug: string
-}
-
-interface LibraryWatchPayload {
-  playedSeconds: number
-  durationSeconds?: number | null
-  lastWatchedAt?: string | null
-  completed: boolean
 }
 
 interface LayoutPayload {

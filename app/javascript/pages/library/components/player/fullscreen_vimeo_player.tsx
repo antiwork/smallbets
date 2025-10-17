@@ -14,27 +14,7 @@ import {
   type WatchPayload,
   type WatchRequestOptions,
 } from "./watch_history"
-
-interface LibrarySessionPayload {
-  id: number
-  title: string
-  description: string
-  padding: number
-  creator: string
-  vimeoId: string
-  vimeoHash?: string
-  playerSrc: string
-  downloadPath: string
-  watchHistoryPath: string
-  watch?: LibraryWatchPayload | null
-}
-
-interface LibraryWatchPayload {
-  playedSeconds: number
-  durationSeconds?: number | null
-  lastWatchedAt?: string | null
-  completed: boolean
-}
+import type { LibrarySessionPayload } from "../../types"
 
 interface FullscreenVimeoPlayerProps {
   session: LibrarySessionPayload

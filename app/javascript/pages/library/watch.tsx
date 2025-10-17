@@ -3,35 +3,7 @@ import type { PageProps as InertiaPageProps } from "@inertiajs/core"
 import { useEffect } from "react"
 
 import FullscreenVimeoPlayer from "./components/player/fullscreen_vimeo_player"
-
-interface LibrarySessionPayload {
-  id: number
-  title: string
-  description: string
-  categories: LibraryCategoryPayload[]
-  padding: number
-  vimeoId: string
-  vimeoHash?: string
-  creator: string
-  playerSrc: string
-  downloadPath: string
-  position: number
-  watchHistoryPath: string
-  watch?: LibraryWatchPayload | null
-}
-
-interface LibraryCategoryPayload {
-  id: number
-  name: string
-  slug: string
-}
-
-interface LibraryWatchPayload {
-  playedSeconds: number
-  durationSeconds?: number | null
-  lastWatchedAt?: string | null
-  completed: boolean
-}
+import type { LibrarySessionPayload } from "./types"
 
 interface LayoutPayload {
   pageTitle?: string

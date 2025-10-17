@@ -27,6 +27,7 @@ import {
   type WatchPayload,
   type WatchRequestOptions,
 } from "./watch_history"
+import type { LibrarySessionPayload, LibraryWatchPayload } from "../../types"
 
 const ACTIVATION_ROOT_MARGIN = "200px"
 const AUTOPLAY_PREVIEW_DELAY_MS = 1000
@@ -51,28 +52,6 @@ interface VimeoPlayerProps {
   onWatchUpdate?: (watch: LibraryWatchPayload) => void
   backIcon?: string
   persistPreview?: boolean
-}
-
-interface LibrarySessionPayload {
-  id: number
-  title: string
-  description: string
-  padding: number
-  creator: string
-  thumbnailUrl?: string | null
-  vimeoId: string
-  vimeoHash?: string
-  playerSrc: string
-  downloadPath: string
-  watchHistoryPath: string
-  watch?: LibraryWatchPayload | null
-}
-
-interface LibraryWatchPayload {
-  playedSeconds: number
-  durationSeconds?: number | null
-  lastWatchedAt?: string | null
-  completed: boolean
 }
 
 export interface VimeoPlayerHandle {
