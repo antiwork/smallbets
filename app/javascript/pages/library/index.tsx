@@ -114,10 +114,10 @@ export default function LibraryIndex({
 
         <LibraryHero continueWatching={continueWatching} />
 
-        <section className="mt-[3vw] pl-3">
+        <section className="mt-10 pl-3 sm:mt-[3vw]">
           {categoryGroups.map((group) => (
             <div
-              className="mb-[3vw] flex flex-col gap-[1vw]"
+              className="mb-10 flex flex-col gap-[1vw] sm:mb-[3vw]"
               key={group.category.slug}
             >
               <SectionHeader title={group.category.name} />
