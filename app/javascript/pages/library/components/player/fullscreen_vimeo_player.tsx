@@ -9,6 +9,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { usePage } from "@inertiajs/react"
+import {
+  postWatchHistory,
+  type WatchPayload,
+  type WatchRequestOptions,
+} from "./watch_history"
 
 interface LibrarySessionPayload {
   id: number
@@ -44,6 +49,58 @@ export default function FullscreenVimeoPlayer({
   const resumeAtRef = useRef<number | null>(
     session.watch?.playedSeconds ?? null,
   )
+  const progressRef = useRef<WatchPayload | null>(session.watch ?? null)
+  const [, setStatus] = useState<"idle" | "saving" | "error">("idle")
+  const watchPath = session.watchHistoryPath
+
+  const PROGRESS_THROTTLE_MS = 10_000
+
+  interface ProgressThrottler {
+    queue: (payload: WatchPayload) => void
+    flush: (payload?: WatchPayload, options?: WatchRequestOptions) => void
+    cancel: () => void
+  }
+
+  const throttler = useMemo<ProgressThrottler>(() => {
+    let timer: number | null = null
+    let pending: WatchPayload | null = null
+
+    function clearTimer(): void {
+      if (timer === null) return
+      window.clearTimeout(timer)
+      timer = null
+    }
+
+    function persist(payload: WatchPayload, options?: WatchRequestOptions) {
+      setStatus("saving")
+      void postWatchHistory(watchPath, payload, options).then((result) => {
+        setStatus(result.ok ? "idle" : "error")
+      })
+    }
+
+    return {
+      queue(payload) {
+        pending = payload
+        if (timer !== null) return
+        timer = window.setTimeout(() => {
+          if (pending) persist(pending)
+          pending = null
+          timer = null
+        }, PROGRESS_THROTTLE_MS)
+      },
+      flush(payload, options) {
+        const next = payload ?? pending
+        pending = null
+        clearTimer()
+        if (!next) return
+        persist(next, options)
+      },
+      cancel() {
+        pending = null
+        clearTimer()
+      },
+    }
+  }, [watchPath])
 
   const playerSrc = useMemo(() => {
     try {
@@ -65,34 +122,126 @@ export default function FullscreenVimeoPlayer({
     } catch {}
   }, [])
 
+  const subscribeToEvents = useCallback(() => {
+    const events = ["play", "pause", "timeupdate", "seeked", "ended"] as const
+    events.forEach((event) => {
+      postToVimeo({ method: "addEventListener", value: event })
+    })
+  }, [postToVimeo])
+
   useEffect(() => {
     document.body.style.overflow = "hidden"
+
+    const flushWithKeepalive = () => {
+      throttler.flush(progressRef.current ?? undefined, { keepalive: true })
+    }
+
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        flushWithKeepalive()
         router.visit("/library", { replace: true, preserveScroll: true })
       }
     }
+
     const handleMessage = (event: MessageEvent) => {
+      if (event.source !== frameRef.current?.contentWindow) return
       const data =
         typeof event.data === "string" ? safelyParse(event.data) : event.data
       if (!data || typeof data !== "object" || !("event" in data)) return
-      if ((data as any).event === "ready") {
-        const resumeAt = resumeAtRef.current
-        if (resumeAt != null) {
-          postToVimeo({ method: "setCurrentTime", value: resumeAt })
+
+      const now = new Date().toISOString()
+
+      switch ((data as any).event) {
+        case "ready": {
+          subscribeToEvents()
+          const resumeAt = resumeAtRef.current
+          if (resumeAt != null) {
+            postToVimeo({ method: "setCurrentTime", value: resumeAt })
+          }
+          postToVimeo({ method: "play" })
+          break
         }
-        // Ensure playback starts
-        postToVimeo({ method: "play" })
+        case "timeupdate": {
+          const seconds = Number((data as any).data?.seconds ?? 0)
+          const duration = Number((data as any).data?.duration ?? 0)
+          const next: WatchPayload = {
+            playedSeconds: seconds,
+            durationSeconds: duration,
+            completed: false,
+            lastWatchedAt: now,
+          }
+          progressRef.current = next
+          throttler.queue(next)
+          break
+        }
+        case "seeked": {
+          const seconds = Number((data as any).data?.seconds ?? 0)
+          const duration = Number((data as any).data?.duration ?? 0)
+          const next: WatchPayload = {
+            playedSeconds: seconds,
+            durationSeconds: duration,
+            completed: false,
+            lastWatchedAt: now,
+          }
+          progressRef.current = next
+          throttler.flush(next)
+          break
+        }
+        case "pause": {
+          const seconds = Number((data as any).data?.seconds ?? 0)
+          const duration = Number((data as any).data?.duration ?? 0)
+          const next: WatchPayload = {
+            playedSeconds: seconds,
+            durationSeconds: duration,
+            completed: false,
+            lastWatchedAt: now,
+          }
+          progressRef.current = next
+          throttler.flush(next)
+          break
+        }
+        case "ended": {
+          const seconds = Number((data as any).data?.seconds ?? 0)
+          const duration = Number((data as any).data?.duration ?? seconds)
+          const final = duration > 0 ? duration : seconds
+          const next: WatchPayload = {
+            playedSeconds: final,
+            durationSeconds: final,
+            completed: true,
+            lastWatchedAt: now,
+          }
+          progressRef.current = next
+          throttler.flush(next)
+          break
+        }
+        default:
+          break
       }
     }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flushWithKeepalive()
+    }
+    const handlePageHide = () => flushWithKeepalive()
+    const handleBeforeUnload = () => flushWithKeepalive()
+
     window.addEventListener("message", handleMessage)
     document.addEventListener("keydown", handleKey)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("pagehide", handlePageHide)
+    window.addEventListener("beforeunload", handleBeforeUnload)
+
     return () => {
       document.body.style.overflow = ""
       document.removeEventListener("keydown", handleKey)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("pagehide", handlePageHide)
+      window.removeEventListener("beforeunload", handleBeforeUnload)
       window.removeEventListener("message", handleMessage)
+      throttler.flush(progressRef.current ?? undefined, { keepalive: true })
+      throttler.cancel()
     }
-  }, [postToVimeo])
+  }, [postToVimeo, throttler, subscribeToEvents])
 
   useEffect(() => {
     // Kick a ping to trigger ready flow quickly
@@ -115,9 +264,10 @@ export default function FullscreenVimeoPlayer({
       <button
         type="button"
         aria-label="Go Back"
-        onClick={() =>
+        onClick={() => {
+          throttler.flush(progressRef.current ?? undefined, { keepalive: true })
           router.visit("/library", { replace: true, preserveScroll: true })
-        }
+        }}
         className="absolute top-4 left-4 z-[1000] flex size-10 items-center justify-center rounded-full bg-black/60! text-white transition-opacity duration-250 ease-out hover:bg-black/80!"
       >
         <span

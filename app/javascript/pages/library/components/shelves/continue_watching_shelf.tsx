@@ -72,5 +72,12 @@ function ContinueWatchingCard({
   session: LibrarySessionPayload
   backIcon?: string
 }) {
-  return <VideoCard session={session} showProgress backIcon={backIcon} />
+  return (
+    <VideoCard
+      session={session}
+      showProgress
+      backIcon={backIcon}
+      persistPreview
+    />
+  )
 }

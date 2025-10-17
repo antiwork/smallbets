@@ -50,6 +50,7 @@ interface VimeoPlayerProps {
   watchOverride?: LibraryWatchPayload | null
   onWatchUpdate?: (watch: LibraryWatchPayload) => void
   backIcon?: string
+  persistPreview?: boolean
 }
 
 interface LibrarySessionPayload {
@@ -107,7 +108,13 @@ const TRACKED_EVENTS = [
 
 const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
   function VimeoPlayer(
-    { session, watchOverride, onWatchUpdate, backIcon }: VimeoPlayerProps,
+    {
+      session,
+      watchOverride,
+      onWatchUpdate,
+      backIcon,
+      persistPreview,
+    }: VimeoPlayerProps,
     ref,
   ) {
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -260,6 +267,7 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
             onWatchUpdate={onWatchUpdate}
             backIcon={backIcon}
             onExitFullscreen={() => setShowControls(false)}
+            persistPreview={persistPreview}
           />
         ) : (
           <button
@@ -296,6 +304,7 @@ interface ActiveVimeoPlayerProps {
   onWatchUpdate?: (watch: LibraryWatchPayload) => void
   backIcon?: string
   onExitFullscreen: () => void
+  persistPreview?: boolean
 }
 
 function ActiveVimeoPlayer({
@@ -308,6 +317,7 @@ function ActiveVimeoPlayer({
   onWatchUpdate,
   backIcon,
   onExitFullscreen,
+  persistPreview,
 }: ActiveVimeoPlayerProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [isReady, setIsReady] = useState(false)
@@ -445,7 +455,7 @@ function ActiveVimeoPlayer({
             lastWatchedAt: new Date().toISOString(),
           }
           progressRef.current = next
-          if (fullscreenStateRef.current) {
+          if (fullscreenStateRef.current || persistPreview) {
             throttler.queue(next)
           }
           break
@@ -458,7 +468,7 @@ function ActiveVimeoPlayer({
             lastWatchedAt: new Date().toISOString(),
           }
           progressRef.current = next
-          if (fullscreenStateRef.current) {
+          if (fullscreenStateRef.current || persistPreview) {
             throttler.flush(next)
           }
           break
@@ -474,7 +484,7 @@ function ActiveVimeoPlayer({
             }
             progressRef.current = next
           }
-          if (fullscreenStateRef.current) {
+          if (fullscreenStateRef.current || persistPreview) {
             throttler.flush(progressRef.current ?? undefined)
           }
           break
@@ -491,7 +501,7 @@ function ActiveVimeoPlayer({
             lastWatchedAt: new Date().toISOString(),
           }
           progressRef.current = next
-          if (fullscreenStateRef.current) {
+          if (fullscreenStateRef.current || persistPreview) {
             throttler.flush(next)
           }
           break
@@ -545,7 +555,7 @@ function ActiveVimeoPlayer({
 
   useEffect(() => {
     function flushWithKeepalive(): void {
-      if (!fullscreenStateRef.current) return
+      if (!fullscreenStateRef.current && !persistPreview) return
       throttler.flush(progressRef.current ?? undefined, { keepalive: true })
     }
 
@@ -575,12 +585,12 @@ function ActiveVimeoPlayer({
 
   useEffect(() => {
     return () => {
-      if (fullscreenStateRef.current) {
+      if (fullscreenStateRef.current || persistPreview) {
         throttler.flush(progressRef.current ?? undefined, { keepalive: true })
       }
       throttler.cancel()
     }
-  }, [throttler])
+  }, [throttler, persistPreview])
 
   useEffect(() => {
     const resumeAt = progressRef.current?.playedSeconds

@@ -6,6 +6,7 @@ interface VideoCardProps {
   session: LibrarySessionPayload
   showProgress?: boolean
   backIcon?: string
+  persistPreview?: boolean
 }
 
 interface LibrarySessionPayload {
@@ -57,6 +58,7 @@ export default function VideoCard({
   session,
   showProgress = false,
   backIcon,
+  persistPreview = false,
 }: VideoCardProps) {
   const playerRef = useRef<VimeoPlayerHandle>(null)
   const [watchOverride, setWatchOverride] =
@@ -94,6 +96,7 @@ export default function VideoCard({
               watchOverride={watchOverride}
               onWatchUpdate={setWatchOverride}
               backIcon={backIcon}
+              persistPreview={persistPreview}
             />
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] opacity-100 transition-opacity duration-300 group-hover:opacity-0" />
           </div>
