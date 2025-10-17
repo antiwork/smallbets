@@ -63,7 +63,8 @@
         The Weekly Yap — <span data-countdown-banner-target="status"></span>
       </a>
     <% end %>
-    <a href="#main-content" class="skip-navigation btn">Skip to main content</a>
+    <a href="#main-content" class="skip-navigation btn" data-turbo="false">Skip to main content</a>
+    <a href="#sidebar-toggle" class="skip-navigation btn" data-turbo="false">Skip to menu</a>
 
     <nav id="nav">
       <%= yield :nav %>
@@ -82,7 +83,7 @@
       </div>
     <% end %>
 
-    <main id="main-content">
+    <main id="main-content" tabindex="-1">
       <%= yield %>
 
       <footer id="footer">
@@ -94,7 +95,7 @@
       <%= yield :sidebar %>
     </template>
 
-    <aside id="sidebar" data-controller="toggle-class" data-toggle-class-toggle-class="open" data-turbo-permanent="true">
+    <aside id="sidebar" data-controller="toggle-class" data-toggle-class-toggle-class="open" data-toggle-class-close-on-escape-value="true" data-toggle-class-focus-trap-value="true" data-toggle-class-initial-focus-selector-value="#room-search" data-turbo-permanent="true">
       <%= yield :sidebar %>
     </aside>
 

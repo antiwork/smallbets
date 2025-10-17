@@ -103,7 +103,7 @@ export default function VideoCard({
         }}
         onMouseLeave={() => playerRef.current?.stopPreview()}
       >
-        <div className="relative order-1 aspect-[16/9] w-full rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
+        <figure className="relative order-1 aspect-[16/9] w-full rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
           <div className="absolute inset-0 overflow-hidden rounded">
             <VimeoPlayer
               ref={playerRef}
@@ -116,7 +116,14 @@ export default function VideoCard({
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] opacity-100 transition-opacity duration-300 group-hover:opacity-0" />
           </div>
           {showProgress && progressPercentage > 0 && (
-            <div className="absolute right-2 bottom-1 left-2 h-[5px] overflow-hidden rounded-full bg-gray-600/70">
+            <div
+              className="absolute right-2 bottom-1 left-2 h-[5px] overflow-hidden rounded-full bg-gray-600/70"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.min(progressPercentage, 100)}
+              aria-label="Watch progress"
+            >
               <div
                 className="h-full rounded-full bg-[#00ADEF]"
                 style={{
@@ -125,7 +132,10 @@ export default function VideoCard({
               />
             </div>
           )}
-        </div>
+          {timeRemaining && (
+            <figcaption className="sr-only">{timeRemaining}</figcaption>
+          )}
+        </figure>
 
         <div className="peer order-2 flex flex-col gap-0.5 text-left select-none [--hover-filter:brightness(1)] [--hover-size:0]">
           {timeRemaining && (
@@ -137,12 +147,15 @@ export default function VideoCard({
             {session.title}
           </h3>
         </div>
-        <button
-          type="button"
+        <a
+          href={`/library/${session.id}`}
           aria-label={`Open ${session.title}`}
           onMouseDown={prefetchWatchPage}
-          onClick={handleTitleClick}
-          className="absolute inset-0 z-[1] cursor-pointer appearance-none border-0 bg-transparent shadow-none ring-0 outline-none hover:shadow-none! hover:ring-0 hover:outline-none focus:shadow-none focus:ring-0 focus:outline-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:outline-none"
+          onClick={(e) => {
+            e.preventDefault()
+            handleTitleClick()
+          }}
+          className="absolute inset-0 z-[1] cursor-pointer rounded bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00ADEF]"
         />
       </div>
     </article>

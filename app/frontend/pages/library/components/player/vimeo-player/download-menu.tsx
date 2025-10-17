@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { usePage } from "@inertiajs/react"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import type { DownloadEntry } from "../types"
 
 const downloadsCache: Map<string, DownloadEntry[]> = new Map()
@@ -34,6 +28,8 @@ export function DownloadMenu({
   const [error, setError] = useState<string | null>(null)
   const [entries, setEntries] = useState<DownloadEntry[]>([])
   const portalRef = useRef<HTMLDivElement | null>(null)
+  const listContainerRef = useRef<HTMLDivElement | null>(null)
+  const panelId = `download-panel-${vimeoId}`
 
   const isDownloadEntry = useCallback((d: unknown): d is DownloadEntry => {
     return (
@@ -71,6 +67,34 @@ export function DownloadMenu({
       .catch(() => setError("Unable to load"))
       .finally(() => setLoading(false))
   }, [vimeoId, entries.length, loading, error, isDownloadEntry])
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    function onDocMouseDown(e: MouseEvent) {
+      const target = e.target as Node
+      const root = portalRef.current
+      if (root && !root.contains(target)) setOpen(false)
+    }
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false)
+    }
+    document.addEventListener("mousedown", onDocMouseDown)
+    document.addEventListener("keydown", onEsc)
+    return () => {
+      document.removeEventListener("mousedown", onDocMouseDown)
+      document.removeEventListener("keydown", onEsc)
+    }
+  }, [open])
+
+  // Focus first item when opened
+  useEffect(() => {
+    if (!open) return
+    const container = listContainerRef.current
+    if (!container) return
+    const firstLink = container.querySelector<HTMLAnchorElement>("a[href]")
+    firstLink?.focus()
+  }, [open])
 
   function hrefFor(download: DownloadEntry): string | null {
     if (download.quality) {
@@ -113,32 +137,36 @@ export function DownloadMenu({
 
   return (
     <div className="relative z-50 shrink-0" ref={portalRef}>
-      <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="border border-[#555]">
-            <span
-              aria-hidden="true"
-              className="mr-1 inline-block size-3.5 bg-white"
-              style={{
-                maskImage: `url(${downloadIconSrc})`,
-                WebkitMaskImage: `url(${downloadIconSrc})`,
-                maskRepeat: "no-repeat",
-                WebkitMaskRepeat: "no-repeat",
-                maskPosition: "center",
-                WebkitMaskPosition: "center",
-                maskSize: "contain",
-                WebkitMaskSize: "contain",
-              }}
-            />
-            Download
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          container={portalRef.current}
-          side="top"
-          align="end"
-          sideOffset={8}
-          className="w-64 border border-white/10 bg-black/95 text-white shadow-lg"
+      <Button
+        variant="secondary"
+        className="border border-[#555]"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span
+          aria-hidden="true"
+          className="mr-1 inline-block size-3.5 bg-white"
+          style={{
+            maskImage: `url(${downloadIconSrc})`,
+            WebkitMaskImage: `url(${downloadIconSrc})`,
+            maskRepeat: "no-repeat",
+            WebkitMaskRepeat: "no-repeat",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+            maskSize: "contain",
+            WebkitMaskSize: "contain",
+          }}
+        />
+        Download
+      </Button>
+      {open && (
+        <div
+          id={panelId}
+          role="region"
+          aria-label="Download options"
+          className="absolute -top-2 right-0 z-50 mt-2 w-64 translate-y-[-100%] rounded-md border border-white/10 bg-black/95 p-1 text-white shadow-lg"
+          ref={listContainerRef}
         >
           {loading && (
             <div className="px-2 py-1.5 text-sm select-none">Loading…</div>
@@ -153,33 +181,37 @@ export function DownloadMenu({
               Error loading download options
             </a>
           )}
-          {!loading &&
-            !error &&
-            entries.map((d, idx) => {
-              const href = hrefFor(d)
-              return (
-                <DropdownMenuItem
-                  key={idx}
-                  onSelect={(e) => {
-                    e.preventDefault()
-                    if (!href) return
-                    try {
-                      window.open(href, "_blank", "noopener,noreferrer")
-                    } catch {}
-                    setOpen(false)
-                  }}
-                >
-                  <div className="flex w-full cursor-pointer items-center justify-between gap-2">
-                    <span className="text-sm">{qualityLabel(d)}</span>
-                    <span className="text-muted-foreground text-xs">
-                      {details(d)}
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-              )
-            })}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          {!loading && !error && (
+            <ul>
+              {entries.map((d, idx) => {
+                const href = hrefFor(d)
+                return (
+                  <li key={idx} className="list-none">
+                    {href ? (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-sm transition-colors hover:bg-white/10 focus:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                        onClick={() => setOpen(false)}
+                      >
+                        <span>{qualityLabel(d)}</span>
+                        <span className="text-muted-foreground text-xs">
+                          {details(d)}
+                        </span>
+                      </a>
+                    ) : (
+                      <span className="block px-2 py-1.5 text-sm opacity-70">
+                        {qualityLabel(d)}
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   )
 }

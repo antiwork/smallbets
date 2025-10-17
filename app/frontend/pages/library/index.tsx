@@ -88,6 +88,7 @@ export default function LibraryIndex({
     <div className="mt-[3vw] min-h-screen bg-black py-12 min-[120ch]:pl-[5vw]">
       <div className="pb-16">
         <Head title="Library" />
+        <h1 className="sr-only">Library</h1>
 
         <div className="flex flex-col gap-5">
           <LibraryHero
@@ -95,20 +96,24 @@ export default function LibraryIndex({
             backIcon={assets?.backIcon}
           />
 
-          <section className="pl-3 sm:mt-[3vw]">
-            {categoryGroups.map((group) => (
-              <div
-                className="mb-10 flex flex-col gap-[1vw] sm:mb-[3vw]"
-                key={group.category.slug}
-              >
-                <SectionHeader title={group.category.name} />
-                <SessionGrid
-                  sessions={group.sessions}
-                  backIcon={assets?.backIcon}
-                />
-              </div>
-            ))}
-          </section>
+          <div className="pl-3 sm:mt-[3vw]">
+            {categoryGroups.map((group) => {
+              const headingId = `category-${group.category.slug}`
+              return (
+                <section
+                  className="mb-10 flex flex-col gap-[1vw] sm:mb-[3vw]"
+                  key={group.category.slug}
+                  aria-labelledby={headingId}
+                >
+                  <SectionHeader id={headingId} title={group.category.name} />
+                  <SessionGrid
+                    sessions={group.sessions}
+                    backIcon={assets?.backIcon}
+                  />
+                </section>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>

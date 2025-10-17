@@ -16,8 +16,8 @@ export function FullscreenInfoBar({
   return (
     <div className="flex h-[var(--bar-h)] items-center justify-between border-t border-white/10 bg-black/95 px-4 pb-[calc(env(safe-area-inset-bottom))] text-white md:px-6">
       <div className="min-w-0 pr-3">
-        <div className="truncate text-lg font-medium">{title}</div>
-        <div className="truncate text-sm text-gray-400">{creator}</div>
+        <h2 className="truncate text-lg font-medium">{title}</h2>
+        <p className="truncate text-sm text-gray-400">{creator}</p>
       </div>
       <DownloadMenu
         vimeoId={vimeoId}

@@ -47,7 +47,8 @@ export default function LibraryWatch() {
   return (
     <div className="min-h-screen bg-black">
       <Head title={session.title} />
-      <div className="relative min-h-screen">
+      <h1 className="sr-only">{session.title}</h1>
+      <section aria-label="Video player" className="relative min-h-screen">
         <FullscreenVimeoPlayer
           session={{
             ...session,
@@ -55,7 +56,7 @@ export default function LibraryWatch() {
           }}
           backIcon={assets?.backIcon}
         />
-      </div>
+      </section>
     </div>
   )
 }

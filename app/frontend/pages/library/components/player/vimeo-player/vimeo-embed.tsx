@@ -46,6 +46,9 @@ export function VimeoEmbed({
   onFrameLoad,
 }: VimeoEmbedProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
+  const overlayRef = useRef<HTMLDivElement | null>(null)
+  const backButtonRef = useRef<HTMLButtonElement | null>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [, setStatus] = useState<PlaybackStatus>({ state: "idle" })
   const [autoplaySoundEnabled, setAutoplaySoundState] = useState(
@@ -66,6 +69,10 @@ export function VimeoEmbed({
   const bgHoldTimerRef = useRef<number | null>(null)
 
   const watchPath = session.watchHistoryPath
+  const dialogTitleId = useMemo(
+    () => `player-title-${session.id}`,
+    [session.id],
+  )
 
   const markHistoryPersisted = useCallback(() => {
     hasPersistedHistoryRef.current = true
@@ -107,6 +114,50 @@ export function VimeoEmbed({
 
   useEffect(() => {
     fullscreenStateRef.current = isFullscreen
+  }, [isFullscreen])
+
+  // Focus management for fullscreen dialog
+  useEffect(() => {
+    if (!isFullscreen) return
+    previousFocusRef.current = (document.activeElement as HTMLElement) || null
+    // Focus the back button when entering
+    const timeout = window.setTimeout(() => {
+      backButtonRef.current?.focus()
+    }, 0)
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Tab") return
+      const container = overlayRef.current
+      if (!container) return
+      const focusable = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled") && el.tabIndex !== -1)
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = document.activeElement as HTMLElement | null
+      if (e.shiftKey) {
+        if (active === first || !container.contains(active)) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (active === last || !container.contains(active)) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      window.clearTimeout(timeout)
+      document.removeEventListener("keydown", handleKeyDown)
+      // Restore focus on exit
+      previousFocusRef.current?.focus?.()
+    }
   }, [isFullscreen])
 
   const resetPreviewPlayback = useCallback(() => {
@@ -423,10 +474,15 @@ export function VimeoEmbed({
         </div>
       ) : (
         <div
+          ref={overlayRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={dialogTitleId}
           className="fixed inset-0 z-[999] flex flex-col bg-black"
           style={{ ["--bar-h" as any]: "72px" }}
         >
           <button
+            ref={backButtonRef}
             type="button"
             onClick={onExitFullscreen}
             aria-label="Go Back"
@@ -463,12 +519,14 @@ export function VimeoEmbed({
               onLoad={onFrameLoad}
             />
           </div>
-          <FullscreenInfoBar
-            title={session.title}
-            creator={session.creator}
-            vimeoId={session.vimeoId}
-            downloadPath={session.downloadPath}
-          />
+          <nav role="toolbar" aria-label="Player controls">
+            <FullscreenInfoBar
+              title={session.title}
+              creator={session.creator}
+              vimeoId={session.vimeoId}
+              downloadPath={session.downloadPath}
+            />
+          </nav>
         </div>
       )}
 
