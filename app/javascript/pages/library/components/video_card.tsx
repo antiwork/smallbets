@@ -91,6 +91,7 @@ export default function VideoCard({
               watchOverride={watchOverride}
               onWatchUpdate={setWatchOverride}
             />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] opacity-100 transition-opacity duration-300 group-hover:opacity-0" />
           </div>
           {showProgress && progressPercentage > 0 && (
             <div className="absolute right-0 bottom-0 left-0 h-[0.3vw] bg-gray-600">

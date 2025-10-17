@@ -28,7 +28,6 @@ import {
 } from "./watch_history"
 
 const ACTIVATION_ROOT_MARGIN = "200px"
-const POSTER_SIZES = [1280, 960, 640, 320]
 const AUTOPLAY_PREVIEW_DELAY_MS = 1000
 const MUTE_OVERLAY_HOLD_MS = 2500
 const PROGRESS_THROTTLE_MS = 10_000
@@ -243,8 +242,6 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       stopPreview: handlePointerLeave,
     }))
 
-    const posterImage = usePosterUrl(session)
-
     return (
       <div
         ref={containerRef}
@@ -269,19 +266,8 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
             type="button"
             aria-label={`Play ${session.title}`}
             onClick={handleActivate}
-            className="group relative flex size-full items-center justify-center overflow-hidden bg-black text-white"
+            className="group relative flex size-full items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white"
           >
-            {posterImage ? (
-              <img
-                src={posterImage}
-                alt={session.title}
-                decoding="async"
-                loading="lazy"
-                className="absolute inset-0 size-full object-contain"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800" />
-            )}
             <div className="relative flex size-14 items-center justify-center rounded-full bg-slate-900/80 transition group-hover:bg-slate-900">
               <svg
                 aria-hidden
@@ -1005,21 +991,6 @@ function DownloadMenu({ vimeoId, downloadPath, title }: DownloadMenuProps) {
       </DropdownMenu>
     </div>
   )
-}
-
-function usePosterUrl(session: LibrarySessionPayload): string | undefined {
-  return useMemo(() => {
-    if (session.thumbnailUrl) return session.thumbnailUrl
-    try {
-      const url = new URL(session.playerSrc)
-      const idParts = url.pathname.split("/").filter(Boolean)
-      const last = idParts[idParts.length - 1]
-      if (!last) return undefined
-      return `https://i.vimeocdn.com/video/${last}_${POSTER_SIZES[2]}.webp`
-    } catch (_error) {
-      return undefined
-    }
-  }, [session.playerSrc, session.thumbnailUrl])
 }
 
 function isVimeoEvent(
