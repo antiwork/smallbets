@@ -29,8 +29,10 @@ export interface VimeoPlayerHandle {
   enterFullscreen: () => void
   startPreview: () => void
   stopPreview: () => void
+  getCurrentWatch: () => import("../watch_history").WatchPayload | null
 }
 
 export interface VimeoEmbedHandle {
   flushKeepalive: () => void
+  getCurrentWatch: () => import("../watch_history").WatchPayload | null
 }

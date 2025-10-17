@@ -73,6 +73,15 @@ export default function VideoCard({
   }
 
   const handleTitleClick = () => {
+    try {
+      const current = playerRef.current?.getCurrentWatch?.()
+      if (current && (current.playedSeconds ?? 0) > 0) {
+        const key = `library:preview:${session.id}`
+        sessionStorage.setItem(key, JSON.stringify(current))
+      }
+    } catch (_e) {
+      // ignore storage errors
+    }
     router.visit(`/library/${session.id}`, {
       preserveScroll: true,
     })

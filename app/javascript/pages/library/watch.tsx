@@ -1,8 +1,9 @@
 import { Head, usePage } from "@inertiajs/react"
 import type { PageProps as InertiaPageProps } from "@inertiajs/core"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 
 import FullscreenVimeoPlayer from "./components/player/fullscreen_vimeo_player"
+import type { LibraryWatchPayload } from "./types"
 import type { LibrarySessionPayload, LibraryLayoutPayload } from "./types"
 
 type LayoutPayload = LibraryLayoutPayload
@@ -16,6 +17,19 @@ interface AppPageProps extends InertiaPageProps {
 export default function LibraryWatch() {
   const { props } = usePage<AppPageProps>()
   const { session, assets, layout } = props
+  const watchOverride = useMemo<LibraryWatchPayload | null>(() => {
+    if (typeof window === "undefined") return null
+    try {
+      const key = `library:preview:${session.id}`
+      const raw = sessionStorage.getItem(key)
+      if (!raw) return null
+      const parsed = JSON.parse(raw) as LibraryWatchPayload
+      sessionStorage.removeItem(key)
+      return parsed
+    } catch (_e) {
+      return null
+    }
+  }, [session.id])
 
   useEffect(() => {
     if (!layout) return
@@ -34,7 +48,13 @@ export default function LibraryWatch() {
     <div className="min-h-screen bg-black">
       <Head title={session.title} />
       <div className="relative min-h-screen">
-        <FullscreenVimeoPlayer session={session} backIcon={assets?.backIcon} />
+        <FullscreenVimeoPlayer
+          session={{
+            ...session,
+            watch: watchOverride ?? session.watch ?? null,
+          }}
+          backIcon={assets?.backIcon}
+        />
       </div>
     </div>
   )

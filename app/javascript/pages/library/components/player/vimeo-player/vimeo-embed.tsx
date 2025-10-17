@@ -172,6 +172,7 @@ export function VimeoEmbed({
             lastWatchedAt: new Date().toISOString(),
           }
           progressRef.current = next
+          if (onWatchUpdate) onWatchUpdate(next)
           if (fullscreenStateRef.current || persistPreview)
             throttler.queue(next)
           break
@@ -184,6 +185,7 @@ export function VimeoEmbed({
             lastWatchedAt: new Date().toISOString(),
           }
           progressRef.current = next
+          if (onWatchUpdate) onWatchUpdate(next)
           if (fullscreenStateRef.current || persistPreview)
             throttler.flush(next)
           break
@@ -198,6 +200,7 @@ export function VimeoEmbed({
               lastWatchedAt: new Date().toISOString(),
             }
             progressRef.current = next
+            if (onWatchUpdate) onWatchUpdate(next)
           }
           if (fullscreenStateRef.current || persistPreview)
             throttler.flush(progressRef.current ?? undefined)
@@ -215,6 +218,7 @@ export function VimeoEmbed({
             lastWatchedAt: new Date().toISOString(),
           }
           progressRef.current = next
+          if (onWatchUpdate) onWatchUpdate(next)
           if (fullscreenStateRef.current || persistPreview)
             throttler.flush(next)
           break

@@ -175,6 +175,9 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       enterFullscreen,
       startPreview: handlePointerEnter,
       stopPreview: handlePointerLeave,
+      getCurrentWatch: () => {
+        return (watchOverride ?? session.watch ?? null) as any
+      },
     }))
 
     // Concurrency gating for mounting the iframe
