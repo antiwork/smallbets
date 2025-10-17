@@ -77,7 +77,7 @@ export default function VideoCard({
       className="relative flex w-[var(--shelf-card-w,21.5vw)] shrink-0 flex-col gap-[0.4vw] p-[4px]"
     >
       <div
-        className="group flex flex-col gap-[0.4vw]"
+        className="group flex flex-col gap-3"
         onMouseEnter={() => playerRef.current?.startPreview()}
         onMouseLeave={() => playerRef.current?.stopPreview()}
         onFocusCapture={() => playerRef.current?.startPreview()}
@@ -108,16 +108,16 @@ export default function VideoCard({
         <button
           type="button"
           onClick={handleTitleClick}
-          className="peer order-2 flex cursor-pointer flex-col text-left select-none [--hover-filter:brightness(1)] [--hover-size:0]"
+          className="peer order-2 flex cursor-pointer flex-col gap-0.5 text-left select-none [--hover-filter:brightness(1)] [--hover-size:0]"
         >
-          <h3 className="text-[clamp(0.875rem,0.875vw,1.125rem)] leading-tight font-medium text-white capitalize">
-            {session.title}
-          </h3>
           {timeRemaining && (
-            <p className="mt-[0.2vw] text-[clamp(0.75rem,0.9vw,0.9375rem)] leading-tight text-gray-400">
+            <p className="text-xs leading-tight text-gray-400">
               {timeRemaining}
             </p>
           )}
+          <h3 className="text-sm font-medium text-white capitalize">
+            {session.title}
+          </h3>
         </button>
       </div>
     </article>

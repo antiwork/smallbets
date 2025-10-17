@@ -709,7 +709,7 @@ function ActiveVimeoPlayer({
   return (
     <div className="relative size-full bg-black">
       {!isReady && (
-        <div className="absolute inset-0 z-10 flex animate-[pulse_4s_ease-in-out_infinite] items-center justify-center overflow-hidden rounded bg-gradient-to-br from-slate-900 to-slate-800"></div>
+        <div className="absolute inset-0 z-0 flex animate-[pulse_4s_ease-in-out_infinite] items-center justify-center overflow-hidden rounded bg-gradient-to-br from-slate-900 to-slate-800"></div>
       )}
       {isFullscreen ? (
         <div
@@ -828,12 +828,8 @@ function FullscreenInfoBar({
   return (
     <div className="flex h-[var(--bar-h)] items-center justify-between border-t border-white/10 bg-black/95 px-4 pb-[calc(env(safe-area-inset-bottom))] text-white md:px-6">
       <div className="min-w-0 pr-3">
-        <div className="truncate text-[clamp(0.95rem,1.2vw,1.25rem)] font-medium">
-          {title}
-        </div>
-        <div className="truncate text-[clamp(0.8rem,0.95vw,1rem)] text-gray-300">
-          {creator}
-        </div>
+        <div className="truncate text-lg font-medium">{title}</div>
+        <div className="truncate text-sm text-gray-400">{creator}</div>
       </div>
       <DownloadMenu
         vimeoId={vimeoId}

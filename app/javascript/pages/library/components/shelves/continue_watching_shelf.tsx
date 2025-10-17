@@ -46,7 +46,7 @@ export default function ContinueWatchingShelf({
 
   return (
     <div className="flex flex-col gap-[1vw]">
-      <h2 className="text-[clamp(1rem,1.2vw,1.5rem)] leading-tight font-medium tracking-wider text-white capitalize select-none">
+      <h2 className="pl-1 text-xl leading-tight font-medium tracking-wider text-white capitalize select-none">
         Continue Watching
       </h2>
 
