@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { usePage } from "@inertiajs/react"
 
 import {
   getAutoplaySoundEnabled,
@@ -847,6 +848,13 @@ interface DownloadMenuProps {
 }
 
 function DownloadMenu({ vimeoId, downloadPath, title }: DownloadMenuProps) {
+  interface InertiaPageProps {
+    assets?: { downloadIcon?: string }
+    [key: string]: unknown
+  }
+  const { props } = usePage<InertiaPageProps>()
+  const downloadIconSrc = props.assets?.downloadIcon ?? "/assets/download.svg"
+
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -936,6 +944,20 @@ function DownloadMenu({ vimeoId, downloadPath, title }: DownloadMenuProps) {
       <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" className="border border-[#555]">
+            <span
+              aria-hidden="true"
+              className="mr-1 inline-block size-3.5 bg-white"
+              style={{
+                maskImage: `url(${downloadIconSrc})`,
+                WebkitMaskImage: `url(${downloadIconSrc})`,
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskPosition: "center",
+                WebkitMaskPosition: "center",
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+              }}
+            />
             Download
           </Button>
         </DropdownMenuTrigger>

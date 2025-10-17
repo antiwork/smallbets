@@ -12,7 +12,9 @@ class LibraryController < AuthenticatedController
     set_layout_content(nav_markup:, sidebar_markup:)
 
     render inertia: "library/index",
-      props: LibraryCatalog.inertia_props(user: Current.user),
+      props: LibraryCatalog.inertia_props(user: Current.user).merge(
+        assets: { downloadIcon: view_context.asset_path("download.svg") }
+      ),
       view_data: { nav: nav_markup, sidebar: sidebar_markup, body_class: view_context.body_classes }
   end
 
