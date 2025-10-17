@@ -21,12 +21,30 @@ And if you're not part of the [Small Bets](https://smallbets.com) community yet,
 
 ### Setup
 
-    bin/setup
-    bin/rails server
+```bash
+bin/setup
+```
 
-The `bin/setup` script will install dependencies, prepare the database, build Tailwind CSS, and configure the application.
+Start the app in development:
 
-If you're actively developing with Tailwind CSS and need continuous builds, run `bin/tailwind-build --watch` in a separate terminal.
+```bash
+bin/rails server
+```
+
+`vite_rails` is configured with `autoBuild: true`, and the layout includes the Vite tags; assets are compiled and served automatically, so Inertia and Tailwind work without a separate Vite process.
+
+The `bin/setup` script installs Ruby gems and Node packages (via `npm install`), prepares the database, builds Tailwind CSS once, and configures the application.
+If you skip `bin/setup`, install frontend dependencies manually with `npm install`.
+
+Tailwind in this app is used in two places:
+
+- For Rails views (asset pipeline): if you edit files under `app/assets/stylesheets/**`, run:
+
+  ```bash
+  bin/tailwind-build --watch
+  ```
+
+- For Inertia/React pages (Vite): styles under `app/frontend/**` are processed automatically by Vite through `vite_rails` during development — no separate Tailwind watch needed.
 
 ## Running in production
 
@@ -43,12 +61,14 @@ Small Bets uses [Kamal](https://kamal-deploy.org/docs/installation/) for deploym
 ### Initial Server Setup
 
 1. **Initialize Kamal (creates `.kamal/secrets` if missing):**
+
    ```bash
    kamal init
    ```
 
 2. **Configure environment variables:**
    Edit `.kamal/secrets` and add your production secrets, for example:
+
    ```bash
    # Registry
    KAMAL_REGISTRY_PASSWORD=your-docker-hub-password
@@ -123,21 +143,21 @@ docker run -p 3000:3000 \
 
 ### Environment Variables Reference
 
-| Variable | Purpose | Required |
-|----------|---------|----------|
-| `SECRET_KEY_BASE` | Rails encryption key | ✅ |
-| `RESEND_API_KEY` | Email delivery via Resend | ✅ |
-| `AWS_ACCESS_KEY_ID` | File storage on AWS | ✅ |
-| `AWS_SECRET_ACCESS_KEY` | File storage on AWS | ✅ |
-| `AWS_DEFAULT_REGION` | AWS region (us-east-1) | ✅ |
-| `VAPID_PUBLIC_KEY` | Web push notifications | ✅ |
-| `VAPID_PRIVATE_KEY` | Web push notifications | ✅ |
-| `WEBHOOK_SECRET` | Webhook security | ✅ |
-| `COOKIE_DOMAIN` | Session cookies domain | ✅ |
-| `VIMEO_ACCESS_TOKEN` | Video downloads | ⚠️ |
-| `GUMROAD_ACCESS_TOKEN` | Payment processing | ⚠️ |
-| `GUMROAD_ON` | Enable Gumroad features | ⚠️ |
-| `GUMROAD_PRODUCT_IDS` | Gumroad product IDs | ⚠️ |
+| Variable                | Purpose                   | Required |
+| ----------------------- | ------------------------- | -------- |
+| `SECRET_KEY_BASE`       | Rails encryption key      | ✅       |
+| `RESEND_API_KEY`        | Email delivery via Resend | ✅       |
+| `AWS_ACCESS_KEY_ID`     | File storage on AWS       | ✅       |
+| `AWS_SECRET_ACCESS_KEY` | File storage on AWS       | ✅       |
+| `AWS_DEFAULT_REGION`    | AWS region (us-east-1)    | ✅       |
+| `VAPID_PUBLIC_KEY`      | Web push notifications    | ✅       |
+| `VAPID_PRIVATE_KEY`     | Web push notifications    | ✅       |
+| `WEBHOOK_SECRET`        | Webhook security          | ✅       |
+| `COOKIE_DOMAIN`         | Session cookies domain    | ✅       |
+| `VIMEO_ACCESS_TOKEN`    | Video downloads           | ⚠️       |
+| `GUMROAD_ACCESS_TOKEN`  | Payment processing        | ⚠️       |
+| `GUMROAD_ON`            | Enable Gumroad features   | ⚠️       |
+| `GUMROAD_PRODUCT_IDS`   | Gumroad product IDs       | ⚠️       |
 
 ✅ = Required for production deployment  
 ⚠️ = Optional
