@@ -5,3 +5,4 @@ Rails.application.config.assets.version = "1.0"
 
 # Ensure the Tailwind build output path is available to the asset pipeline.
 Rails.application.config.assets.paths << Rails.root.join("app", "assets", "builds")
+Rails.application.config.assets.paths << Rails.root.join("app", "frontend")

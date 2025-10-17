@@ -9,7 +9,7 @@
     }
   ],
   "compilerOptions": {
-    "baseUrl": "./app/javascript",
+    "baseUrl": "./app/frontend",
     "paths": {
       "@/*": ["./*"]
     }
