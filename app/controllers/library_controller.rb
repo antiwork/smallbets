@@ -13,8 +13,52 @@ class LibraryController < AuthenticatedController
 
     render inertia: "library/index",
       props: LibraryCatalog.inertia_props(user: Current.user).merge(
-        assets: { downloadIcon: view_context.asset_path("download.svg") }
+        assets: {
+          downloadIcon: view_context.asset_path("download.svg"),
+          backIcon: view_context.asset_path("arrow-left.svg"),
+        },
+        initialSessionId: params[:id]&.to_i,
+        layout: {
+          pageTitle: @page_title,
+          bodyClass: view_context.body_classes,
+          nav: nav_markup,
+          sidebar: sidebar_markup,
+        },
       ),
+      view_data: { nav: nav_markup, sidebar: sidebar_markup, body_class: view_context.body_classes }
+  end
+
+  def show
+    @page_title = "Library"
+    @body_class = "bg-black"
+
+    # Keep layout empty for watch page
+    nav_markup = ""
+    sidebar_markup = ""
+
+    set_layout_content(nav_markup:, sidebar_markup:)
+
+    session = LibrarySession.includes(:library_watch_histories, library_class: :library_categories).find_by(id: params[:id])
+    return redirect_to library_path unless session
+
+    history = Current.user ? session.library_watch_histories.where(user: Current.user).order(updated_at: :desc).first : nil
+
+    payload = LibraryCatalog.send(:build_session_payload, session, categories: session.library_class.library_categories.map { |c| LibraryCatalog.send(:build_category_payload, c) }, history: history)
+
+    render inertia: "library/watch",
+      props: {
+        session: payload,
+        assets: {
+          downloadIcon: view_context.asset_path("download.svg"),
+          backIcon: view_context.asset_path("arrow-left.svg"),
+        },
+        layout: {
+          pageTitle: @page_title,
+          bodyClass: view_context.body_classes,
+          nav: nav_markup,
+          sidebar: sidebar_markup,
+        },
+      },
       view_data: { nav: nav_markup, sidebar: sidebar_markup, body_class: view_context.body_classes }
   end
 

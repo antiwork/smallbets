@@ -189,9 +189,10 @@ Rails.application.routes.draw do
   get "webmanifest"    => "pwa#manifest"
   get "service-worker" => "pwa#service_worker"
 
-  get "library" => "library#index"
+  get "library" => "library#index", as: :library
   get "library/download/:id" => "library#download", as: :library_download
   get "library/downloads/:id" => "library#downloads", as: :library_downloads
+  get "library/:id" => "library#show", as: :library_watch
   resources :library_sessions, only: [] do
     resource :watch_history, only: [ :create, :update ], controller: "library/watch_histories"
   end

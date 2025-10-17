@@ -49,6 +49,7 @@ interface VimeoPlayerProps {
   session: LibrarySessionPayload
   watchOverride?: LibraryWatchPayload | null
   onWatchUpdate?: (watch: LibraryWatchPayload) => void
+  backIcon?: string
 }
 
 interface LibrarySessionPayload {
@@ -106,7 +107,7 @@ const TRACKED_EVENTS = [
 
 const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
   function VimeoPlayer(
-    { session, watchOverride, onWatchUpdate }: VimeoPlayerProps,
+    { session, watchOverride, onWatchUpdate, backIcon }: VimeoPlayerProps,
     ref,
   ) {
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -247,10 +248,6 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       <div
         ref={containerRef}
         className="vimeo-fullscreen absolute inset-0 bg-black"
-        onMouseEnter={handlePointerEnter}
-        onMouseLeave={handlePointerLeave}
-        onFocusCapture={handlePointerEnter}
-        onBlurCapture={handlePointerLeave}
       >
         {isActivated ? (
           <ActiveVimeoPlayer
@@ -261,6 +258,8 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
             resetPreviewSignal={resetPreviewSignal}
             watchOverride={watchOverride}
             onWatchUpdate={onWatchUpdate}
+            backIcon={backIcon}
+            onExitFullscreen={() => setShowControls(false)}
           />
         ) : (
           <button
@@ -280,14 +279,6 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
             </div>
           </button>
         )}
-        {!showControls && (
-          <button
-            type="button"
-            aria-label={`Open ${session.title} in full screen`}
-            onClick={enterFullscreen}
-            className="absolute inset-0 z-10 cursor-pointer opacity-0"
-          />
-        )}
       </div>
     )
   },
@@ -303,6 +294,8 @@ interface ActiveVimeoPlayerProps {
   resetPreviewSignal: number
   watchOverride?: LibraryWatchPayload | null
   onWatchUpdate?: (watch: LibraryWatchPayload) => void
+  backIcon?: string
+  onExitFullscreen: () => void
 }
 
 function ActiveVimeoPlayer({
@@ -313,6 +306,8 @@ function ActiveVimeoPlayer({
   resetPreviewSignal,
   watchOverride,
   onWatchUpdate,
+  backIcon,
+  onExitFullscreen,
 }: ActiveVimeoPlayerProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [isReady, setIsReady] = useState(false)
@@ -337,6 +332,14 @@ function ActiveVimeoPlayer({
   const overlayDurationClass = overlayVisible
     ? "before:duration-150" // fade-in
     : "before:duration-500" // fade-out
+
+  // Back button fade logic
+  const [showBackButton, setShowBackButton] = useState(false)
+  const [backButtonFadeSpeed, setBackButtonFadeSpeed] = useState<
+    "slow" | "fast"
+  >("slow")
+  const backButtonTimerRef = useRef<number | null>(null)
+  const hasMouseMovedRef = useRef(false)
 
   const watchPath = session.watchHistoryPath
 
@@ -707,6 +710,67 @@ function ActiveVimeoPlayer({
     setAutoplaySoundEnabled(!autoplaySoundEnabled)
   }, [autoplaySoundEnabled])
 
+  // Back button visibility management
+  useEffect(() => {
+    if (!isFullscreen) {
+      setShowBackButton(false)
+      if (backButtonTimerRef.current) {
+        window.clearTimeout(backButtonTimerRef.current)
+        backButtonTimerRef.current = null
+      }
+      hasMouseMovedRef.current = false
+      return
+    }
+
+    // Show immediately on entering fullscreen
+    setShowBackButton(true)
+    setBackButtonFadeSpeed("slow")
+    hasMouseMovedRef.current = false
+
+    // Hide after 2 seconds
+    backButtonTimerRef.current = window.setTimeout(() => {
+      setShowBackButton(false)
+      backButtonTimerRef.current = null
+    }, 2000)
+
+    return () => {
+      if (backButtonTimerRef.current) {
+        window.clearTimeout(backButtonTimerRef.current)
+        backButtonTimerRef.current = null
+      }
+    }
+  }, [isFullscreen])
+
+  // Handle mouse movement in fullscreen
+  useEffect(() => {
+    if (!isFullscreen) return
+
+    const handleMouseMove = () => {
+      if (backButtonTimerRef.current) {
+        window.clearTimeout(backButtonTimerRef.current)
+        backButtonTimerRef.current = null
+      }
+
+      if (!showBackButton) {
+        setBackButtonFadeSpeed("fast")
+      }
+
+      setShowBackButton(true)
+      hasMouseMovedRef.current = true
+
+      // Hide after 2 seconds of no movement
+      backButtonTimerRef.current = window.setTimeout(() => {
+        setShowBackButton(false)
+        backButtonTimerRef.current = null
+      }, 2000)
+    }
+
+    document.addEventListener("mousemove", handleMouseMove)
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove)
+    }
+  }, [isFullscreen, showBackButton])
+
   return (
     <div className="relative size-full bg-black">
       {!isReady && (
@@ -717,6 +781,37 @@ function ActiveVimeoPlayer({
           className="fixed inset-0 z-[999] flex flex-col bg-black"
           style={{ ["--bar-h" as any]: "72px" }}
         >
+          {backIcon && (
+            <button
+              type="button"
+              onClick={onExitFullscreen}
+              aria-label="Go Back"
+              className={[
+                "absolute top-4 left-4 z-[1000] flex size-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity hover:bg-black/80",
+                backButtonFadeSpeed === "fast"
+                  ? "duration-150"
+                  : "duration-500",
+                showBackButton
+                  ? "opacity-100"
+                  : "pointer-events-none opacity-0",
+              ].join(" ")}
+            >
+              <span
+                aria-hidden="true"
+                className="inline-block size-5 bg-white"
+                style={{
+                  maskImage: `url(${backIcon})`,
+                  WebkitMaskImage: `url(${backIcon})`,
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskPosition: "center",
+                  WebkitMaskPosition: "center",
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                }}
+              />
+            </button>
+          )}
           <div className="flex flex-1 items-center justify-center">
             <iframe
               ref={frameRef}
@@ -755,7 +850,12 @@ function ActiveVimeoPlayer({
           type="button"
           aria-pressed={autoplaySoundEnabled}
           aria-label={autoplaySoundEnabled ? "Mute" : "Unmute"}
-          onClick={toggleAutoplaySound}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleAutoplaySound()
+          }}
           onMouseEnter={handleButtonEnter}
           onMouseLeave={handleButtonLeave}
           className={[

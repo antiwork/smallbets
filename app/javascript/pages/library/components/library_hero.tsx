@@ -1,7 +1,9 @@
+// No external player refs needed; watch page used for playback
 import ContinueWatchingShelf from "./shelves/continue_watching_shelf"
 
 interface LibraryHeroProps {
   continueWatching: LibrarySessionPayload[]
+  backIcon?: string
 }
 
 interface LibrarySessionPayload {
@@ -32,10 +34,13 @@ interface LibraryWatchPayload {
   completed: boolean
 }
 
-export default function LibraryHero({ continueWatching }: LibraryHeroProps) {
+export default function LibraryHero({
+  continueWatching,
+  backIcon,
+}: LibraryHeroProps) {
   return (
     <section className="pt-12 pl-3">
-      <ContinueWatchingShelf sessions={continueWatching} />
+      <ContinueWatchingShelf sessions={continueWatching} backIcon={backIcon} />
     </section>
   )
 }

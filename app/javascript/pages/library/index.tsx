@@ -9,6 +9,11 @@ interface LibraryPageProps {
   continueWatching: LibrarySessionPayload[]
   sections: LibrarySectionPayload[]
   layout?: LayoutPayload
+  initialSessionId?: number | null
+  assets?: {
+    backIcon?: string
+    downloadIcon?: string
+  }
 }
 
 interface LibrarySectionPayload {
@@ -65,6 +70,7 @@ export default function LibraryIndex({
   continueWatching,
   sections,
   layout,
+  assets,
 }: LibraryPageProps) {
   useEffect(() => {
     if (!layout) return
@@ -112,7 +118,10 @@ export default function LibraryIndex({
       <div className="pb-16">
         <Head title="Library" />
 
-        <LibraryHero continueWatching={continueWatching} />
+        <LibraryHero
+          continueWatching={continueWatching}
+          backIcon={assets?.backIcon}
+        />
 
         <section className="mt-10 pl-3 sm:mt-[3vw]">
           {categoryGroups.map((group) => (
@@ -121,7 +130,10 @@ export default function LibraryIndex({
               key={group.category.slug}
             >
               <SectionHeader title={group.category.name} />
-              <SessionGrid sessions={group.sessions} />
+              <SessionGrid
+                sessions={group.sessions}
+                backIcon={assets?.backIcon}
+              />
             </div>
           ))}
         </section>

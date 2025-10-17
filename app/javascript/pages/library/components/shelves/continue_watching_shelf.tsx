@@ -4,6 +4,7 @@ import VideoCard from "../video_card"
 
 interface ContinueWatchingShelfProps {
   sessions: LibrarySessionPayload[]
+  backIcon?: string
 }
 
 interface LibrarySessionPayload {
@@ -37,6 +38,7 @@ interface LibraryWatchPayload {
 
 export default function ContinueWatchingShelf({
   sessions,
+  backIcon,
 }: ContinueWatchingShelfProps) {
   const items = useMemo(() => sessions, [sessions])
 
@@ -52,13 +54,23 @@ export default function ContinueWatchingShelf({
 
       <div className="scrollbar-hide flex gap-[0.8vw] overflow-x-auto overflow-y-visible pr-0 pb-[0.4vw] [--shelf-card-w:calc((100%_-_var(--shelf-gap)_*_(var(--shelf-items)))/(var(--shelf-items)_+_var(--shelf-peek)))] [--shelf-gap:0.4vw] [--shelf-items:2] [--shelf-peek:0.25] md:[--shelf-items:3] lg:[--shelf-items:4] xl:[--shelf-items:5] 2xl:[--shelf-items:6]">
         {items.map((session) => (
-          <ContinueWatchingCard key={session.id} session={session} />
+          <ContinueWatchingCard
+            key={session.id}
+            session={session}
+            backIcon={backIcon}
+          />
         ))}
       </div>
     </div>
   )
 }
 
-function ContinueWatchingCard({ session }: { session: LibrarySessionPayload }) {
-  return <VideoCard session={session} showProgress />
+function ContinueWatchingCard({
+  session,
+  backIcon,
+}: {
+  session: LibrarySessionPayload
+  backIcon?: string
+}) {
+  return <VideoCard session={session} showProgress backIcon={backIcon} />
 }

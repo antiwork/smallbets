@@ -1,9 +1,11 @@
 import { useMemo, useRef, useState } from "react"
 import VimeoPlayer, { type VimeoPlayerHandle } from "./player/vimeo_player"
+import { router } from "@inertiajs/react"
 
 interface VideoCardProps {
   session: LibrarySessionPayload
   showProgress?: boolean
+  backIcon?: string
 }
 
 interface LibrarySessionPayload {
@@ -54,6 +56,7 @@ function formatTimeRemaining(
 export default function VideoCard({
   session,
   showProgress = false,
+  backIcon,
 }: VideoCardProps) {
   const playerRef = useRef<VimeoPlayerHandle>(null)
   const [watchOverride, setWatchOverride] =
@@ -68,7 +71,9 @@ export default function VideoCard({
   )
 
   const handleTitleClick = () => {
-    playerRef.current?.enterFullscreen()
+    router.visit(`/library/${session.id}`, {
+      preserveScroll: true,
+    })
   }
 
   return (
@@ -77,11 +82,9 @@ export default function VideoCard({
       className="relative flex w-[var(--shelf-card-w,21.5vw)] shrink-0 flex-col gap-[0.4vw] p-[4px]"
     >
       <div
-        className="group flex flex-col gap-3"
+        className="group relative flex flex-col gap-3"
         onMouseEnter={() => playerRef.current?.startPreview()}
         onMouseLeave={() => playerRef.current?.stopPreview()}
-        onFocusCapture={() => playerRef.current?.startPreview()}
-        onBlurCapture={() => playerRef.current?.stopPreview()}
       >
         <div className="relative order-1 aspect-[16/9] w-full rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
           <div className="absolute inset-0 overflow-hidden rounded">
@@ -90,6 +93,7 @@ export default function VideoCard({
               session={session}
               watchOverride={watchOverride}
               onWatchUpdate={setWatchOverride}
+              backIcon={backIcon}
             />
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] opacity-100 transition-opacity duration-300 group-hover:opacity-0" />
           </div>
@@ -105,11 +109,7 @@ export default function VideoCard({
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={handleTitleClick}
-          className="peer order-2 flex cursor-pointer flex-col gap-0.5 text-left select-none [--hover-filter:brightness(1)] [--hover-size:0]"
-        >
+        <div className="peer order-2 flex flex-col gap-0.5 text-left select-none [--hover-filter:brightness(1)] [--hover-size:0]">
           {timeRemaining && (
             <p className="text-xs leading-tight text-gray-400">
               {timeRemaining}
@@ -118,7 +118,13 @@ export default function VideoCard({
           <h3 className="text-sm font-medium text-white capitalize">
             {session.title}
           </h3>
-        </button>
+        </div>
+        <button
+          type="button"
+          aria-label={`Open ${session.title}`}
+          onClick={handleTitleClick}
+          className="absolute inset-0 z-10 cursor-pointer appearance-none border-0 bg-transparent shadow-none ring-0 outline-none hover:shadow-none! hover:ring-0 hover:outline-none focus:shadow-none focus:ring-0 focus:outline-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:outline-none"
+        />
       </div>
     </article>
   )
