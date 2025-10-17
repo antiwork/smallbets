@@ -210,7 +210,7 @@
 /* Library: show hamburger only when closed on desktop */
 @media (min-width: 120ch) {
   body.library-collapsed .sidebar__toggle {
-    display: block;
+    display: flex;
     animation: hamburger-scale-in 250ms ease-out;
     /* when sidebar is open on desktop, keep the toggle visible inside panel */
     .open & {
