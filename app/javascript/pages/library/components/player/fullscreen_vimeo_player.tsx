@@ -118,7 +118,7 @@ export default function FullscreenVimeoPlayer({
         onClick={() =>
           router.visit("/library", { replace: true, preserveScroll: true })
         }
-        className="absolute top-4 left-4 z-[1000] flex size-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity hover:bg-black/80"
+        className="absolute top-4 left-4 z-[1000] flex size-10 items-center justify-center rounded-full bg-black/60! text-white transition-opacity duration-250 ease-out hover:bg-black/80!"
       >
         <span
           aria-hidden="true"
@@ -158,6 +158,7 @@ export default function FullscreenVimeoPlayer({
         <DownloadMenu
           vimeoId={session.vimeoId}
           downloadPath={session.downloadPath}
+          title={session.title}
         />
       </div>
     </div>
@@ -167,9 +168,20 @@ export default function FullscreenVimeoPlayer({
 interface DownloadMenuProps {
   vimeoId: string
   downloadPath?: string
+  title?: string
 }
 
-function DownloadMenu({ vimeoId, downloadPath }: DownloadMenuProps) {
+interface DownloadEntry {
+  quality?: string
+  link?: string
+  width?: number
+  height?: number
+  size?: number
+  size_short?: string
+  type?: string
+}
+
+function DownloadMenu({ vimeoId, downloadPath, title }: DownloadMenuProps) {
   interface InertiaPageProps {
     assets?: { downloadIcon?: string }
     [key: string]: unknown
@@ -180,8 +192,17 @@ function DownloadMenu({ vimeoId, downloadPath }: DownloadMenuProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [entries, setEntries] = useState<any[]>([])
+  const [entries, setEntries] = useState<DownloadEntry[]>([])
   const portalRef = useRef<HTMLDivElement | null>(null)
+
+  const isDownloadEntry = useCallback((d: unknown): d is DownloadEntry => {
+    return (
+      !!d &&
+      typeof d === "object" &&
+      ("quality" in (d as Record<string, unknown>) ||
+        "link" in (d as Record<string, unknown>))
+    )
+  }, [])
 
   useEffect(() => {
     if (entries.length > 0 || loading || error) return
@@ -192,16 +213,18 @@ function DownloadMenu({ vimeoId, downloadPath }: DownloadMenuProps) {
       .then((r) =>
         r.ok ? r.json() : Promise.reject(new Error(String(r.status))),
       )
-      .then((json) => {
-        const list = Array.isArray(json) ? json : []
+      .then((json: unknown) => {
+        const list = Array.isArray(json)
+          ? (json.filter(isDownloadEntry) as DownloadEntry[])
+          : []
         setEntries(list)
         setError(list.length === 0 ? "No options" : null)
       })
       .catch(() => setError("Unable to load"))
       .finally(() => setLoading(false))
-  }, [vimeoId, entries.length, loading, error])
+  }, [vimeoId, entries.length, loading, error, isDownloadEntry])
 
-  function hrefFor(download: any): string | null {
+  function hrefFor(download: DownloadEntry): string | null {
     if (download.quality) {
       const url = new URL(
         `/library/download/${vimeoId}`,
@@ -211,6 +234,33 @@ function DownloadMenu({ vimeoId, downloadPath }: DownloadMenuProps) {
       return url.toString()
     }
     return download.link || downloadPath || null
+  }
+
+  function qualityLabel(download: DownloadEntry): string {
+    if (download.quality) return String(download.quality).toUpperCase()
+    if (download.type) return String(download.type).toUpperCase()
+    return title ? `Download (${title})` : "Download"
+  }
+
+  function details(download: DownloadEntry): string {
+    const parts: string[] = []
+    const w = download.width
+    const h = download.height
+    if (w && h) parts.push(`${w}×${h}`)
+    const short = download.size_short
+    const size = Number(download.size)
+    if (short) parts.push(short)
+    else if (Number.isFinite(size) && size > 0) {
+      const units = ["B", "KB", "MB", "GB", "TB"]
+      let value = size
+      let i = 0
+      while (value >= 1024 && i < units.length - 1) {
+        value /= 1024
+        i += 1
+      }
+      parts.push(`${value.toFixed(value >= 10 ? 0 : 1)} ${units[i]}`)
+    }
+    return parts.join(" • ")
   }
 
   return (
@@ -272,8 +322,9 @@ function DownloadMenu({ vimeoId, downloadPath }: DownloadMenuProps) {
                   }}
                 >
                   <div className="flex w-full cursor-pointer items-center justify-between gap-2">
-                    <span className="text-sm">
-                      {d.quality ?? d.type ?? "Download"}
+                    <span className="text-sm">{qualityLabel(d)}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {details(d)}
                     </span>
                   </div>
                 </DropdownMenuItem>

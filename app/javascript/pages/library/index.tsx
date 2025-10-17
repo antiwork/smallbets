@@ -118,25 +118,27 @@ export default function LibraryIndex({
       <div className="pb-16">
         <Head title="Library" />
 
-        <LibraryHero
-          continueWatching={continueWatching}
-          backIcon={assets?.backIcon}
-        />
+        <div className="flex flex-col gap-5">
+          <LibraryHero
+            continueWatching={continueWatching}
+            backIcon={assets?.backIcon}
+          />
 
-        <section className="mt-10 pl-3 sm:mt-[3vw]">
-          {categoryGroups.map((group) => (
-            <div
-              className="mb-10 flex flex-col gap-[1vw] sm:mb-[3vw]"
-              key={group.category.slug}
-            >
-              <SectionHeader title={group.category.name} />
-              <SessionGrid
-                sessions={group.sessions}
-                backIcon={assets?.backIcon}
-              />
-            </div>
-          ))}
-        </section>
+          <section className="pl-3 sm:mt-[3vw]">
+            {categoryGroups.map((group) => (
+              <div
+                className="mb-10 flex flex-col gap-[1vw] sm:mb-[3vw]"
+                key={group.category.slug}
+              >
+                <SectionHeader title={group.category.name} />
+                <SessionGrid
+                  sessions={group.sessions}
+                  backIcon={assets?.backIcon}
+                />
+              </div>
+            ))}
+          </section>
+        </div>
       </div>
     </div>
   )
