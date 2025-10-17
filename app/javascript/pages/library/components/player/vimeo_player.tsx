@@ -321,7 +321,7 @@ function ActiveVimeoPlayer({
 }: ActiveVimeoPlayerProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const [isReady, setIsReady] = useState(false)
-  const [status, setStatus] = useState<PlaybackStatus>({ state: "idle" })
+  const [, setStatus] = useState<PlaybackStatus>({ state: "idle" })
   const [autoplaySoundEnabled, setAutoplaySoundState] = useState(
     getAutoplaySoundEnabled(),
   )
@@ -918,7 +918,6 @@ function ActiveVimeoPlayer({
           )}
         </button>
       )}
-      <StatusIndicator status={status} />
     </div>
   )
 }
@@ -1228,29 +1227,16 @@ async function persistProgress(
       state: "error",
       message: result.message ?? "Unable to save progress",
     })
+    console.error(
+      "[Library] Failed to save watch progress",
+      result.message ?? "Unable to save progress",
+      { payload },
+    )
     return false
   }
 
   setStatus({ state: "idle" })
   return true
-}
-
-function StatusIndicator({ status }: { status: PlaybackStatus }) {
-  if (status.state === "idle") return null
-
-  if (status.state === "error") {
-    return (
-      <div className="pointer-events-none absolute right-3 bottom-3 rounded-xl bg-red-900/90 px-3 py-2 text-xs font-medium text-white shadow">
-        {status.message}
-      </div>
-    )
-  }
-
-  return (
-    <div className="pointer-events-none absolute right-3 bottom-3 rounded-full bg-slate-900/80 px-3 py-1 text-xs font-medium text-white shadow">
-      Saving…
-    </div>
-  )
 }
 
 interface ProgressThrottler {
