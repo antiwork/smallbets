@@ -724,8 +724,9 @@ function ActiveVimeoPlayer({
               src={playerSrc}
               className="vimeo-embed h-auto max-h-[calc(100vh-var(--bar-h))] w-[100vw]"
               style={{ aspectRatio: "16 / 9" }}
-              allow="autoplay; picture-in-picture; clipboard-write"
+              allow="fullscreen; autoplay; picture-in-picture; clipboard-write"
               loading="lazy"
+              allowFullScreen={true}
               referrerPolicy="strict-origin-when-cross-origin"
             />
           </div>
@@ -743,7 +744,7 @@ function ActiveVimeoPlayer({
             title={session.title}
             src={playerSrc}
             className="vimeo-embed size-full"
-            allow="autoplay; picture-in-picture; clipboard-write"
+            allow="picture-in-picture; clipboard-write"
             loading="lazy"
             referrerPolicy="strict-origin-when-cross-origin"
           />
