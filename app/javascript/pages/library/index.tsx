@@ -4,7 +4,11 @@ import { useEffect, useMemo } from "react"
 import LibraryHero from "./components/library_hero"
 import SectionHeader from "./components/layout/section_header"
 import SessionGrid from "./components/session_grid"
-import type { LibrarySessionPayload, LibraryCategoryPayload } from "./types"
+import type {
+  LibrarySessionPayload,
+  LibraryCategoryPayload,
+  LibraryLayoutPayload,
+} from "./types"
 
 interface LibraryPageProps {
   continueWatching: LibrarySessionPayload[]
@@ -26,12 +30,7 @@ interface LibrarySectionPayload {
   sessions: LibrarySessionPayload[]
 }
 
-interface LayoutPayload {
-  pageTitle?: string
-  bodyClass?: string
-  nav?: string
-  sidebar?: string
-}
+type LayoutPayload = LibraryLayoutPayload
 
 interface CategoryGroup {
   category: LibraryCategoryPayload

@@ -15,6 +15,7 @@ import {
   type WatchRequestOptions,
 } from "./watch_history"
 import type { LibrarySessionPayload } from "../../types"
+import type { DownloadEntry } from "./types"
 
 interface FullscreenVimeoPlayerProps {
   session: LibrarySessionPayload
@@ -299,16 +300,6 @@ interface DownloadMenuProps {
   vimeoId: string
   downloadPath?: string
   title?: string
-}
-
-interface DownloadEntry {
-  quality?: string
-  link?: string
-  width?: number
-  height?: number
-  size?: number
-  size_short?: string
-  type?: string
 }
 
 function DownloadMenu({ vimeoId, downloadPath, title }: DownloadMenuProps) {

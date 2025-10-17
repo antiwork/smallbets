@@ -3,14 +3,9 @@ import type { PageProps as InertiaPageProps } from "@inertiajs/core"
 import { useEffect } from "react"
 
 import FullscreenVimeoPlayer from "./components/player/fullscreen_vimeo_player"
-import type { LibrarySessionPayload } from "./types"
+import type { LibrarySessionPayload, LibraryLayoutPayload } from "./types"
 
-interface LayoutPayload {
-  pageTitle?: string
-  bodyClass?: string
-  nav?: string
-  sidebar?: string
-}
+type LayoutPayload = LibraryLayoutPayload
 
 interface AppPageProps extends InertiaPageProps {
   session: LibrarySessionPayload

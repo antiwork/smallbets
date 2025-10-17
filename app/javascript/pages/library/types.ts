@@ -26,3 +26,10 @@ export interface LibrarySessionPayload {
   watchHistoryPath: string
   watch?: LibraryWatchPayload | null
 }
+
+export interface LibraryLayoutPayload {
+  pageTitle?: string
+  bodyClass?: string
+  nav?: string
+  sidebar?: string
+}
