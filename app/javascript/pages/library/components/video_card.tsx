@@ -139,7 +139,7 @@ export default function VideoCard({
           aria-label={`Open ${session.title}`}
           onMouseDown={prefetchWatchPage}
           onClick={handleTitleClick}
-          className="absolute inset-0 z-10 cursor-pointer appearance-none border-0 bg-transparent shadow-none ring-0 outline-none hover:shadow-none! hover:ring-0 hover:outline-none focus:shadow-none focus:ring-0 focus:outline-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:outline-none"
+          className="absolute inset-0 z-[1] cursor-pointer appearance-none border-0 bg-transparent shadow-none ring-0 outline-none hover:shadow-none! hover:ring-0 hover:outline-none focus:shadow-none focus:ring-0 focus:outline-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:outline-none"
         />
       </div>
     </article>

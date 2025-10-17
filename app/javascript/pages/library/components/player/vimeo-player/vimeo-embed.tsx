@@ -405,7 +405,7 @@ export function VimeoEmbed({
         ) : (
           <div
             aria-hidden
-            className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
+            className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
           />
         ))}
       {!isFullscreen ? (
@@ -486,7 +486,7 @@ export function VimeoEmbed({
           onMouseEnter={handleButtonEnter}
           onMouseLeave={handleButtonLeave}
           className={[
-            "absolute top-2.5 right-2.5 z-20 flex size-9 items-center justify-center overflow-hidden rounded-full text-white hover:shadow-none!",
+            "absolute top-2.5 right-2.5 z-[1] flex size-9 items-center justify-center overflow-hidden rounded-full text-white hover:shadow-none!",
             "before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:bg-black before:transition-opacity before:ease-out before:content-['']",
             isBgVisible || isButtonHovered
               ? "before:opacity-60 before:duration-150"
