@@ -26,7 +26,7 @@ interface VimeoPlayerProps {
   persistPreview?: boolean
 }
 
-const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
+export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
   function VimeoPlayer(
     {
       session,
@@ -250,5 +250,3 @@ const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     )
   },
 )
-
-export default VimeoPlayer

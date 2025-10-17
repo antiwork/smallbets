@@ -2,7 +2,7 @@ import { Head, usePage } from "@inertiajs/react"
 import type { PageProps as InertiaPageProps } from "@inertiajs/core"
 import { useEffect, useMemo } from "react"
 
-import FullscreenVimeoPlayer from "./components/player/fullscreen_vimeo_player"
+import { FullscreenVimeoPlayer } from "@/pages/library/components/player"
 import type { LibraryWatchPayload } from "./types"
 import type { LibrarySessionPayload, LibraryLayoutPayload } from "./types"
 

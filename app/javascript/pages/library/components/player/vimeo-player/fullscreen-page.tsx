@@ -8,7 +8,7 @@ interface FullscreenPageProps {
   backIcon?: string
 }
 
-export default function FullscreenPage({
+export function FullscreenVimeoPlayer({
   session,
   backIcon,
 }: FullscreenPageProps) {

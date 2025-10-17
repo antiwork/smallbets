@@ -1,5 +1,8 @@
 import { useMemo, useRef, useState } from "react"
-import VimeoPlayer, { type VimeoPlayerHandle } from "./player/vimeo_player"
+import {
+  VimeoPlayer,
+  type VimeoPlayerHandle,
+} from "@/pages/library/components/player"
 import { router } from "@inertiajs/react"
 import type { LibrarySessionPayload, LibraryWatchPayload } from "../types"
 
