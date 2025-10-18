@@ -18,6 +18,20 @@ import {
 import { PROGRESS_THROTTLE_MS, MUTE_OVERLAY_HOLD_MS } from "./constants"
 import type { PlaybackStatus } from "./types"
 
+const RESUME_TAIL_RESET_SECONDS = 10
+
+function computeResumeTime(watch: WatchPayload | null | undefined): number {
+  if (!watch) return 0
+  const played = watch.playedSeconds ?? 0
+  const duration = watch.durationSeconds ?? null
+  if (watch.completed) return 0
+  if (typeof duration === "number" && duration > 0) {
+    const remaining = duration - played
+    if (remaining <= RESUME_TAIL_RESET_SECONDS) return 0
+  }
+  return played
+}
+
 export interface VimeoEmbedProps {
   session: LibrarySessionPayload
   shouldPlay: boolean
@@ -169,7 +183,7 @@ export function VimeoEmbed({
       { method: "pause" },
       { fallbackOrigin: fallbackOriginRef.current },
     )
-    const resumeAt = progressRef.current?.playedSeconds ?? 0
+    const resumeAt = computeResumeTime(progressRef.current)
     postToVimeo(
       frame,
       vimeoOriginRef,
@@ -341,7 +355,7 @@ export function VimeoEmbed({
   }, [throttler, persistPreview])
 
   useEffect(() => {
-    const resumeAt = progressRef.current?.playedSeconds
+    const resumeAt = computeResumeTime(progressRef.current)
     if (!isReady || resumeAt == null || !frameRef.current) return
     postToVimeo(frameRef.current, vimeoOriginRef, {
       method: "setCurrentTime",
