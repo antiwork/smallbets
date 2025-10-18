@@ -5,6 +5,7 @@
   <%= search_results_tag("inbox", paged_inbox_mentions_url, highlight_mentions: true) do %>
     <%= render collection: @messages, partial: '/messages/message', cached: -> message { message_cache_key(message, room_id: "inbox_mentions_#{Current.user.id}", show_room_name: true) }, locals: { timestamp_style: :long_datetime, show_date_separator: false } %>
   <% end %>
+  <%= turbo_stream_from Current.user, :inbox_mentions %>
 <% end %>
 
 <%= render template: 'inboxes/show' %>
