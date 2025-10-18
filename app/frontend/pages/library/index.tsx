@@ -90,18 +90,18 @@ export default function LibraryIndex({
         <Head title="Library" />
         <h1 className="sr-only">Library</h1>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-[3vw] pt-12">
           <LibraryHero
             continueWatching={continueWatching}
             backIcon={assets?.backIcon}
           />
 
-          <div className="pl-3 sm:mt-[3vw]">
+          <div className="flex flex-col gap-10 pl-3 sm:gap-[3vw]">
             {categoryGroups.map((group) => {
               const headingId = `category-${group.category.slug}`
               return (
                 <section
-                  className="mb-10 flex flex-col gap-[1vw] sm:mb-[3vw]"
+                  className="flex flex-col gap-[1vw]"
                   key={group.category.slug}
                   aria-labelledby={headingId}
                 >

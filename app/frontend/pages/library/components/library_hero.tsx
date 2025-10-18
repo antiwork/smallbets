@@ -11,7 +11,7 @@ export default function LibraryHero({
   backIcon,
 }: LibraryHeroProps) {
   return (
-    <section className="pt-12 pl-3">
+    <section className="pl-3">
       <ContinueWatchingShelf sessions={continueWatching} backIcon={backIcon} />
     </section>
   )
