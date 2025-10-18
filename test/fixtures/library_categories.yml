@@ -1,0 +1,11 @@
+design:
+  name: Design
+  slug: design
+
+development:
+  name: Development
+  slug: development
+
+business:
+  name: Business
+  slug: business

@@ -1,0 +1,21 @@
+design_systems_intro:
+  library_class: design_systems
+  vimeo_id: "123456789"
+  vimeo_hash: "abc123"
+  description: Learn the fundamentals of building scalable design systems
+  padding: 56.25
+  position: 0
+
+design_systems_advanced:
+  library_class: design_systems
+  vimeo_id: "987654321"
+  description: Deep dive into design token architecture
+  padding: 56.25
+  position: 1
+
+indie_hacking_mvp:
+  library_class: indie_hacking
+  vimeo_id: "111222333"
+  description: How to ship fast and validate ideas
+  padding: 56.25
+  position: 0

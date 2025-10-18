@@ -7,7 +7,10 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "new redirects to first run when no users exist" do
-    User.destroy_all
+    # Delete dependent records first to avoid foreign key violations from library_watch_histories
+    ActiveRecord::Base.connection.disable_referential_integrity do
+      User.destroy_all
+    end
 
     get new_session_url
 
