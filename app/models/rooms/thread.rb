@@ -6,7 +6,7 @@ class Rooms::Thread < Room
     if user.present? && (user == creator || user == parent_message&.creator)
       "everything"
     else
-      "invisible"
+      "mentions"
     end
   end
 end

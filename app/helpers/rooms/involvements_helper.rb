@@ -15,8 +15,7 @@ module Rooms::InvolvementsHelper
   private
     HUMANIZE_INVOLVEMENT = {
       "mentions" => "Room in All Rooms",
-      "everything" => "Room in My Rooms",
-      "invisible" => "Room hidden from sidebar"
+      "everything" => "Room in My Rooms"
     }
 
     SHARED_INVOLVEMENT_ORDER = %w[ mentions everything ]
