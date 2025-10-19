@@ -90,7 +90,7 @@ export default function LibraryIndex({
         <Head title="Library" />
         <h1 className="sr-only">Library</h1>
 
-        <div className="flex flex-col gap-[3vw] pt-12">
+        <div className="flex flex-col gap-10 pt-12 sm:gap-[3vw]">
           <LibraryHero
             continueWatching={continueWatching}
             backIcon={assets?.backIcon}
