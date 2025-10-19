@@ -19,17 +19,14 @@ module Rooms::InvolvementsHelper
       "invisible" => "Room hidden from sidebar"
     }
 
-    SHARED_INVOLVEMENT_ORDER = %w[ mentions everything invisible ]
-    SHARED_SIDEBAR_INVOLVEMENT_ORDER = %w[ mentions everything ]
+    SHARED_INVOLVEMENT_ORDER = %w[ mentions everything ]
     DIRECT_INVOLVEMENT_ORDER = %w[ everything nothing ]
 
     def next_involvement_for(room, involvement:, from_sidebar: false)
       if room.direct?
         DIRECT_INVOLVEMENT_ORDER[DIRECT_INVOLVEMENT_ORDER.index(involvement) + 1] || DIRECT_INVOLVEMENT_ORDER.first
-      elsif from_sidebar
-        SHARED_SIDEBAR_INVOLVEMENT_ORDER[(SHARED_SIDEBAR_INVOLVEMENT_ORDER.index(involvement) || 0) + 1] || SHARED_SIDEBAR_INVOLVEMENT_ORDER.first
       else
-        SHARED_INVOLVEMENT_ORDER[SHARED_INVOLVEMENT_ORDER.index(involvement) + 1] || SHARED_INVOLVEMENT_ORDER.first
+        SHARED_INVOLVEMENT_ORDER[(SHARED_INVOLVEMENT_ORDER.index(involvement) || 0) + 1] || SHARED_INVOLVEMENT_ORDER.first
       end
     end
 end
