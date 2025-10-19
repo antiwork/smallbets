@@ -7,6 +7,10 @@ function getSidebarElements() {
   return { sidebar, slot }
 }
 
+function getSlotFromBody(bodyEl) {
+  return bodyEl ? bodyEl.querySelector("#sidebar-slot") : null
+}
+
 function isInertiaPage() {
   // Inertia mounts into #app with data-page. If present, Library handles DOM itself.
   const app = document.getElementById("app")
@@ -18,6 +22,14 @@ function isSidebarAllowedOnPage() {
   return (
     body.classList.contains("sidebar") ||
     body.classList.contains("library-collapsed")
+  )
+}
+
+function isSidebarAllowedOnBody(bodyEl) {
+  if (!bodyEl) return false
+  return (
+    bodyEl.classList.contains("sidebar") ||
+    bodyEl.classList.contains("library-collapsed")
   )
 }
 
@@ -44,6 +56,29 @@ function syncSidebarFromSlot() {
   if (html.length > 0) sidebar.innerHTML = html
 }
 
+// Sync the permanent sidebar BEFORE Turbo renders the next page, using the
+// incoming body snapshot. This avoids post-render mutations that can break
+// view transitions.
+function syncSidebarFromNewBody(newBody) {
+  const { sidebar } = getSidebarElements()
+  if (!sidebar) return
+
+  if (!isSidebarAllowedOnBody(newBody)) {
+    sidebar.innerHTML = ""
+    sidebar.classList.remove("open")
+    return
+  }
+
+  // Do not overwrite an existing standard sidebar turbo-frame
+  if (sidebar.querySelector("#user_sidebar")) return
+
+  const slot = getSlotFromBody(newBody)
+  if (!slot) return
+
+  const html = slot.innerHTML.trim()
+  if (html.length > 0) sidebar.innerHTML = html
+}
+
 // Initial sync on DOM ready or when Turbo loads a new page
 function install() {
   // Direct loads
@@ -54,7 +89,10 @@ function install() {
   }
 
   // Turbo navigations
-  document.addEventListener("turbo:render", syncSidebarFromSlot)
+  document.addEventListener("turbo:before-render", (event) => {
+    const newBody = event?.detail?.newBody
+    if (newBody) syncSidebarFromNewBody(newBody)
+  })
 }
 
 install()
