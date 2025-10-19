@@ -45,7 +45,16 @@ export function DownloadMenu({
 
     const cached = downloadsCache.get(vimeoId)
     if (cached) {
-      setEntries(cached)
+      // Sort cached entries by size (desc), then by resolution (desc)
+      const sorted = [...cached].sort((a, b) => {
+        const sizeA = Number(a.size) || 0
+        const sizeB = Number(b.size) || 0
+        if (sizeA !== sizeB) return sizeB - sizeA
+        const pxA = (Number(a.width) || 0) * (Number(a.height) || 0)
+        const pxB = (Number(b.width) || 0) * (Number(b.height) || 0)
+        return pxB - pxA
+      })
+      setEntries(sorted)
       return
     }
 
@@ -60,8 +69,17 @@ export function DownloadMenu({
         const list = Array.isArray(json)
           ? (json.filter(isDownloadEntry) as DownloadEntry[])
           : []
-        downloadsCache.set(vimeoId, list)
-        setEntries(list)
+        // Sort entries by size (desc), then resolution (desc)
+        const sorted = [...list].sort((a, b) => {
+          const sizeA = Number(a.size) || 0
+          const sizeB = Number(b.size) || 0
+          if (sizeA !== sizeB) return sizeB - sizeA
+          const pxA = (Number(a.width) || 0) * (Number(a.height) || 0)
+          const pxB = (Number(b.width) || 0) * (Number(b.height) || 0)
+          return pxB - pxA
+        })
+        downloadsCache.set(vimeoId, sorted)
+        setEntries(sorted)
         setError(list.length === 0 ? "No options" : null)
       })
       .catch(() => setError("Unable to load"))
@@ -109,6 +127,11 @@ export function DownloadMenu({
   }
 
   function qualityLabel(download: DownloadEntry): string {
+    const w = Number(download.width) || 0
+    const h = Number(download.height) || 0
+    // Prefer resolution labels like 1080p when available
+    if (h > 0) return `${h}p`
+    if (w > 0) return `${w}w`
     if (download.quality) return String(download.quality).toUpperCase()
     if (download.type) return String(download.type).toUpperCase()
     return `Download (${title})`
@@ -118,6 +141,7 @@ export function DownloadMenu({
     const parts: string[] = []
     const w = download.width
     const h = download.height
+    // Keep explicit dimensions in details for clarity
     if (w && h) parts.push(`${w}×${h}`)
     const short = download.size_short
     const size = Number(download.size)
