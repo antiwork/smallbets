@@ -24,7 +24,7 @@ class Room::MessagePusher
 
     def build_shared_payload
       {
-        title: room.name,
+        title: room.display_name,
         body: "#{message.creator.name}: #{message.plain_text_body}",
         path: Rails.application.routes.url_helpers.room_path(room)
       }

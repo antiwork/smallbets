@@ -59,8 +59,8 @@ module MessagesHelper
     render "messages/unrenderable"
   end
 
-  def message_timestamp(message, **attributes)
-    local_datetime_tag message.created_at, **attributes
+  def message_timestamp(message, style: :time, **attributes)
+    local_datetime_tag message.created_at, style: style, **attributes
   end
 
   def message_presentation(message)
@@ -79,13 +79,15 @@ module MessagesHelper
     ""
   end
 
-  def message_cache_key(message, room_id: nil, is_first_unread_message: false)
+  def message_cache_key(message, room_id: nil, is_first_unread_message: false, is_parent: false, show_room_name: false)
     [
       message,
       room_id,
       message.bookmarked_by_current_user?,
       message.creator,
-      is_first_unread_message
+      is_first_unread_message,
+      is_parent,
+      show_room_name
     ]
   end
 

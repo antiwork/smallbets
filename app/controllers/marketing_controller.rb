@@ -55,7 +55,7 @@ class MarketingController < ApplicationController
   end
 
   def join
-    redirect_to "https://dvassallo.gumroad.com/l/small-bets/100_OFF?wanted=true", status: :found, allow_other_host: true
+    redirect_to "https://dvassallo.gumroad.com/l/small-bets/LAST_CHANCE?wanted=true", status: :found, allow_other_host: true
   end
 
   def stats

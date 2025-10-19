@@ -17,13 +17,16 @@ And if you're not part of the [Small Bets](https://smallbets.com) community yet,
 - Ruby 3.3.1 (check with `ruby --version`)
 - Redis server
 - SQLite3
+- Node.js with npm (or bun) for Tailwind CSS builds
 
 ### Setup
 
     bin/setup
     bin/rails server
 
-The `bin/setup` script will install dependencies, prepare the database, and configure the application.
+The `bin/setup` script will install dependencies, prepare the database, build Tailwind CSS, and configure the application.
+
+If you're actively developing with Tailwind CSS and need continuous builds, run `bin/tailwind-build --watch` in a separate terminal.
 
 ## Running in production
 

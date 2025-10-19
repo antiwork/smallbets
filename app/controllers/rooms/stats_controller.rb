@@ -9,7 +9,7 @@ class Rooms::StatsController < ApplicationController
       access_count: @room.memberships.joins(:user).where(users: { suspended_at: nil, active: true }).count,
       visibility_count: @room.visible_memberships.joins(:user).where(users: { suspended_at: nil, active: true }).count,
       starred_count: @room.memberships.where(involvement: "everything").joins(:user).where(users: { suspended_at: nil, active: true }).count,
-      messages_count: @room.messages.count,
+      messages_count: all_messages_count_for_room(@room),
       last_message_at: @room.messages.where(active: true).order(created_at: :desc).first&.created_at
     }
 
@@ -37,11 +37,21 @@ class Rooms::StatsController < ApplicationController
       @room = Current.user.rooms.find(params[:room_id])
     end
 
+    # Count messages in a room including messages in threads
+    def all_messages_count_for_room(room)
+      Message.joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+             .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+             .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+             .active.distinct.count
+    end
+
     # Get top talkers for a specific room
     def top_talkers_for_room(room, limit = 10)
-      User.select("users.id, users.name, COUNT(messages.id) AS message_count, COALESCE(users.membership_started_at, users.created_at) as joined_at")
+      User.select("users.id, users.name, COUNT(DISTINCT messages.id) AS message_count, COALESCE(users.membership_started_at, users.created_at) as joined_at")
           .joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
-          .where("messages.room_id = ?", room.id)
+          .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+          .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+          .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
           .where("users.active = true AND users.suspended_at IS NULL")
           .group("users.id, users.name, users.membership_started_at, users.created_at")
           .order("message_count DESC, joined_at ASC, users.id ASC")
@@ -50,9 +60,11 @@ class Rooms::StatsController < ApplicationController
 
     # Get user stats for a specific room
     def user_stats_for_room(user_id, room)
-      User.select("users.id, users.name, COUNT(messages.id) AS message_count")
+      User.select("users.id, users.name, COUNT(DISTINCT messages.id) AS message_count")
           .joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
-          .where("messages.room_id = ?", room.id)
+          .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+          .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+          .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
           .where("users.id = ?", user_id)
           .group("users.id")
           .first
@@ -68,28 +80,32 @@ class Rooms::StatsController < ApplicationController
 
       # Count users with more messages
       users_with_more_messages = User.joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
-                                    .where("messages.room_id = ?", room.id)
-                                    .where("users.active = true AND users.suspended_at IS NULL")
-                                    .group("users.id")
-                                    .having("COUNT(messages.id) > ?", stats.message_count.to_i)
-                                    .count.size
+                                     .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+                                     .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+                                     .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+                                     .where("users.active = true AND users.suspended_at IS NULL")
+                                     .group("users.id")
+                                     .having("COUNT(DISTINCT messages.id) > ?", stats.message_count.to_i)
+                                     .count.size
 
-      # Count users with same number of messages but earlier join date
+      # Count users with the same number of messages but earlier join date
       if stats.message_count.to_i > 0
         users_with_same_messages_earlier_join = User.joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
-                                                  .where("messages.room_id = ?", room.id)
-                                                  .where("users.active = true AND users.suspended_at IS NULL")
-                                                  .group("users.id")
-                                                  .having("COUNT(messages.id) = ?", stats.message_count.to_i)
-                                                  .where("COALESCE(users.membership_started_at, users.created_at) < ?",
-                                                         user.membership_started_at || user.created_at)
-                                                  .count.size
+                                                    .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+                                                    .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+                                                    .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+                                                    .where("users.active = true AND users.suspended_at IS NULL")
+                                                    .group("users.id")
+                                                    .having("COUNT(DISTINCT messages.id) = ?", stats.message_count.to_i)
+                                                    .where("COALESCE(users.membership_started_at, users.created_at) < ?",
+                                                           user.membership_started_at || user.created_at)
+                                                    .count.size
       else
         # For users with 0 messages, count users with earlier join date
         users_with_same_messages_earlier_join = User.where("COALESCE(membership_started_at, created_at) < ?",
-                                                        user.membership_started_at || user.created_at)
-                                                .where("active = true AND users.suspended_at IS NULL")
-                                                .count
+                                                           user.membership_started_at || user.created_at)
+                                                    .where("active = true AND users.suspended_at IS NULL")
+                                                    .count
       end
 
       users_with_more_messages + users_with_same_messages_earlier_join + 1

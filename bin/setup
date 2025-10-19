@@ -21,6 +21,28 @@ fi
 announce "Installing dependencies"
 bundle install
 
+announce "Installing Node.js dependencies"
+if command -v npm >/dev/null 2>&1; then
+  npm install
+elif command -v bun >/dev/null 2>&1; then
+  bun install
+else
+  echo "Warning: Neither npm nor bun found. You'll need to install Node.js dependencies manually."
+  echo "Run 'npm install' or 'bun install' after installing a Node.js package manager."
+fi
+
+announce "Building Tailwind CSS"
+if [ -f "bin/tailwind-build" ]; then
+  if command -v npx >/dev/null 2>&1; then
+    npx @tailwindcss/cli -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/tailwind.css
+  elif command -v bunx >/dev/null 2>&1; then
+    bunx @tailwindcss/cli -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/tailwind.css
+  else
+    echo "Warning: Neither npx nor bunx found. Tailwind CSS won't be built."
+    echo "Install Node.js and run './bin/tailwind-build' manually."
+  fi
+fi
+
 announce "Preparing database"
 if [[ $* == *--reset* ]]; then
   rm -rf ./storage/{db,files}

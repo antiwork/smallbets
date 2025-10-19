@@ -54,7 +54,7 @@
   </div>
 
   <%= search_results_tag("search-results", page_searches_url(q: params[:q])) do %>
-    <%= render partial: "messages/message", collection: @messages, cached: -> message { message_cache_key(message, room_id: "search_#{Current.user.id}") } %>
+    <%= render partial: "messages/message", collection: @messages, cached: -> message { message_cache_key(message, room_id: "search_#{Current.user.id}", show_room_name: true) }, locals: { timestamp_style: :long_datetime, show_date_separator: false } %>
   <% end %>
 </div>
 

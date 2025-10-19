@@ -114,6 +114,8 @@ export default class extends Controller {
         unreadRoom.classList.add(this.badgeClass)
       }
     })
+
+    this.dispatch("addBadge", { detail: { roomId: roomId } })
   }
   
   #roomUpdated({ roomId, sortableName }) {

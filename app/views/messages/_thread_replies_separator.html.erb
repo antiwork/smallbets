@@ -1,0 +1,5 @@
+<%# locals: (thread:) -%>
+<% reply_count = thread.messages_count || thread.messages.count %>
+<h2 id="<%= dom_id(thread, :replies_separator) %>" class="message-separator message__replies-separator">
+  <span class="message__replies-count"><%= pluralize(reply_count, 'reply', 'replies') %></span>
+</h2>

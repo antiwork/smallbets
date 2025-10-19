@@ -15,11 +15,11 @@
   <% @sections.each do |section| %>
     <section id="<%= section.slug %>" class="library__section">
       <header class="library__header">
-        <h2 class="library__section-title"><%= section.title %></h2>
+        <h2 class="library__section-title"><%= section.title %> - <%= section.creator %></h2>
       </header>
 
       <div class="library__videos">
-        <% section.videos.each do |video| %>
+        <% section.library_sessions.each do |video| %>
           <%= render "library/video_card", video: video %>
         <% end %>
       </div>

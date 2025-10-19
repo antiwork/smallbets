@@ -16,9 +16,9 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM --platform=$TARGETPLATFORM base as build
 
-# Install packages need to build gems
+# Install packages need to build gems and Node.js for Tailwind
 RUN apt-get update -qq && \
-    apt-get install -y build-essential git pkg-config
+    apt-get install -y build-essential git pkg-config nodejs npm
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -26,6 +26,10 @@ RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
 
 COPY . .
+
+# Install Node dependencies and build Tailwind CSS
+RUN npm install && \
+    npx @tailwindcss/cli -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/tailwind.css
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN mkdir -p /rails/storage/logs

@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  # Top-level room slug routing (must come before other catch-alls that could conflict)
+  constraints(RoomSlugConstraint.new) do
+    get "/:slug", to: "rooms#show", as: :room_slug
+  end
+
   # Redirect www.smallbets.com to smallbets.com
   constraints(host: /^www\.smallbets\.com/) do
     match "(*any)", to: redirect { |params, request|
@@ -121,7 +126,7 @@ Rails.application.routes.draw do
     resources :opens
     resources :closeds
     resources :directs
-    resources :threads, only: %i[ edit update destroy ]
+    resources :threads, only: %i[ new edit update destroy ]
 
     post ":bot_key/directs", to: "directs/by_bots#create", as: :bot_directs
   end
@@ -144,6 +149,7 @@ Rails.application.routes.draw do
   resource :inbox, only: %i[ show ] do
     member do
       get :mentions
+      get :threads
       get :notifications
       get :messages
       get :bookmarks
@@ -152,6 +158,7 @@ Rails.application.routes.draw do
     end
     scope path: "/paged", as: :paged do
       resources :mentions, only: %i[ index ], controller: "inboxes/mentions"
+      resources :threads, only: %i[ index ], controller: "inboxes/threads"
       resources :notifications, only: %i[ index ], controller: "inboxes/notifications"
       resources :messages, only: %i[ index ], controller: "inboxes/messages"
       resources :bookmarks, only: %i[ index ], controller: "inboxes/bookmarks"

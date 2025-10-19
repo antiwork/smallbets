@@ -1,4 +1,4 @@
-<% @page_title = room_display_name(@room) %>
+<% @page_title = @room.thread? ? "🧵 #{room_display_name(@room.parent_message.room)}" : room_display_name(@room) %>
 <% @body_class = "sidebar" %>
 <% content_for :head do %>
   <%= turbo_exempts_page_from_preview %>
@@ -15,9 +15,15 @@
   <%= messages_tag(@room) do %>
     <%= render "rooms/show/invitation", room: @room %>
     <%= render "rooms/show/block_notice", room: @room %>
-    <%= render partial: "messages/message", collection: @messages, 
-               cached: -> message { message_cache_key(message, room_id: @room.id, is_first_unread_message: message == @first_unread_message) }, 
-               locals: { current_room: @room, first_unread_message: @first_unread_message } %>
+    <% @messages.each do |message| %>
+      <% if message == @room.parent_message %>
+        <% cache message_cache_key(message, room_id: @room.id, is_parent: true) do %>
+          <%= render "messages/parent_message", message: message, thread: @room %>
+        <% end %>
+      <% else %>
+        <%= render partial: "messages/message", locals: { message: message, current_room: @room, first_unread_message: @first_unread_message }, cached: message_cache_key(message, room_id: @room.id, is_first_unread_message: message == @first_unread_message) %>
+      <% end %>
+    <% end %>
   <% end %>
 
   <%= turbo_stream_from @membership %>

@@ -66,13 +66,28 @@
   transition: background-color 0.2s ease;
   margin-bottom: calc(var(--block-space) * 2);
   position: relative;
-  
+
   &:hover {
     background-color: var(--color-border);
   }
-  
+
   img {
     margin: 0;
+  }
+
+  &.has-unread-mentions::after {
+    --size: 1em;
+
+    aspect-ratio: 1;
+    background-color: var(--color-negative);
+    block-size: var(--size);
+    border-radius: calc(var(--size) * 2);
+    content: "";
+    flex-shrink: 0;
+    inline-size: var(--size);
+    position: absolute;
+    inset-block-start: calc(var(--size) / -4);
+    inset-inline-end: calc(var(--size) / -4);
   }
 }
 

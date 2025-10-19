@@ -7,7 +7,6 @@ class AuthToken < ApplicationRecord
   validates_presence_of :expires_at
 
   before_validation :generate_code
-  after_create :invalidate_other_tokens
 
   scope :valid, -> { where(used_at: nil).where("expires_at > ?", Time.current) }
 
@@ -17,6 +16,7 @@ class AuthToken < ApplicationRecord
 
   def use!
     update!(used_at: Time.current)
+    user.auth_tokens.without(self).update_all(expires_at: Time.current)
   end
 
   def self.lookup(token: nil, email_address: nil, code: nil)
@@ -35,9 +35,5 @@ class AuthToken < ApplicationRecord
 
   def generate_code
     self.code = format("%06d", rand(100_000..999_999))
-  end
-
-  def invalidate_other_tokens
-    user.auth_tokens.without(self).update_all(expires_at: Time.current)
   end
 end

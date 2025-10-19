@@ -16,6 +16,10 @@ class InboxesController < ApplicationController
     track_last_loaded_message :inbox_last_loaded_mention_created_at
   end
 
+  def threads
+    @messages = find_threads
+  end
+
   def answers
     @messages = find_answers
     @answer_count = Current.user.reachable_messages.where(answered_by: Current.user).count
@@ -77,6 +81,44 @@ class InboxesController < ApplicationController
 
     def find_answers
       Bookmark.populate_for paginate(Current.user.reachable_messages.where(answered_by: Current.user).with_threads.with_creator)
+    end
+
+    def find_threads
+      # Find parent messages of threads where:
+      # 1. User has visible membership in the thread, OR
+      # 2. User has everything involvement in the parent room
+      thread_memberships = Current.user.memberships.active.visible.joins(:room).where(rooms: { type: 'Rooms::Thread' })
+      parent_room_memberships = Current.user.memberships.active.involved_in_everything.joins(:room).where.not(rooms: { type: 'Rooms::Thread' })
+
+      thread_ids_from_memberships = thread_memberships.pluck(:room_id)
+      parent_room_ids = parent_room_memberships.pluck(:room_id)
+      thread_ids_from_parent_rooms = Room.where(type: 'Rooms::Thread')
+                                          .joins(:parent_message)
+                                          .where(messages: { room_id: parent_room_ids })
+                                          .pluck(:id)
+
+      all_thread_ids = (thread_ids_from_memberships + thread_ids_from_parent_rooms).uniq
+
+      # Use a subquery to get messages ordered by their thread's last_active_at
+      thread_order_sql = <<~SQL
+        (SELECT threads.last_active_at
+         FROM rooms threads
+         WHERE threads.parent_message_id = messages.id
+         AND threads.type = 'Rooms::Thread'
+         LIMIT 1)
+      SQL
+
+      base_query = Message.active
+                          .joins(:room)
+                          .where.not(rooms: { type: 'Rooms::Thread' })
+                          .where(id: Room.active.where(id: all_thread_ids, type: 'Rooms::Thread')
+                                      .where("messages_count > 0")
+                                      .pluck(:parent_message_id))
+                          .with_threads
+                          .with_creator
+                          .order(Arel.sql(thread_order_sql))
+
+      Bookmark.populate_for paginate(base_query)
     end
 
     def paginate(records)

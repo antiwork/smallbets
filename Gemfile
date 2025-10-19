@@ -16,6 +16,7 @@ gem "puma", "~> 6.4"
 # Jobs
 gem "resque", "~> 2.6.0"
 gem "resque-pool", "~> 0.7.1"
+gem "resque-scheduler", "~> 4.11.0"
 
 # Assets
 gem "propshaft", github: "rails/propshaft"

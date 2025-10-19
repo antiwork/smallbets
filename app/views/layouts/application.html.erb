@@ -20,7 +20,7 @@
     <%= tag.link rel: "icon", href: fresh_account_logo_path, type: "image/png" %>
     <%= tag.link rel: "apple-touch-icon", href: fresh_account_logo_path %>
 
-    <%= stylesheet_link_tag *(Stylesheets.from("application") + Stylesheets.vendor_stylesheets), "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", *(Stylesheets.from("application") + Stylesheets.vendor_stylesheets), "data-turbo-track": "reload" %>
     <% if hotwire_native_app? %>
       <%= stylesheet_link_tag "native", "data-turbo-track": "reload" %>
     <% end %>
@@ -36,12 +36,12 @@
     <% if controller_name == "rooms" && action_name == "show" %>
       <a 
         id="special-event-banner"
-        href="https://x.com/nestersk/status/1929860214091555304"
+        href="https://x.com/nestersk/status/1973501168312783190"
         target="_blank"
         style="font-weight: 600; letter-spacing: -0.02em; text-align: center; padding: 0.5rem; display: none; width: 100%; cursor: pointer; text-decoration: none; box-sizing: border-box;"
         data-controller="countdown-banner"
         data-countdown-banner-urgent-class="banner-urgent"
-        data-countdown-banner-target-time-value="2025-06-05T05:00:00Z"
+        data-countdown-banner-target-time-value="2025-10-02T16:00:00Z"
         data-countdown-banner-duration-hours-value="2"
       >
         The Weekly Yap — <span data-countdown-banner-target="status"></span>

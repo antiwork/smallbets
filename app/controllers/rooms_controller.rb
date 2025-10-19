@@ -10,6 +10,13 @@ class RoomsController < ApplicationController
   end
 
   def show
+    # Redirect to canonical slug URL when available, unless viewing a specific message
+    if params[:message_id].blank? && @room.slug.present? && params[:slug].blank?
+      target = room_slug_url(@room.slug)
+      target = target + "?" + request.query_string if request.query_string.present?
+      return redirect_to(target)
+    end
+
     @messages = Bookmark.populate_for(find_messages)
   end
 
@@ -26,7 +33,17 @@ class RoomsController < ApplicationController
     end
 
     def set_room
-      if room = Current.user.rooms.find_by(id: params[:room_id] || params[:id])
+      identifier = params[:room_id] || params[:id] || params[:slug]
+
+      # Try by numeric id first (preserve existing behavior)
+      room = Current.user.rooms.includes(parent_message: { creator: :avatar_attachment }).find_by(id: identifier)
+
+      # Fallback to slug-based lookup when identifier is not a numeric id
+      if room.nil?
+        room = Current.user.rooms.includes(parent_message: { creator: :avatar_attachment }).find_by(slug: identifier)
+      end
+
+      if room
         @room = room
       else
         redirect_to root_url, alert: "Room not found or inaccessible"
@@ -55,14 +72,33 @@ class RoomsController < ApplicationController
       @first_unread_message = messages.ordered.since(@membership.unread_at).first if @membership.unread?
 
       if show_first_message = messages.find_by(id: params[:message_id]) || @first_unread_message
-        @messages = messages.page_around(show_first_message)
+        result = messages.page_around(show_first_message)
       else
-        @messages = messages.last_page
+        result = messages.last_page
       end
+
+      # If this is a thread, prepend the parent message when appropriate
+      if @room.thread? && @room.parent_message.present?
+        if result.empty?
+          # Empty thread - show just the parent message
+          result = [@room.parent_message]
+        elsif result.any?
+          # Thread has messages - prepend parent if we're showing the first message
+          first_thread_message = @room.messages.ordered.first
+          messages_array = result.to_a
+          if first_thread_message && messages_array.first.id == first_thread_message.id
+            result = [@room.parent_message] + messages_array
+          end
+        end
+      end
+
+      result
     end
 
     def room_params
-      params.require(:room).permit(:name)
+      permitted = [ :name ]
+      permitted << :slug if Current.user.administrator?
+      params.require(:room).permit(*permitted)
     end
 
     def broadcast_remove_room
