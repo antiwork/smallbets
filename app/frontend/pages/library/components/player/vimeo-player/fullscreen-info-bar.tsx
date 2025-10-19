@@ -14,7 +14,7 @@ export function FullscreenInfoBar({
   downloadPath,
 }: FullscreenInfoBarProps) {
   return (
-    <div className="border-border bg-background text-foreground flex h-[var(--bar-h)] items-center justify-between border-t px-4 pb-[calc(env(safe-area-inset-bottom))] md:px-6">
+    <div className="bg-background text-foreground flex h-[var(--bar-h)] items-center justify-between border-t border-transparent px-4 pb-[calc(env(safe-area-inset-bottom))] shadow-[0_-1px_0_0_var(--control-border)] md:px-6">
       <div className="min-w-0 pr-3">
         <h2 className="truncate text-lg font-medium">{title}</h2>
         <p className="library-muted-light truncate text-sm">{creator}</p>
