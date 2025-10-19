@@ -122,16 +122,14 @@
 
 /* Default state: buttons have borders */
 .btn.everything,
-.btn.mentions,
-.btn.invisible {
+.btn.mentions {
   border: var(--btn-border-size, 1px) solid
     var(--btn-border-color, var(--color-border-darker));
 }
 
 /* Remove borders only for involvement buttons in the sidebar */
 [data-type="list_node"] .btn.everything,
-[data-type="list_node"] .btn.mentions,
-[data-type="list_node"] .btn.invisible {
+[data-type="list_node"] .btn.mentions {
   border: 0;
 }
 
@@ -251,8 +249,7 @@ button {
 
 /* Make involvement buttons in the navbar consistent with edit-room button */
 .flex.gap-half.align-center .btn.everything,
-.flex.gap-half.align-center .btn.mentions,
-.flex.gap-half.align-center .btn.invisible {
+.flex.gap-half.align-center .btn.mentions {
   height: var(--navbar-btn-size);
   width: var(--navbar-btn-size);
   padding: 0;
@@ -262,8 +259,7 @@ button {
 }
 
 .flex.gap-half.align-center .btn.everything img,
-.flex.gap-half.align-center .btn.mentions img,
-.flex.gap-half.align-center .btn.invisible img {
+.flex.gap-half.align-center .btn.mentions img {
   width: 18px;
   height: 18px;
 }
@@ -283,8 +279,7 @@ a.btn[data-room-id] img {
 
 /* Hide text in navbar involvement buttons to match other circular buttons */
 .flex.gap-half.align-center .btn.everything .for-screen-reader,
-.flex.gap-half.align-center .btn.mentions .for-screen-reader,
-.flex.gap-half.align-center .btn.invisible .for-screen-reader {
+.flex.gap-half.align-center .btn.mentions .for-screen-reader {
   position: absolute;
   width: 1px;
   height: 1px;
