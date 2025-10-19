@@ -48,8 +48,15 @@ export default class extends Controller {
       if (!this.closeOnEscapeValue || !isOpen) return
       this.element.classList.remove(this.toggleClass)
       if (this.element.id === "sidebar") {
-        const toggle = document.getElementById("sidebar-toggle")
-        if (toggle) toggle.focus()
+        // On Library overlay, return focus to main content for better a11y
+        if (document.body.classList.contains("library-collapsed")) {
+          const main = document.getElementById("main-content")
+          if (main && typeof main.focus === "function") main.focus()
+        } else {
+          // Fallback to the sidebar toggle elsewhere
+          const toggle = document.getElementById("sidebar-toggle")
+          if (toggle) toggle.focus()
+        }
       }
       return
     }
