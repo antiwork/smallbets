@@ -64,6 +64,18 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
         url.searchParams.set("controls", showControls ? "1" : "0")
         url.searchParams.set("fullscreen", "0")
         url.searchParams.set("muted", "1")
+        // Match system appearance on initial load: black in dark, transparent in light
+        let prefersDark = false
+        try {
+          if (typeof window !== "undefined" && "matchMedia" in window) {
+            prefersDark = window.matchMedia(
+              "(prefers-color-scheme: dark)",
+            ).matches
+          }
+        } catch (_e) {
+          // noop
+        }
+        url.searchParams.set("transparent", prefersDark ? "0" : "1")
         return url.toString()
       } catch (_error) {
         return session.playerSrc

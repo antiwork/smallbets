@@ -14,6 +14,7 @@
   --foreground: oklch(0.145 0 0);
   --border: oklch(0.922 0 0);
   --control-border: #b1adae;
+  color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,6 +27,11 @@
 }
 
 /* Ensure black background when the Vimeo container is fullscreen */
+.vimeo-embed {
+  /* Match system preference from first paint to avoid white flash */
+  background-color: var(--background);
+}
+
 .vimeo-fullscreen:fullscreen {
   background-color: var(--background);
 }
