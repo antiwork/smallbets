@@ -17,12 +17,34 @@ export default class extends Controller {
 
     this._handleKeydown = (event) => this.#handleKeydown(event)
     document.addEventListener("keydown", this._handleKeydown)
+
+    this._handleSkipToMenu = (event) => {
+      if (!document.body.classList.contains("library-collapsed")) return
+      const anchor = event.currentTarget
+      if (!(anchor instanceof HTMLAnchorElement)) return
+      if (anchor.getAttribute("href") !== "#sidebar-toggle") return
+      event.preventDefault()
+      if (!this.element.classList.contains(this.toggleClass)) {
+        this.element.classList.add(this.toggleClass)
+      }
+      if (this.focusTrapValue) this.#focusInitial()
+    }
+
+    const skipToMenu = document.querySelector(
+      'a.skip-navigation[href="#sidebar-toggle"]',
+    )
+    if (skipToMenu) skipToMenu.addEventListener("click", this._handleSkipToMenu)
   }
 
   disconnect() {
     document.removeEventListener("mousedown", this._handleDocumentPointer)
     document.removeEventListener("touchstart", this._handleDocumentPointer)
     document.removeEventListener("keydown", this._handleKeydown)
+    const skipToMenu = document.querySelector(
+      'a.skip-navigation[href="#sidebar-toggle"]',
+    )
+    if (skipToMenu)
+      skipToMenu.removeEventListener("click", this._handleSkipToMenu)
   }
 
   toggle() {
