@@ -166,11 +166,12 @@ export function DownloadMenu({
         className="border border-transparent shadow-[0_0_0_1px_var(--control-border)]"
         aria-expanded={open}
         aria-controls={panelId}
+        aria-label="Download"
         onClick={() => setOpen((v) => !v)}
       >
         <span
           aria-hidden="true"
-          className="bg-foreground mr-1 inline-block size-3.5"
+          className="bg-foreground mr-0 inline-block size-3.5 md:mr-1"
           style={{
             maskImage: `url(${downloadIconSrc})`,
             WebkitMaskImage: `url(${downloadIconSrc})`,
@@ -182,7 +183,7 @@ export function DownloadMenu({
             WebkitMaskSize: "contain",
           }}
         />
-        Download
+        <span className="hidden md:inline">Download</span>
       </Button>
       {open && (
         <div
