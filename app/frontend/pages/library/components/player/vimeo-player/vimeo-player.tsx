@@ -210,7 +210,7 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     return (
       <div
         ref={containerRef}
-        className="vimeo-fullscreen absolute inset-0 bg-black"
+        className="vimeo-fullscreen bg-background absolute inset-0"
       >
         {isActivated && canMount ? (
           <Suspense

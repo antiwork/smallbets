@@ -139,14 +139,14 @@ export function DownloadMenu({
     <div className="relative z-50 shrink-0" ref={portalRef}>
       <Button
         variant="secondary"
-        className="border border-[#555]"
+        className="border border-transparent shadow-[0_0_0_1px_var(--control-border)]"
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
       >
         <span
           aria-hidden="true"
-          className="mr-1 inline-block size-3.5 bg-white"
+          className="bg-foreground mr-1 inline-block size-3.5"
           style={{
             maskImage: `url(${downloadIconSrc})`,
             WebkitMaskImage: `url(${downloadIconSrc})`,
@@ -165,7 +165,7 @@ export function DownloadMenu({
           id={panelId}
           role="region"
           aria-label="Download options"
-          className="absolute -top-2 right-0 z-50 mt-2 w-64 translate-y-[-100%] rounded-md border border-white/10 bg-black/95 p-1 text-white shadow-lg"
+          className="border-border bg-background/95 text-foreground absolute -top-2 right-0 z-50 mt-2 w-64 translate-y-[-100%] rounded-md border p-1 shadow-lg"
           ref={listContainerRef}
         >
           {loading && (
@@ -192,7 +192,7 @@ export function DownloadMenu({
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-sm transition-colors hover:bg-white/10 focus:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                        className="hover:bg-foreground/10 focus:bg-foreground/10 focus-visible:ring-ring/50 flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-sm transition-colors focus:outline-none focus-visible:ring-2"
                         onClick={() => setOpen(false)}
                       >
                         <span>{qualityLabel(d)}</span>

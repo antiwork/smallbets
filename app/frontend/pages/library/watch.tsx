@@ -45,7 +45,7 @@ export default function LibraryWatch() {
   }, [layout?.bodyClass, layout?.nav, layout?.sidebar])
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="bg-background min-h-screen">
       <Head title={session.title} />
       <h1 className="sr-only">{session.title}</h1>
       <section aria-label="Video player" className="relative min-h-screen">

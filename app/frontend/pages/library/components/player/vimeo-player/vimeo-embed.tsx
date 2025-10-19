@@ -460,7 +460,7 @@ export function VimeoEmbed({
   }, [autoplaySoundEnabled])
 
   return (
-    <div className="relative size-full bg-black">
+    <div className="bg-background relative size-full">
       {!isReady &&
         (isFullscreen ? (
           <div
@@ -492,7 +492,7 @@ export function VimeoEmbed({
           role="dialog"
           aria-modal="true"
           aria-labelledby={dialogTitleId}
-          className="fixed inset-0 z-[999] flex flex-col bg-black"
+          className="bg-background fixed inset-0 z-[999] flex flex-col"
           style={{ ["--bar-h" as any]: "72px" }}
         >
           <button
@@ -500,12 +500,12 @@ export function VimeoEmbed({
             type="button"
             onClick={onExitFullscreen}
             aria-label="Go Back"
-            className="absolute top-4 left-4 z-[1000] flex size-10 items-center justify-center rounded-full bg-black/60! text-white backdrop-blur-sm transition-opacity hover:bg-black/80!"
+            className="bg-background/60! text-foreground hover:bg-background/80! absolute top-4 left-4 z-[1000] flex size-10 items-center justify-center rounded-full border border-transparent shadow-[0_0_0_1px_var(--control-border)] transition-opacity"
           >
             {backIcon && (
               <span
                 aria-hidden="true"
-                className="inline-block size-5 bg-white"
+                className="bg-foreground inline-block size-5"
                 style={{
                   maskImage: `url(${backIcon})`,
                   WebkitMaskImage: `url(${backIcon})`,
@@ -533,7 +533,11 @@ export function VimeoEmbed({
               onLoad={onFrameLoad}
             />
           </div>
-          <nav role="toolbar" aria-label="Player controls">
+          <nav
+            role="toolbar"
+            aria-label="Player controls"
+            className="bg-background text-foreground"
+          >
             <FullscreenInfoBar
               title={session.title}
               creator={session.creator}
@@ -558,8 +562,8 @@ export function VimeoEmbed({
           onMouseEnter={handleButtonEnter}
           onMouseLeave={handleButtonLeave}
           className={[
-            "pointer-events-auto absolute top-2.5 right-2.5 z-[2] flex size-9 items-center justify-center overflow-hidden rounded-full text-white hover:shadow-none!",
-            "before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:bg-black before:transition-opacity before:ease-out before:content-['']",
+            "text-foreground pointer-events-auto absolute top-2.5 right-2.5 z-[2] flex size-9 items-center justify-center overflow-hidden rounded-full hover:shadow-none!",
+            "before:bg-background before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:transition-opacity before:ease-out before:content-['']",
             isBgVisible || isButtonHovered
               ? "before:opacity-60 before:duration-150"
               : "before:opacity-0 before:duration-500",

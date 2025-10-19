@@ -139,11 +139,11 @@ export default function VideoCard({
 
         <div className="peer order-2 flex flex-col gap-0.5 text-left select-none [--hover-filter:brightness(1)] [--hover-size:0]">
           {timeRemaining && (
-            <p className="text-xs leading-tight text-gray-400">
+            <p className="library-muted-light text-xs leading-tight">
               {timeRemaining}
             </p>
           )}
-          <h3 className="text-sm font-medium text-white capitalize">
+          <h3 className="text-foreground text-sm font-medium capitalize">
             {session.title}
           </h3>
         </div>

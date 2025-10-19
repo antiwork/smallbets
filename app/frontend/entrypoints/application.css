@@ -3,36 +3,72 @@
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --border: oklch(0.922 0 0);
+  --control-border: #b1adae;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: oklch(0 0 0);
+    --foreground: oklch(0.985 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --control-border: #555;
+  }
+}
+
 /* Ensure black background when the Vimeo container is fullscreen */
 .vimeo-fullscreen:fullscreen {
-  background-color: #000;
+  background-color: var(--background);
 }
 
 .vimeo-fullscreen:-webkit-full-screen {
-  background-color: #000;
+  background-color: var(--background);
 }
 
 .vimeo-fullscreen:fullscreen::backdrop {
-  background-color: #000;
+  background-color: var(--background);
 }
 
 .vimeo-fullscreen:-webkit-full-screen::backdrop {
-  background-color: #000;
+  background-color: var(--background);
 }
 
 /* Ensure black background if the iframe itself is fullscreen */
 .vimeo-embed:fullscreen {
-  background-color: #000;
+  background-color: var(--background);
 }
 
 .vimeo-embed:-webkit-full-screen {
-  background-color: #000;
+  background-color: var(--background);
 }
 
 .vimeo-embed:fullscreen::backdrop {
-  background-color: #000;
+  background-color: var(--background);
 }
 
 .vimeo-embed:-webkit-full-screen::backdrop {
-  background-color: #000;
+  background-color: var(--background);
+}
+
+main#main-content:focus {
+  outline: none;
+}
+
+.library-muted-light {
+  color: #6b6b6b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .library-muted-light {
+    color: inherit;
+  }
 }

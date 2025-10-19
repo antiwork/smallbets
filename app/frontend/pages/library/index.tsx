@@ -85,7 +85,7 @@ export default function LibraryIndex({
   }, [sections])
 
   return (
-    <div className="mt-[3vw] min-h-screen bg-black py-12 min-[120ch]:pl-[5vw]">
+    <div className="bg-background mt-[3vw] min-h-screen py-12 min-[120ch]:pl-[5vw]">
       <div className="pb-16">
         <Head title="Library" />
         <h1 className="sr-only">Library</h1>

@@ -28,7 +28,7 @@ export function SessionsShelfRow({
       {title ? (
         <h2
           id={headingId}
-          className="pl-1 text-xl leading-tight font-medium tracking-wider text-white capitalize select-none"
+          className="text-foreground pl-1 text-xl leading-tight font-medium tracking-wider capitalize select-none"
         >
           {title}
         </h2>
