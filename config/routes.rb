@@ -23,6 +23,12 @@ Rails.application.routes.draw do
   get "/api/stats", to: "marketing#stats", defaults: { format: :json }
   get "/chat", to: "welcome#show"
 
+  namespace :api, defaults: { format: :json }, module: :api do
+    namespace :videos do
+      resources :thumbnails, only: :index
+    end
+  end
+
   resource :first_run
 
   resource :session do
@@ -211,3 +217,4 @@ Rails.application.routes.draw do
   get "stats/all", to: "stats#all"
   get "stats/rooms", to: "stats#rooms"
 end
+

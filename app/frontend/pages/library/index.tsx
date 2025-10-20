@@ -1,5 +1,5 @@
 import { Head } from "@inertiajs/react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import LibraryHero from "./components/library_hero"
 import SectionHeader from "./components/layout/section_header"
@@ -8,6 +8,7 @@ import type {
   LibrarySessionPayload,
   LibraryCategoryPayload,
   LibraryLayoutPayload,
+  VimeoThumbnailPayload,
 } from "./types"
 
 interface LibraryPageProps {
@@ -84,6 +85,55 @@ export default function LibraryIndex({
     return Array.from(categoryMap.values())
   }, [sections])
 
+  const [thumbnails, setThumbnails] = useState<
+    Record<string, VimeoThumbnailPayload>
+  >({})
+  useEffect(() => {
+    const ids = Array.from(
+      new Set([
+        ...sections.flatMap((section) =>
+          section.sessions.map((session) => session.vimeoId),
+        ),
+        ...continueWatching.map((s) => s.vimeoId),
+      ]),
+    )
+      .filter(Boolean)
+      .sort()
+
+    if (ids.length === 0) return
+
+    const controller = new AbortController()
+    const fetchThumbnails = async () => {
+      try {
+        const params = new URLSearchParams()
+        params.set("ids", ids.join(","))
+        const url = `/api/videos/thumbnails?${params.toString()}`
+        const response = await fetch(url, {
+          headers: {
+            Accept: "application/json",
+          },
+          signal: controller.signal,
+          credentials: "same-origin",
+        })
+
+        if (!response.ok) return
+        const json = (await response.json()) as Record<
+          string,
+          VimeoThumbnailPayload
+        >
+        setThumbnails(json)
+      } catch (error) {
+        if ((error as Error).name === "AbortError") return
+        console.warn("Failed to load Vimeo thumbnails", error)
+      }
+    }
+
+    void fetchThumbnails()
+    return () => {
+      controller.abort()
+    }
+  }, [sections, continueWatching])
+
   return (
     <div className="bg-background mt-[3vw] min-h-screen py-12 min-[120ch]:pl-[5vw]">
       <div className="pb-16">
@@ -94,6 +144,7 @@ export default function LibraryIndex({
           <LibraryHero
             continueWatching={continueWatching}
             backIcon={assets?.backIcon}
+            thumbnails={thumbnails}
           />
 
           <div className="flex flex-col gap-10 pl-3 sm:gap-[3vw]">
@@ -109,6 +160,7 @@ export default function LibraryIndex({
                   <SessionGrid
                     sessions={group.sessions}
                     backIcon={assets?.backIcon}
+                    thumbnails={thumbnails}
                   />
                 </section>
               )

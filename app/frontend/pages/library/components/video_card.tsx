@@ -1,13 +1,18 @@
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   VimeoPlayer,
   type VimeoPlayerHandle,
 } from "@/pages/library/components/player"
 import { router } from "@inertiajs/react"
-import type { LibrarySessionPayload, LibraryWatchPayload } from "../types"
+import type {
+  LibrarySessionPayload,
+  LibraryWatchPayload,
+  VimeoThumbnailPayload,
+} from "../types"
 
 interface VideoCardProps {
   session: LibrarySessionPayload
+  thumbnail?: VimeoThumbnailPayload
   showProgress?: boolean
   backIcon?: string
   persistPreview?: boolean
@@ -31,11 +36,15 @@ function formatTimeRemaining(
 
 export default function VideoCard({
   session,
+  thumbnail,
   showProgress = false,
   backIcon,
   persistPreview = false,
 }: VideoCardProps) {
   const playerRef = useRef<VimeoPlayerHandle>(null)
+  const [shouldStartOnVisible, setShouldStartOnVisible] = useState(false)
+  const [iframeVisible, setIframeVisible] = useState(false)
+
   const [watchOverride, setWatchOverride] =
     useState<LibraryWatchPayload | null>(session.watch ?? null)
 
@@ -46,6 +55,23 @@ export default function VideoCard({
     () => (showProgress ? formatTimeRemaining(progress, duration) : ""),
     [showProgress, progress, duration],
   )
+
+  useEffect(() => {
+    // Debug: log thumbnail presence per card
+    console.debug(
+      "[video_card] thumbnail",
+      session.vimeoId,
+      Boolean(thumbnail),
+      thumbnail?.src,
+    )
+  }, [session.vimeoId, thumbnail?.src])
+
+  useEffect(() => {
+    if (!iframeVisible) return
+    if (!shouldStartOnVisible) return
+    playerRef.current?.startPreview()
+    setShouldStartOnVisible(false)
+  }, [iframeVisible, shouldStartOnVisible])
 
   function isDataSaverEnabled(): boolean {
     try {
@@ -98,23 +124,52 @@ export default function VideoCard({
       <div
         className="group relative flex flex-col gap-3"
         onMouseEnter={() => {
+          if (isDataSaverEnabled()) return
+          if (!iframeVisible) {
+            setShouldStartOnVisible(true)
+            setIframeVisible(true)
+          }
           playerRef.current?.startPreview()
           prefetchWatchPage()
         }}
         onMouseLeave={() => playerRef.current?.stopPreview()}
       >
-        <figure className="relative order-1 aspect-[16/9] w-full rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
-          <div className="absolute inset-0 overflow-hidden rounded">
-            <VimeoPlayer
-              ref={playerRef}
-              session={session}
-              watchOverride={watchOverride}
-              onWatchUpdate={setWatchOverride}
-              backIcon={backIcon}
-              persistPreview={persistPreview}
+        <figure className="relative order-1 aspect-[16/9] w-full overflow-hidden rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
+          {thumbnail ? (
+            <picture className="absolute inset-0 block h-full w-full">
+              <source
+                srcSet={thumbnail.srcset}
+                sizes="(min-width: 768px) 33vw, 100vw"
+              />
+              <img
+                src={thumbnail.src}
+                alt=""
+                decoding="async"
+                loading="lazy"
+                width={thumbnail.width}
+                height={thumbnail.height}
+                className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${iframeVisible ? "opacity-0" : "opacity-100"}`}
+              />
+            </picture>
+          ) : (
+            <div
+              aria-hidden
+              className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
             />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] opacity-100 transition-opacity duration-300 group-hover:opacity-0" />
+          )}
+          <div className="absolute inset-0 overflow-hidden">
+            {iframeVisible ? (
+              <VimeoPlayer
+                ref={playerRef}
+                session={session}
+                watchOverride={watchOverride}
+                onWatchUpdate={setWatchOverride}
+                backIcon={backIcon}
+                persistPreview={persistPreview}
+              />
+            ) : null}
           </div>
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] opacity-100 transition-opacity duration-300 group-hover:opacity-0" />
           {showProgress && progressPercentage > 0 && (
             <div
               className="absolute right-2 bottom-1 left-2 h-[5px] overflow-hidden rounded-full bg-gray-600/70"

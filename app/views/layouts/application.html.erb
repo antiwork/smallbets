@@ -19,6 +19,8 @@
     <%= tag.link rel: "manifest", href: webmanifest_path(format: :json) %>
     <%= tag.link rel: "icon", href: fresh_account_logo_path, type: "image/png" %>
     <%= tag.link rel: "apple-touch-icon", href: fresh_account_logo_path %>
+    <%= tag.link rel: "preconnect", href: "https://i.vimeocdn.com", crossorigin: "anonymous" %>
+    <%= tag.link rel: "preconnect", href: "https://player.vimeo.com", crossorigin: "anonymous" %>
 
     <%= stylesheet_link_tag "tailwind", *(Stylesheets.from("application") + Stylesheets.vendor_stylesheets), "data-turbo-track": "reload" %>
     <% if hotwire_native_app? %>

@@ -33,3 +33,11 @@ export interface LibraryLayoutPayload {
   nav?: string
   sidebar?: string
 }
+
+export interface VimeoThumbnailPayload {
+  id: string
+  src: string
+  srcset: string
+  width: number
+  height: number
+}

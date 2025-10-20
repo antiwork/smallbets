@@ -1,16 +1,18 @@
 import { useMemo } from "react"
 
-import type { LibrarySessionPayload } from "../../types"
+import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../../types"
 import { SessionsShelfRow } from "./sessions_shelf_row"
 
 interface ContinueWatchingShelfProps {
   sessions: LibrarySessionPayload[]
   backIcon?: string
+  thumbnails?: Record<string, VimeoThumbnailPayload>
 }
 
 export default function ContinueWatchingShelf({
   sessions,
   backIcon,
+  thumbnails,
 }: ContinueWatchingShelfProps) {
   const items = useMemo(() => sessions, [sessions])
 
@@ -21,6 +23,7 @@ export default function ContinueWatchingShelf({
       title="Continue Watching"
       showProgress
       persistPreview
+      thumbnails={thumbnails}
     />
   )
 }

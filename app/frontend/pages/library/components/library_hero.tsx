@@ -1,18 +1,24 @@
 import ContinueWatchingShelf from "./shelves/continue_watching_shelf"
-import type { LibrarySessionPayload } from "../types"
+import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../types"
 
 interface LibraryHeroProps {
   continueWatching: LibrarySessionPayload[]
   backIcon?: string
+  thumbnails?: Record<string, VimeoThumbnailPayload>
 }
 
 export default function LibraryHero({
   continueWatching,
   backIcon,
+  thumbnails,
 }: LibraryHeroProps) {
   return (
     <section className="pl-3">
-      <ContinueWatchingShelf sessions={continueWatching} backIcon={backIcon} />
+      <ContinueWatchingShelf
+        sessions={continueWatching}
+        backIcon={backIcon}
+        thumbnails={thumbnails}
+      />
     </section>
   )
 }
