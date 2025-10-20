@@ -44,6 +44,7 @@ export interface VimeoEmbedProps {
   onExitFullscreen?: () => void
   persistPreview?: boolean
   onFrameLoad?: () => void
+  onReady?: () => void
 }
 
 export function VimeoEmbed({
@@ -58,6 +59,7 @@ export function VimeoEmbed({
   onExitFullscreen,
   persistPreview,
   onFrameLoad,
+  onReady,
 }: VimeoEmbedProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null)
   const overlayRef = useRef<HTMLDivElement | null>(null)
@@ -217,6 +219,7 @@ export function VimeoEmbed({
             fallbackOriginRef.current,
           )
           setIsReady(true)
+          if (onReady) onReady()
           try {
             performance.mark(`vimeo:ready:${session.id}`)
             performance.measure(
@@ -470,7 +473,7 @@ export function VimeoEmbed({
         ) : (
           <div
             aria-hidden
-            className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
+            className="absolute inset-0 z-[1] flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 opacity-80 motion-safe:animate-[pulse_8s_ease-in-out_infinite]"
           />
         ))}
       {!isFullscreen ? (

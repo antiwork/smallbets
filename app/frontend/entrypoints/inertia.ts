@@ -27,6 +27,9 @@ function bootInertiaApp() {
 
   const initialPage = JSON.parse(pagePayload)
 
+  // Mark page boot for early-mousemove suppression during initial render
+  ;(window as any).__sb_page_boot_ts = performance.now?.() ?? Date.now()
+
   createInertiaApp({
     id: mount.id,
     page: initialPage,

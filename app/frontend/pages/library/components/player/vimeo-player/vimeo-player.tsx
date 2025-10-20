@@ -24,6 +24,7 @@ interface VimeoPlayerProps {
   onWatchUpdate?: (watch: LibraryWatchPayload) => void
   backIcon?: string
   persistPreview?: boolean
+  onReady?: () => void
 }
 
 export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
@@ -34,6 +35,7 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       onWatchUpdate,
       backIcon,
       persistPreview,
+      onReady,
     }: VimeoPlayerProps,
     ref,
   ) {
@@ -46,6 +48,10 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     const hoverTimerRef = useRef<number | null>(null)
     const hasAutoplayedRef = useRef(false)
     const releaseMountRef = useRef<null | (() => void)>(null)
+    const instanceIdRef = useRef<string>(
+      `vp_${Math.random().toString(36).slice(2)}`,
+    )
+    const PREVIEW_EVENT = "smallbets:preview-start"
 
     function isDataSaverEnabled(): boolean {
       try {
@@ -124,12 +130,33 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       if (!isActivated) setIsActivated(true)
       if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current)
       if (hasAutoplayedRef.current) {
+        // Announce start to stop other instances playing same video
+        try {
+          window.dispatchEvent(
+            new CustomEvent(PREVIEW_EVENT, {
+              detail: {
+                vimeoId: session.vimeoId,
+                sourceId: instanceIdRef.current,
+              },
+            } as CustomEventInit),
+          )
+        } catch (_e) {}
         setShouldPlay(true)
         return
       }
       hoverTimerRef.current = window.setTimeout(() => {
         hasAutoplayedRef.current = true
         hoverTimerRef.current = null
+        try {
+          window.dispatchEvent(
+            new CustomEvent(PREVIEW_EVENT, {
+              detail: {
+                vimeoId: session.vimeoId,
+                sourceId: instanceIdRef.current,
+              },
+            } as CustomEventInit),
+          )
+        } catch (_e) {}
         setShouldPlay(true)
       }, AUTOPLAY_PREVIEW_DELAY_MS)
       preconnectVimeoOnce()
@@ -155,6 +182,25 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
     useEffect(() => {
       setShowControls(false)
     }, [session.id])
+
+    // Stop this preview when another instance of the same vimeoId starts
+    useEffect(() => {
+      const onPreviewStart = (e: Event) => {
+        const ce = e as CustomEvent<{ vimeoId: string; sourceId: string }>
+        const detail = ce.detail
+        if (!detail) return
+        if (detail.vimeoId !== session.vimeoId) return
+        if (detail.sourceId === instanceIdRef.current) return
+        if (hoverTimerRef.current) {
+          window.clearTimeout(hoverTimerRef.current)
+          hoverTimerRef.current = null
+        }
+        setShouldPlay(false)
+        setResetPreviewSignal((value) => value + 1)
+      }
+      window.addEventListener(PREVIEW_EVENT, onPreviewStart)
+      return () => window.removeEventListener(PREVIEW_EVENT, onPreviewStart)
+    }, [session.vimeoId])
 
     useEffect(() => {
       if (!showControls) return
@@ -250,6 +296,7 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
                   releaseMountRef.current = null
                 }
               }}
+              onReady={onReady}
             />
           </Suspense>
         ) : (

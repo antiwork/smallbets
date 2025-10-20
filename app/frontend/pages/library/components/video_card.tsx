@@ -44,6 +44,8 @@ export default function VideoCard({
   const playerRef = useRef<VimeoPlayerHandle>(null)
   const [shouldStartOnVisible, setShouldStartOnVisible] = useState(false)
   const [iframeVisible, setIframeVisible] = useState(false)
+  const [iframeReady, setIframeReady] = useState(false)
+  const hoverMoveStartedRef = useRef(false)
 
   const [watchOverride, setWatchOverride] =
     useState<LibraryWatchPayload | null>(session.watch ?? null)
@@ -115,14 +117,28 @@ export default function VideoCard({
         className="group relative flex flex-col gap-3"
         onMouseEnter={() => {
           if (isDataSaverEnabled()) return
-          if (!iframeVisible) {
-            setShouldStartOnVisible(true)
-            setIframeVisible(true)
-          }
-          playerRef.current?.startPreview()
+          if (!iframeVisible) setIframeVisible(true)
+          hoverMoveStartedRef.current = false
           prefetchWatchPage()
         }}
-        onMouseLeave={() => playerRef.current?.stopPreview()}
+        onMouseMove={(e) => {
+          // Ignore early synthetic moves during initial render/reflow
+          const now = performance.now?.() ?? Date.now()
+          // Safari/iOS may send movementX=0; require actual pageX/pageY change from element entry
+          // Use a short debounce from mount to avoid triggers before thumbs are visible
+          if (
+            (window as any).__sb_page_boot_ts &&
+            now - (window as any).__sb_page_boot_ts < 300
+          )
+            return
+          if (hoverMoveStartedRef.current) return
+          hoverMoveStartedRef.current = true
+          setShouldStartOnVisible(true)
+        }}
+        onMouseLeave={() => {
+          hoverMoveStartedRef.current = false
+          playerRef.current?.stopPreview()
+        }}
       >
         <figure className="relative order-1 aspect-[16/9] w-full overflow-hidden rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
           {thumbnail ? (
@@ -138,7 +154,7 @@ export default function VideoCard({
                 loading="lazy"
                 width={thumbnail.width}
                 height={thumbnail.height}
-                className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${iframeVisible ? "opacity-0" : "opacity-100"}`}
+                className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${iframeReady ? "opacity-0" : "opacity-100"}`}
               />
             </picture>
           ) : (
@@ -149,14 +165,19 @@ export default function VideoCard({
           )}
           <div className="absolute inset-0 overflow-hidden">
             {iframeVisible ? (
-              <VimeoPlayer
-                ref={playerRef}
-                session={session}
-                watchOverride={watchOverride}
-                onWatchUpdate={setWatchOverride}
-                backIcon={backIcon}
-                persistPreview={persistPreview}
-              />
+              <div
+                className={`absolute inset-0 transition-opacity duration-150 ${iframeReady ? "opacity-100" : "opacity-0"}`}
+              >
+                <VimeoPlayer
+                  ref={playerRef}
+                  session={session}
+                  watchOverride={watchOverride}
+                  onWatchUpdate={setWatchOverride}
+                  backIcon={backIcon}
+                  persistPreview={persistPreview}
+                  onReady={() => setIframeReady(true)}
+                />
+              </div>
             ) : null}
           </div>
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] opacity-100 transition-opacity duration-300 group-hover:opacity-0" />
