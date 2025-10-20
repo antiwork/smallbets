@@ -20,6 +20,7 @@ interface LibraryPageProps {
     backIcon?: string
     downloadIcon?: string
   }
+  initialThumbnails?: Record<string, VimeoThumbnailPayload>
 }
 
 interface LibrarySectionPayload {
@@ -43,6 +44,7 @@ export default function LibraryIndex({
   sections,
   layout,
   assets,
+  initialThumbnails,
 }: LibraryPageProps) {
   useEffect(() => {
     if (!layout) return
@@ -87,9 +89,10 @@ export default function LibraryIndex({
 
   const [thumbnails, setThumbnails] = useState<
     Record<string, VimeoThumbnailPayload>
-  >({})
+  >(initialThumbnails ?? {})
+
   useEffect(() => {
-    const ids = Array.from(
+    const allIds = Array.from(
       new Set([
         ...sections.flatMap((section) =>
           section.sessions.map((session) => session.vimeoId),
@@ -98,37 +101,75 @@ export default function LibraryIndex({
       ]),
     )
       .filter(Boolean)
-      .sort()
+      .map(String)
 
-    if (ids.length === 0) return
+    if (allIds.length === 0) return
+
+    // Above-the-fold priority: continue watching + first shelf
+    const prioritySet = new Set<string>([
+      ...continueWatching
+        .map((s) => s.vimeoId)
+        .filter(Boolean)
+        .map(String),
+      ...(sections[0]?.sessions ?? [])
+        .map((s) => s.vimeoId)
+        .filter(Boolean)
+        .map(String),
+    ])
+    const priorityIds = Array.from(prioritySet)
+    const restIds = allIds.filter((id) => !prioritySet.has(String(id)))
 
     const controller = new AbortController()
-    const fetchThumbnails = async () => {
+
+    const merge = (partial: Record<string, VimeoThumbnailPayload>) => {
+      if (!partial || Object.keys(partial).length === 0) return
+      setThumbnails((prev) => ({ ...prev, ...partial }))
+    }
+
+    const fetchBatch = async (ids: string[]) => {
+      if (ids.length === 0) return
       try {
         const params = new URLSearchParams()
-        params.set("ids", ids.join(","))
+        params.set("ids", Array.from(new Set(ids)).sort().join(","))
         const url = `/api/videos/thumbnails?${params.toString()}`
         const response = await fetch(url, {
-          headers: {
-            Accept: "application/json",
-          },
+          headers: { Accept: "application/json" },
           signal: controller.signal,
           credentials: "same-origin",
         })
-
         if (!response.ok) return
         const json = (await response.json()) as Record<
           string,
           VimeoThumbnailPayload
         >
-        setThumbnails(json)
+        merge(json)
       } catch (error) {
         if ((error as Error).name === "AbortError") return
         console.warn("Failed to load Vimeo thumbnails", error)
       }
     }
 
-    void fetchThumbnails()
+    // Phase A: priority first
+    void fetchBatch(priorityIds)
+
+    // Phase B: remaining when idle
+    const scheduleIdle = (cb: () => void) => {
+      const ric = (
+        window as unknown as {
+          requestIdleCallback?: (
+            fn: () => void,
+            opts?: { timeout?: number },
+          ) => number
+        }
+      ).requestIdleCallback
+      if (typeof ric === "function") ric(cb, { timeout: 1500 })
+      else setTimeout(cb, 300)
+    }
+
+    scheduleIdle(() => {
+      void fetchBatch(restIds)
+    })
+
     return () => {
       controller.abort()
     }

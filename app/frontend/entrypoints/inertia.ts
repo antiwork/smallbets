@@ -22,7 +22,6 @@ function bootInertiaApp() {
   const pagePayload = mount.dataset.page
 
   if (!pagePayload) {
-    console.debug("[Inertia] Skipping bootstrap: missing data-page payload")
     return
   }
 

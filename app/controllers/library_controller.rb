@@ -11,12 +11,32 @@ class LibraryController < AuthenticatedController
 
     set_layout_content(nav_markup:, sidebar_markup:)
 
+    props = LibraryCatalog.inertia_props(user: Current.user)
+
+    # Compute server-rendered thumbnails for above-the-fold cards to remove first paint placeholders
+    initial_thumbnails = begin
+      continue_watching = props[:continueWatching] || []
+      first_shelf = (props[:sections] || []).first || {}
+      first_shelf_sessions = first_shelf[:sessions] || []
+
+      priority_ids = (
+        continue_watching.map { |s| s[:vimeoId] } +
+        first_shelf_sessions.map { |s| s[:vimeoId] }
+      ).compact.uniq
+
+      Vimeo::ThumbnailFetcher.read_cached_many(priority_ids)
+    rescue => e
+      Rails.logger.warn("library.index.initial_thumbnails.error" => { error: e.class.name, message: e.message })
+      {}
+    end
+
     render inertia: "library/index",
-      props: LibraryCatalog.inertia_props(user: Current.user).merge(
+      props: props.merge(
         assets: {
           downloadIcon: view_context.asset_path("download.svg"),
           backIcon: view_context.asset_path("arrow-left.svg"),
         },
+        initialThumbnails: initial_thumbnails,
         initialSessionId: params[:id]&.to_i,
         layout: {
           pageTitle: @page_title,

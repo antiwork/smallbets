@@ -57,16 +57,6 @@ export default function VideoCard({
   )
 
   useEffect(() => {
-    // Debug: log thumbnail presence per card
-    console.debug(
-      "[video_card] thumbnail",
-      session.vimeoId,
-      Boolean(thumbnail),
-      thumbnail?.src,
-    )
-  }, [session.vimeoId, thumbnail?.src])
-
-  useEffect(() => {
     if (!iframeVisible) return
     if (!shouldStartOnVisible) return
     playerRef.current?.startPreview()

@@ -52,6 +52,30 @@ module Vimeo
       assert Rails.cache.exist?(ThumbnailFetcher.cache_key("404"))
     end
 
+    test "read_cached enqueues refresh when stale" do
+      previous_adapter = ActiveJob::Base.queue_adapter
+      ActiveJob::Base.queue_adapter = :test
+      begin
+        stale = {
+          "id" => "123",
+          "src" => "https://example.com/640.jpg",
+          "srcset" => "https://example.com/640.jpg 640w",
+          "width" => 640,
+          "height" => 360,
+          "sizes" => [],
+          "fetchedAt" => 8.days.ago.iso8601
+        }
+        Rails.cache.write(ThumbnailFetcher.cache_key("123"), stale)
+
+        assert_enqueued_with(job: Vimeo::FetchThumbnailJob, args: ["123"]) do
+          value = ThumbnailFetcher.read_cached("123")
+          assert_equal "https://example.com/640.jpg", value["src"]
+        end
+      ensure
+        ActiveJob::Base.queue_adapter = previous_adapter
+      end
+    end
+
     private
 
     def stub_vimeo_video(id, body)

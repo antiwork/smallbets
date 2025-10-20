@@ -2,7 +2,11 @@ module Vimeo
   module ThumbnailFetcher
     API_ROOT = "https://api.vimeo.com".freeze
     CACHE_VERSION = "v1".freeze
-    CACHE_TTL = 7.days
+    # Hard/Redis TTL: keep entries for a long time to maximize cache hits
+    LONG_TTL = 30.days
+    # Soft TTL window: after this, entries are considered stale and should be refreshed
+    SOFT_TTL = 7.days
+    CACHE_TTL = LONG_TTL
     NEGATIVE_TTL = 5.minutes
 
     module_function
@@ -11,7 +15,20 @@ module Vimeo
     def read_cached(video_id)
       key = cache_key(video_id)
       return nil unless Rails.cache.exist?(key)
-      Rails.cache.read(key)
+      value = Rails.cache.read(key)
+
+      # If the cached value is present but stale, enqueue a background refresh
+      if value.present? && stale?(value)
+        enqueue(video_id)
+        Rails.logger.info(
+          "vimeo.thumbnail_fetcher.stale_enqueued" => {
+            video_id: video_id.to_s,
+            fetched_at: value["fetchedAt"]
+          }
+        )
+      end
+
+      value
     end
 
     def read_cached_many(video_ids)
@@ -125,6 +142,22 @@ module Vimeo
     def cache_negative(video_id)
       Rails.cache.write(cache_key(video_id), nil, expires_in: NEGATIVE_TTL)
       nil
+    end
+
+    # Returns true when a cached thumbnail payload is older than the soft TTL window.
+    def stale?(entry)
+      return false if entry.blank?
+      fetched_at = entry.is_a?(Hash) ? entry["fetchedAt"] : nil
+      return false if fetched_at.blank?
+
+      begin
+        fetched_time = Time.zone.parse(fetched_at)
+      rescue ArgumentError, TypeError
+        return true
+      end
+
+      return true if fetched_time.blank?
+      fetched_time < SOFT_TTL.ago
     end
   end
 end

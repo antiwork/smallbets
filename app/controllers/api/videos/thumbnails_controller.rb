@@ -11,13 +11,22 @@ module API
           return
         end
 
-        # Serve any cached thumbnails immediately; enqueue background fetch for misses.
+        # Serve cached thumbnails immediately; enqueue background fetch for misses.
         cached = Vimeo::ThumbnailFetcher.read_cached_many(ids)
         missing = ids.map(&:to_s) - cached.keys
         Vimeo::ThumbnailFetcher.enqueue_many(missing)
-        thumbnails = cached.presence || Vimeo::ThumbnailFetcher.fetch_many(ids)
+
+        Rails.logger.info(
+          "api.videos.thumbnails.request" => {
+            requested: ids.size,
+            cached: cached.size,
+            enqueued: missing.size,
+            ids: ids
+          }
+        )
+        thumbnails = cached
+
         if thumbnails.blank?
-          # Avoid 500 by returning empty JSON and cache headers anyway
           response.headers["Cache-Control"] = "public, max-age=300"
           render json: {}
           return

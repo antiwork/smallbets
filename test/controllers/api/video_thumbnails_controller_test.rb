@@ -19,7 +19,7 @@ module Api
       end
 
       test "returns cached thumbnails" do
-        stub_vimeo("123", payload_for("123", 640))
+        Rails.cache.write(Vimeo::ThumbnailFetcher.cache_key("123"), thumb_payload_for("123", 640))
 
         get api_videos_thumbnails_url(ids: "123"), headers: { "Accept" => "application/json" }
 
@@ -34,6 +34,21 @@ module Api
         assert WebMock::RequestRegistry.instance.requested_signatures.hash.empty?
       end
 
+      test "returns empty json on cache miss and enqueues fetch" do
+        previous_adapter = ActiveJob::Base.queue_adapter
+        ActiveJob::Base.queue_adapter = :test
+        begin
+          assert_enqueued_with(job: Vimeo::FetchThumbnailJob, args: ["999"]) do
+            get api_videos_thumbnails_url(ids: "999"), headers: { "Accept" => "application/json" }
+            assert_response :success
+            body = response.parsed_body
+            assert_equal({}, body)
+          end
+        ensure
+          ActiveJob::Base.queue_adapter = previous_adapter
+        end
+      end
+
       private
 
       def stub_vimeo(id, payload)
@@ -42,18 +57,18 @@ module Api
           .to_return(status: 200, body: payload.to_json, headers: { "Content-Type" => "application/json" })
       end
 
-      def payload_for(id, width)
+      def thumb_payload_for(id, width)
         {
-          "pictures" => {
-            "base_link" => "https://example.com/base-#{id}.jpg",
-            "sizes" => [
-              {
-                "link" => "https://example.com/#{width}.jpg",
-                "width" => width,
-                "height" => (width / 16.0 * 9).round
-              }
-            ]
-          }
+          "id" => id.to_s,
+          "baseLink" => "https://example.com/base-#{id}.jpg",
+          "src" => "https://example.com/#{width}.jpg",
+          "srcset" => "https://example.com/#{width}.jpg #{width}w",
+          "width" => width,
+          "height" => (width / 16.0 * 9).round,
+          "sizes" => [
+            { "link" => "https://example.com/#{width}.jpg", "width" => width, "height" => (width / 16.0 * 9).round }
+          ],
+          "fetchedAt" => Time.current.iso8601
         }
       end
 

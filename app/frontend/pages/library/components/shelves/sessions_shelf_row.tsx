@@ -27,19 +27,6 @@ export function SessionsShelfRow({
 
   return (
     <section className="flex flex-col gap-[1vw]" aria-labelledby={headingId}>
-      {(() => {
-        const missing = sessions
-          .filter((s) => !thumbnails?.[s.vimeoId])
-          .map((s) => s.vimeoId)
-        if (missing.length > 0) {
-          console.debug(
-            "[library] shelf missing thumbnails",
-            title ?? "(untitled)",
-            missing,
-          )
-        }
-        return null
-      })()}
       {title ? (
         <h2
           id={headingId}

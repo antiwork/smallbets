@@ -2,6 +2,8 @@ class LibrarySession < ApplicationRecord
   belongs_to :library_class
   has_many :library_watch_histories, dependent: :destroy
 
+  after_commit :warm_vimeo_thumbnail, on: [:create, :update]
+
   validates :vimeo_id, presence: true
   validates :padding, presence: true, numericality: { greater_than: 0 }
   validates :position, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
@@ -27,5 +29,12 @@ class LibrarySession < ApplicationRecord
   def download_path
     query = quality.present? ? { quality: quality } : {}
     Rails.application.routes.url_helpers.library_download_path(vimeo_id, query)
+  end
+
+  private
+
+  def warm_vimeo_thumbnail
+    return if vimeo_id.blank?
+    Vimeo::ThumbnailFetcher.enqueue(vimeo_id)
   end
 end
