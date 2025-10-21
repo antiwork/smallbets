@@ -57,6 +57,11 @@ rails log:clear tmp:clear
 announce "Restarting services"
 rails restart
 
+announce "Warming Vimeo thumbnails (no-op if no token)"
+if ! rails thumbnails:warm; then
+  echo "thumbnails:warm skipped or failed; continuing"
+fi
+
 if [ -d "$HOME/.puma-dev" ]; then
   announce "Configuring puma-dev"
   ln -nfs "$app_root" "$HOME/.puma-dev/$app_name"
