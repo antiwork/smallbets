@@ -2,13 +2,17 @@ class LibrarySession < ApplicationRecord
   belongs_to :library_class
   has_many :library_watch_histories, dependent: :destroy
 
-  after_commit :warm_vimeo_thumbnail, on: [:create, :update]
+  after_commit :warm_vimeo_thumbnail, on: %i[create update]
 
   validates :vimeo_id, presence: true
   validates :padding, presence: true, numericality: { greater_than: 0 }
   validates :position, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :featured_position, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   default_scope { order(position: :asc) }
+
+  scope :featured, -> { where(featured: true) }
+  scope :featured_ordered, -> { featured.order(featured_position: :asc, position: :asc, id: :asc) }
 
   delegate :title, to: :library_class
 

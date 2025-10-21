@@ -148,14 +148,17 @@ FOREIGN KEY ("user_id")
   REFERENCES "users" ("id")
 );
 CREATE UNIQUE INDEX "index_library_watch_histories_on_session_and_user" ON "library_watch_histories" ("library_session_id", "user_id");
-CREATE TABLE IF NOT EXISTS "library_sessions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "library_class_id" integer NOT NULL, "vimeo_id" varchar NOT NULL, "vimeo_hash" varchar DEFAULT NULL, "padding" decimal(5,2) DEFAULT 56.25 NOT NULL, "quality" varchar DEFAULT NULL, "position" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "description" text NOT NULL, "played_seconds" integer DEFAULT 0 NOT NULL, "last_watched_at" datetime(6) DEFAULT NULL, CONSTRAINT "fk_rails_dd5ecdc6f9"
+CREATE TABLE IF NOT EXISTS "library_sessions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "library_class_id" integer NOT NULL, "vimeo_id" varchar NOT NULL, "vimeo_hash" varchar DEFAULT NULL, "padding" decimal(5,2) DEFAULT 56.25 NOT NULL, "quality" varchar DEFAULT NULL, "position" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "description" text NOT NULL, "played_seconds" integer DEFAULT 0 NOT NULL, "last_watched_at" datetime(6) DEFAULT NULL, "featured" boolean DEFAULT 0 NOT NULL, "featured_position" integer DEFAULT 0 NOT NULL, CONSTRAINT "fk_rails_dd5ecdc6f9"
 FOREIGN KEY ("library_class_id")
   REFERENCES "library_classes" ("id")
 );
 CREATE INDEX "index_library_sessions_on_library_class_id" ON "library_sessions" ("library_class_id");
 CREATE INDEX "index_library_sessions_on_vimeo_id" ON "library_sessions" ("vimeo_id");
 CREATE INDEX "index_library_sessions_on_position" ON "library_sessions" ("position");
+CREATE INDEX "index_library_sessions_on_featured" ON "library_sessions" ("featured");
+CREATE INDEX "index_library_sessions_on_featured_position" ON "library_sessions" ("featured_position");
 INSERT INTO "schema_migrations" (version) VALUES
+('20251021090000'),
 ('20251013024845'),
 ('20251013024703'),
 ('20251013024645'),

@@ -35,9 +35,22 @@ class LibraryCatalog
         session_payload_lookup[history.library_session_id]
       end
 
+      featured_sessions = LibrarySession
+        .featured_ordered
+        .includes(:library_watch_histories, library_class: :library_categories)
+
+      featured_payload = featured_sessions.map do |session|
+        categories = session.library_class.library_categories.map { |category| build_category_payload(category) }
+        history = history_by_session_id[session.id]
+        payload = build_session_payload(session, categories:, history: history)
+        session_payload_lookup[session.id] = payload
+        payload
+      end
+
       {
         sections: sections_payload,
-        continueWatching: continue_watching
+        continueWatching: continue_watching,
+        featuredSessions: featured_payload
       }
     end
 
