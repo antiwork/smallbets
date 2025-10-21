@@ -15,7 +15,14 @@ class User < ApplicationRecord
   has_many :messages, -> { active }, foreign_key: :creator_id, class_name: "Message"
 
   has_many :mentions
-  has_many :mentioning_messages, ->(user) { active.where(room_id: user.room_ids) }, through: :mentions, source: :message
+
+  def mentioning_messages
+    Message.active
+      .where(room_id: room_ids)
+      .left_joins(:mentions)
+      .where("mentions.user_id = ? OR messages.mentions_everyone = ?", id, true)
+      .distinct
+  end
 
   has_many :push_subscriptions, class_name: "Push::Subscription", dependent: :delete_all
 

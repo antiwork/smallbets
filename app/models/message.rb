@@ -45,6 +45,7 @@ class Message < ApplicationRecord
   alias_method :bookmarked?, :bookmarked
 
   validate :ensure_can_message_recipient, on: :create
+  validate :ensure_everyone_mention_allowed, on: :create
 
   def bookmarked_by_current_user?
     return bookmarked? unless bookmarked.nil?
@@ -77,6 +78,10 @@ class Message < ApplicationRecord
   private
 
   def involve_mentionees_in_room(unread:)
+    # Skip auto-involvement for @everyone to avoid creating thousands of membership updates
+    # Users already in the room will be notified via the updated queries
+    return if mentions_everyone?
+
     mentionees.each { |user| room.involve_user(user, unread: unread) }
   end
 
@@ -135,6 +140,19 @@ class Message < ApplicationRecord
 
   def ensure_can_message_recipient
     errors.add(:base, "Messaging this user isn't allowed") if creator.blocked_in?(room)
+  end
+
+  def ensure_everyone_mention_allowed
+    return unless body.body
+
+    has_everyone_mention = body.body.attachables.any? { |a| a.is_a?(Everyone) }
+    return unless has_everyone_mention
+
+    if !room.is_a?(Rooms::Open)
+      errors.add(:base, "@everyone is only allowed in open rooms")
+    elsif !creator&.administrator?
+      errors.add(:base, "Only admins can mention @everyone")
+    end
   end
 
   private

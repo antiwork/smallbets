@@ -7,7 +7,13 @@ class Membership < ApplicationRecord
   has_many :unread_notifications, ->(membership) {
     scope = since(membership.unread_at || Time.current)
 
-    membership.room.direct? ? scope : scope.mentioning(membership.user_id)
+    if membership.room.direct?
+      scope
+    else
+      scope.left_joins(:mentions)
+        .where("mentions.user_id = ? OR messages.mentions_everyone = ?", membership.user_id, true)
+        .distinct
+    end
   }, through: :room, source: :messages
 
   scope :with_has_unread_notifications, -> {
@@ -36,6 +42,7 @@ class Membership < ApplicationRecord
               WHERE mentions.message_id = messages.id
                 AND mentions.user_id = memberships.user_id
             )
+            OR messages.mentions_everyone = true
           )
       ) AS preloaded_has_unread_notifications
     SQL

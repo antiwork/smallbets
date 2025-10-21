@@ -77,24 +77,115 @@ class MessageTest < ActiveSupport::TestCase
     user2 = users(:jason)
     membership1 = room.memberships.find_by(user: user1)
     membership2 = room.memberships.find_by(user: user2)
-    
+
     # Create two messages
     message1 = room.messages.create!(creator: users(:jason), body: "First message", client_message_id: "msg1")
     message2 = room.messages.create!(creator: users(:jason), body: "Second message", client_message_id: "msg2")
-    
+
     # Mark memberships with different unread_at timestamps
     membership1.update!(unread_at: message1.created_at)
     membership2.update!(unread_at: message2.created_at)
-    
+
     # Deactivate message1
     message1.deactivate
-    
+
     # Only membership1 should be affected
     membership1.reload
     membership2.reload
-    
+
     assert_equal message2.created_at, membership1.unread_at  # Updated to next message
     assert_equal message2.created_at, membership2.unread_at  # Unchanged
+  end
+
+  test "@everyone mention sets mentions_everyone flag" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div>Hey <action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    admin = users(:jason)  # jason is already an administrator
+
+    message = Message.create!(
+      room: rooms(:pets),
+      body: body_html,
+      creator: admin,
+      client_message_id: "test123"
+    )
+
+    assert message.mentions_everyone?
+    assert_equal 0, message.mentions.count  # No individual mention records created
+  end
+
+  test "@everyone returns all room users as mentionees" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    admin = users(:jason)  # jason is already an administrator
+
+    room = rooms(:pets)
+    message = Message.create!(
+      room: room,
+      body: body_html,
+      creator: admin,
+      client_message_id: "test456"
+    )
+
+    assert_equal room.users.count, message.mentionees.count
+    assert_includes message.mentionees, users(:david)
+  end
+
+  test "only admins can use @everyone" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    non_admin = users(:jz)  # jz is not an administrator
+
+    message = Message.new(
+      room: rooms(:pets),
+      body: body_html,
+      creator: non_admin,
+      client_message_id: "test789"
+    )
+
+    assert_not message.valid?
+    assert_includes message.errors[:base], "Only admins can mention @everyone"
+  end
+
+  test "@everyone only allowed in open rooms" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    admin = users(:jason)  # jason is already an administrator
+
+    # Test that @everyone is not allowed in direct messages
+    direct_room = rooms(:david_and_jason)
+    message = Message.new(
+      room: direct_room,
+      body: body_html,
+      creator: admin,
+      client_message_id: "test999"
+    )
+
+    assert_not message.valid?
+    assert_includes message.errors[:base], "@everyone is only allowed in open rooms"
+  end
+
+  test "Message.mentioning scope includes @everyone messages" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    admin = users(:jason)  # jason is already an administrator
+
+    room = rooms(:pets)
+    message = Message.create!(
+      room: room,
+      body: body_html,
+      creator: admin,
+      client_message_id: "scope_test"
+    )
+
+    user = users(:david)
+    mentioning_messages = Message.where(room: room).mentioning(user.id)
+
+    assert_includes mentioning_messages, message
   end
 
   private
