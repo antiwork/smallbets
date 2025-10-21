@@ -146,13 +146,26 @@ export default function FeaturedCarousel({
                     <div className="flex flex-wrap items-center gap-3">
                       <Button
                         size="lg"
-                        className="rounded-lg bg-white! px-8 py-5 text-base font-semibold text-black shadow-lg transition hover:bg-white/90"
+                        className="inline-flex items-center gap-3 rounded-lg bg-white! px-8 py-5 text-base font-semibold text-black shadow-lg transition hover:bg-white/90"
                         onClick={() => {
                           router.visit(`/library/${session.id}`, {
                             preserveScroll: true,
                           })
                         }}
                       >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden
+                          focusable="false"
+                          className="-ml-1 size-5 shrink-0"
+                        >
+                          <path
+                            d="M7.1634 5.26359C6.47653 5.61065 6 6.26049 6 7.17893V16.8099C6 18.6468 7.94336 19.5276 9.54792 18.6696L17.1109 14.6211C19.676 13.1239 19.5829 10.8124 17.1109 9.3678L9.54792 5.3184C8.74564 4.88956 7.85027 4.91669 7.1634 5.26359Z"
+                            fill="currentColor"
+                          />
+                        </svg>
                         Watch Now
                       </Button>
                     </div>
