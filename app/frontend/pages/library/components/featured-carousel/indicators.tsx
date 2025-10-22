@@ -9,7 +9,7 @@ interface IndicatorsProps {
 
 export function Indicators({ current, total, isReady, goTo }: IndicatorsProps) {
   return (
-    <nav aria-label="Featured slides">
+    <nav aria-label="Featured slides" className="pt-2 sm:pt-1 md:pt-0">
       <ol
         className={cn(
           "relative z-0 mt-0 flex items-center justify-center gap-0 transition-opacity duration-250 md:mt-3 lg:mt-5",
@@ -25,7 +25,7 @@ export function Indicators({ current, total, isReady, goTo }: IndicatorsProps) {
                 aria-label={`Go to slide ${index + 1}`}
                 aria-current={isActive ? "page" : undefined}
                 onClick={() => goTo(index)}
-                className="group flex size-11 items-center justify-center ring-0! ring-offset-0! outline-none! hover:ring-0! hover:ring-offset-0! hover:outline-none! focus:ring-0! focus:ring-offset-0! focus:outline-none! focus-visible:ring-2! focus-visible:ring-[#00ADEF]! focus-visible:ring-offset-2! focus-visible:ring-offset-transparent! focus-visible:outline-none! md:size-8 dark:focus-visible:ring-[#00ADEF]!"
+                className="group flex size-6 items-center justify-center ring-0! ring-offset-0! outline-none! hover:ring-0! hover:ring-offset-0! hover:outline-none! focus:ring-0! focus:ring-offset-0! focus:outline-none! focus-visible:ring-2! focus-visible:ring-[#00ADEF]! focus-visible:ring-offset-2! focus-visible:ring-offset-transparent! focus-visible:outline-none! md:size-8 dark:focus-visible:ring-[#00ADEF]!"
               >
                 <span
                   className={cn(

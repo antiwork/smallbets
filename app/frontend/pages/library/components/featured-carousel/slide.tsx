@@ -46,6 +46,7 @@ export function Slide({
       aria-label={`${session.title} — by ${session.creator}`}
       aria-hidden={!isCurrent}
       inert={!isCurrent}
+      tabIndex={isCurrent ? 0 : -1}
       style={
         isCurrent
           ? {
@@ -67,7 +68,7 @@ export function Slide({
         !isCurrent && !isPrevious && !isNext && "pointer-events-none opacity-0",
         isCurrent && "cursor-grab active:cursor-grabbing",
         isCurrent &&
-          "shadow-none! hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]!",
+          "shadow-none! hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]! focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent focus-visible:outline-none",
       )}
       onPointerDownCapture={
         isCurrent ? drag.bindings.onPointerDownCapture : undefined
@@ -95,6 +96,7 @@ export function Slide({
               width={thumbnail.width}
               height={thumbnail.height}
               className="h-full w-full object-cover"
+              draggable="false"
             />
           </picture>
         ) : (
@@ -115,6 +117,7 @@ export function Slide({
           <div className="flex flex-wrap items-center gap-3">
             <Button
               size="lg"
+              data-no-drag="true"
               className="hidden items-center gap-3 rounded-lg bg-white! px-8 py-5 text-base font-semibold text-black shadow-lg transition hover:bg-white/90 sm:inline-flex"
               onClick={() => onWatch(session.id)}
             >
@@ -140,7 +143,7 @@ export function Slide({
               >
                 ·
               </span>
-              <span className="library-muted-light text-sm font-medium">
+              <span className="text-sm font-medium text-white">
                 {session.creator}
               </span>
               {durationLabel && (
@@ -148,7 +151,7 @@ export function Slide({
                   <span aria-hidden="true" className="text-xl font-bold">
                     ·
                   </span>
-                  <span className="library-muted-light text-sm font-medium">
+                  <span className="text-sm font-medium text-white">
                     {durationLabel}
                   </span>
                 </>

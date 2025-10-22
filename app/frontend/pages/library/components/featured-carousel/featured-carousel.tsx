@@ -76,7 +76,7 @@ export function FeaturedCarousel({
           </CarouselContent>
         </Carousel>
 
-        <div className="relative isolate mx-auto aspect-[16/9] w-[75%] sm:w-[80%] md:w-[85%] lg:aspect-[21/9] lg:w-[88%] xl:aspect-[5/2] xl:w-[90%] 2xl:w-[95%]">
+        <div className="relative isolate mx-auto aspect-[16/9] w-[75%] sm:w-[80%] md:w-[85%] lg:aspect-[21/9] lg:w-[88%] xl:aspect-[5/2] xl:w-[85%] 2xl:w-[90%]">
           {slides.map(({ session, thumbnail }, index) => {
             const position = (index - current + count) % count
             const isPrevious = position === count - 1

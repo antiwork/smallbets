@@ -74,16 +74,18 @@ export function useDragNavigation(
 
   const onPointerDownCapture: React.PointerEventHandler<HTMLElement> = (e) => {
     if (e.button === 2) return
+
+    // Don't intercept pointer events on elements marked as no-drag
+    const target = e.target as HTMLElement
+    if (target.closest('[data-no-drag="true"]')) {
+      return
+    }
+
     dragPointerIdRef.current = e.pointerId
     startXRef.current = e.clientX
     startYRef.current = e.clientY
     currentOffsetRef.current = 0
     suppressClickRef.current = false
-    try {
-      e.currentTarget.setPointerCapture?.(e.pointerId)
-    } catch {
-      /* ignore */
-    }
   }
 
   const onPointerMoveCapture: React.PointerEventHandler<HTMLElement> = (e) => {
@@ -91,18 +93,17 @@ export function useDragNavigation(
     const dx = e.clientX - startXRef.current
     const dy = e.clientY - startYRef.current
 
-    if (!isDragging && Math.abs(dx) > 5 && Math.abs(dx) > Math.abs(dy))
-      setIsDragging(true)
+    const DRAG_START_THRESHOLD = 10
+    const draggingNow =
+      isDragging ||
+      (Math.abs(dx) > DRAG_START_THRESHOLD && Math.abs(dx) > Math.abs(dy))
 
-    if (isDragging || Math.abs(dx) > 5) {
+    if (!isDragging && draggingNow) setIsDragging(true)
+
+    if (draggingNow) {
       if (Math.abs(dx) >= thresholdPx) {
         if (dx < 0) api?.scrollNext()
         else api?.scrollPrev()
-        try {
-          e.currentTarget.releasePointerCapture?.(e.pointerId)
-        } catch {
-          /* ignore */
-        }
         dragPointerIdRef.current = null
         setIsDragging(false)
         setDragOffset(0)
@@ -116,8 +117,6 @@ export function useDragNavigation(
 
       currentOffsetRef.current = dx
       setDragOffset(dx)
-      e.preventDefault()
-      e.stopPropagation()
     }
   }
 
@@ -126,13 +125,20 @@ export function useDragNavigation(
   ) => {
     if (dragPointerIdRef.current !== e.pointerId) return
     const dx = currentOffsetRef.current
+    const target = e.target as HTMLElement
+    const isInteractive =
+      target.closest("button") ||
+      target.closest("a") ||
+      target.closest('[role="button"]')
 
     if (isDragging) {
       if (dx < -thresholdPx) api?.scrollNext()
       else if (dx > thresholdPx) api?.scrollPrev()
-      suppressClickRef.current = Math.abs(dx) > 10
-      e.preventDefault()
-      e.stopPropagation()
+
+      if (!isInteractive) {
+        suppressClickRef.current = Math.abs(dx) > 10
+      }
+
       setTimeout(() => {
         suppressClickRef.current = false
       }, 100)
