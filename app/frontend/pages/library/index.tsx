@@ -189,7 +189,7 @@ export default function LibraryIndex({
         <Head title="Library" />
         <h1 className="sr-only">Library</h1>
 
-        <div className="flex flex-col gap-10 pt-12 sm:gap-[3vw]">
+        <div className="flex flex-col gap-10 sm:gap-[3vw]">
           <FeaturedCarousel
             sessions={featuredSessions}
             thumbnails={thumbnails}
