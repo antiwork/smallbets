@@ -229,7 +229,7 @@ export default function FeaturedCarousel({
 
       <div
         className={cn(
-          "relative z-0 mt-6 flex items-center justify-center gap-0 transition-opacity duration-250",
+          "relative z-0 mt-0 flex items-center justify-center gap-0 transition-opacity duration-250 md:mt-3 lg:mt-5",
           isReady ? "opacity-100" : "opacity-0",
         )}
       >
