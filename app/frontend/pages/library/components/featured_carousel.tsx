@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { router } from "@inertiajs/react"
 
 import { Button } from "@/components/ui/button"
@@ -27,6 +27,15 @@ export default function FeaturedCarousel({
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
   const [isReady, setIsReady] = useState(false)
+  const [dragOffset, setDragOffset] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+
+  const dragPointerIdRef = useRef<number | null>(null)
+  const startXRef = useRef(0)
+  const startYRef = useRef(0)
+  const currentOffsetRef = useRef(0)
+  const suppressClickRef = useRef(false)
+  const DRAG_THRESHOLD_PX = 100
 
   useEffect(() => {
     if (!api) return
@@ -59,6 +68,95 @@ export default function FeaturedCarousel({
 
   function navigateToSession(sessionId: string | number) {
     router.visit(`/library/${String(sessionId)}`, { preserveScroll: true })
+  }
+
+  function onPointerDownCapture(
+    e: React.PointerEvent<HTMLElement>,
+    isCurrent: boolean,
+  ) {
+    if (!isCurrent || e.button === 2) return
+    dragPointerIdRef.current = e.pointerId
+    startXRef.current = e.clientX
+    startYRef.current = e.clientY
+    currentOffsetRef.current = 0
+    suppressClickRef.current = false
+    try {
+      e.currentTarget.setPointerCapture?.(e.pointerId)
+    } catch {
+      // Ignore errors
+    }
+  }
+
+  function onPointerMoveCapture(e: React.PointerEvent<HTMLElement>) {
+    if (dragPointerIdRef.current !== e.pointerId) return
+    const dx = e.clientX - startXRef.current
+    const dy = e.clientY - startYRef.current
+
+    if (!isDragging && Math.abs(dx) > 5 && Math.abs(dx) > Math.abs(dy)) {
+      setIsDragging(true)
+    }
+
+    if (isDragging || Math.abs(dx) > 5) {
+      if (Math.abs(dx) >= DRAG_THRESHOLD_PX) {
+        if (dx < 0) {
+          api?.scrollNext()
+        } else {
+          api?.scrollPrev()
+        }
+        try {
+          e.currentTarget.releasePointerCapture?.(e.pointerId)
+        } catch {
+          // Ignore errors
+        }
+        dragPointerIdRef.current = null
+        setIsDragging(false)
+        setDragOffset(0)
+        currentOffsetRef.current = 0
+        suppressClickRef.current = true
+        setTimeout(() => {
+          suppressClickRef.current = false
+        }, 100)
+        return
+      }
+
+      currentOffsetRef.current = dx
+      setDragOffset(dx)
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
+  function onPointerUpOrCancelCapture(e: React.PointerEvent<HTMLElement>) {
+    if (dragPointerIdRef.current !== e.pointerId) return
+    const dx = currentOffsetRef.current
+
+    if (isDragging) {
+      if (dx < -DRAG_THRESHOLD_PX) {
+        api?.scrollNext()
+      } else if (dx > DRAG_THRESHOLD_PX) {
+        api?.scrollPrev()
+      }
+      suppressClickRef.current = Math.abs(dx) > 10
+      e.preventDefault()
+      e.stopPropagation()
+
+      setTimeout(() => {
+        suppressClickRef.current = false
+      }, 100)
+    }
+
+    dragPointerIdRef.current = null
+    setIsDragging(false)
+    setDragOffset(0)
+    currentOffsetRef.current = 0
+  }
+
+  function onClickCapture(e: React.MouseEvent<HTMLElement>) {
+    if (suppressClickRef.current) {
+      e.preventDefault()
+      e.stopPropagation()
+      suppressClickRef.current = false
+    }
   }
 
   useEffect(() => {
@@ -98,8 +196,20 @@ export default function FeaturedCarousel({
                 role="group"
                 aria-roledescription="slide"
                 aria-label={`${session.title}`}
+                style={
+                  isCurrent
+                    ? {
+                        transform:
+                          dragOffset !== 0
+                            ? `translateX(${dragOffset}px)`
+                            : undefined,
+                        transition: isDragging ? "none" : "all 500ms",
+                        touchAction: "none",
+                      }
+                    : undefined
+                }
                 className={cn(
-                  "bg-muted absolute inset-0 overflow-hidden rounded-3xl shadow-2xl transition-all duration-500",
+                  "bg-muted absolute inset-0 overflow-hidden rounded-3xl shadow-2xl transition-all duration-250",
                   "opacity-0",
                   isCurrent && "z-30 scale-100 opacity-100 shadow-black/40",
                   isPrevious &&
@@ -110,7 +220,25 @@ export default function FeaturedCarousel({
                     !isPrevious &&
                     !isNext &&
                     "pointer-events-none opacity-0",
+                  isCurrent && "cursor-grab active:cursor-grabbing",
+                  isCurrent &&
+                    "shadow-none! hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]!",
                 )}
+                onPointerDownCapture={
+                  isCurrent
+                    ? (e) => onPointerDownCapture(e, isCurrent)
+                    : undefined
+                }
+                onPointerMoveCapture={
+                  isCurrent ? onPointerMoveCapture : undefined
+                }
+                onPointerUpCapture={
+                  isCurrent ? onPointerUpOrCancelCapture : undefined
+                }
+                onPointerCancelCapture={
+                  isCurrent ? onPointerUpOrCancelCapture : undefined
+                }
+                onClickCapture={isCurrent ? onClickCapture : undefined}
               >
                 <div className="relative flex h-full flex-col justify-end">
                   {thumbnail ? (
