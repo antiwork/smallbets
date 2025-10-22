@@ -62,9 +62,9 @@ export function Slide({
         "opacity-0",
         isCurrent && "z-30 scale-100 opacity-100 shadow-black/40",
         isPrevious &&
-          "z-20 -translate-x-[20%] scale-[0.90] opacity-70 md:-translate-x-[18%]",
+          "z-20 -translate-x-[6%] scale-100 opacity-0 shadow-none md:-translate-x-[18%] md:scale-[0.90] md:opacity-70 md:shadow-2xl",
         isNext &&
-          "z-20 translate-x-[20%] scale-[0.90] opacity-70 md:translate-x-[18%]",
+          "z-20 translate-x-[6%] scale-100 opacity-0 shadow-none md:translate-x-[18%] md:scale-[0.90] md:opacity-70 md:shadow-2xl",
         !isCurrent && !isPrevious && !isNext && "pointer-events-none opacity-0",
         isCurrent && "cursor-grab active:cursor-grabbing",
         isCurrent &&
@@ -106,7 +106,7 @@ export function Slide({
         <div
           aria-hidden={!isCurrent}
           className={cn(
-            "relative z-20 flex flex-col gap-3 p-6 pb-8 text-white transition-all duration-500 sm:gap-4 sm:p-10 sm:pb-10",
+            "relative z-20 flex flex-col gap-3 p-5 pb-2 text-white transition-all duration-500 sm:gap-4 sm:p-10 sm:pb-10",
             isCurrent
               ? "translate-y-0 opacity-100"
               : "pointer-events-none translate-y-6 opacity-0",
