@@ -66,7 +66,7 @@ export default function FeaturedCarousel({
   return (
     <section
       aria-label="Featured sessions"
-      className="relative mx-auto w-full max-w-7xl px-8 select-none sm:px-12 md:px-16 lg:px-20"
+      className="relative mx-auto w-full max-w-7xl px-8 pt-8 select-none sm:px-12 md:px-16 lg:px-20 lg:pt-4 xl:pt-0"
     >
       <div className="relative">
         <Carousel
@@ -81,7 +81,7 @@ export default function FeaturedCarousel({
           </CarouselContent>
         </Carousel>
 
-        <div className="relative isolate mx-auto aspect-[16/9] w-[75%] sm:w-[80%] md:w-[85%] lg:aspect-[21/9] lg:w-[88%] xl:aspect-[5/2] xl:w-[92%]">
+        <div className="relative isolate mx-auto aspect-[16/9] w-[75%] sm:w-[80%] md:w-[85%] lg:aspect-[21/9] lg:w-[88%] xl:aspect-[5/2] xl:w-[90%] 2xl:w-[95%]">
           {slides.map(({ session, thumbnail }, index) => {
             const position = (index - current + count) % count
             const isPrevious = position === count - 1
@@ -180,7 +180,7 @@ export default function FeaturedCarousel({
           type="button"
           aria-label="Previous slide"
           onClick={() => api?.scrollPrev()}
-          className="group absolute top-1/2 left-[-11vw] z-40 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-neutral-900/60 focus-visible:outline-none 2xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-white/70"
+          className="group absolute top-1/2 left-[-12vw] z-40 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-neutral-900/60 focus-visible:outline-none 2xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-white/70"
         >
           <svg
             viewBox="0 0 24 24"
@@ -200,7 +200,7 @@ export default function FeaturedCarousel({
           type="button"
           aria-label="Next slide"
           onClick={() => api?.scrollNext()}
-          className="group absolute top-1/2 right-[-11vw] z-40 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-neutral-900/60 focus-visible:outline-none 2xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-white/70"
+          className="group absolute top-1/2 right-[-12vw] z-40 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-neutral-900/60 focus-visible:outline-none 2xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-white/70"
         >
           <svg
             viewBox="0 0 24 24"
