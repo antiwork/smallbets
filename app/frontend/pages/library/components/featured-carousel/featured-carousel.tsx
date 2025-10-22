@@ -11,7 +11,12 @@ import {
 } from "@/components/ui/carousel"
 
 import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../../types"
-import { useSlides, useCarouselState, useDragNavigation } from "./hooks"
+import {
+  useSlides,
+  useCarouselState,
+  useDragNavigation,
+  useAutoplay,
+} from "./hooks"
 import { Slide } from "./slide"
 import { NavButtons } from "./nav-buttons"
 import { Indicators } from "./indicators"
@@ -34,21 +39,33 @@ export function FeaturedCarousel({
   const { current, count, isReady } = useCarouselState(api, slides.length)
   const totalSlides = count || slides.length
 
+  const autoplay = useAutoplay(api)
+
   function navigateToSession(sessionId: string | number) {
+    autoplay.stop()
     router.visit(`/library/${String(sessionId)}`, { preserveScroll: true })
   }
 
-  const drag = useDragNavigation(api)
+  const drag = useDragNavigation(api, 100, () => autoplay.stop())
 
   function onRegionKeyDown(e: React.KeyboardEvent<HTMLElement>) {
     if (e.target !== e.currentTarget) return
     if (e.key === "ArrowLeft") {
       e.preventDefault()
+      autoplay.stop()
       api?.scrollPrev()
     } else if (e.key === "ArrowRight") {
       e.preventDefault()
+      autoplay.stop()
       api?.scrollNext()
     }
+  }
+
+  function onRegionBlur(e: React.FocusEvent<HTMLElement>) {
+    const next = e.relatedTarget as Node | null
+    if (next && e.currentTarget.contains(next)) return
+    if (e.currentTarget.matches(":hover")) return
+    autoplay.resume()
   }
 
   return (
@@ -59,6 +76,10 @@ export function FeaturedCarousel({
       aria-label="Featured sessions"
       tabIndex={0}
       onKeyDown={onRegionKeyDown}
+      onFocus={() => autoplay.pause()}
+      onBlur={onRegionBlur}
+      onMouseEnter={() => autoplay.pause()}
+      onMouseLeave={() => autoplay.resume()}
       className="relative mx-auto w-full max-w-7xl px-8 pt-8 select-none focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:ring-offset-2 focus-visible:outline-none sm:px-12 md:px-16 lg:px-20 lg:pt-4 xl:pt-0 dark:focus-visible:ring-[#00ADEF]"
     >
       <div className="relative">
@@ -98,7 +119,7 @@ export function FeaturedCarousel({
           })}
         </div>
 
-        <NavButtons api={api} />
+        <NavButtons api={api} onInteract={() => autoplay.stop()} />
       </div>
 
       <p id="featured-carousel-instructions" className="sr-only">
@@ -118,6 +139,7 @@ export function FeaturedCarousel({
         total={totalSlides}
         isReady={isReady}
         goTo={(i) => api?.scrollTo(i)}
+        onInteract={() => autoplay.stop()}
       />
     </section>
   )

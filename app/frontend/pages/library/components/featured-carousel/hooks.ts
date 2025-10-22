@@ -2,6 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import type { CarouselApi } from "@/components/ui/carousel"
 import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../../types"
 
+const DEFAULT_AUTOPLAY_INTERVAL_MS = 6000
+const MIN_AUTOPLAY_INTERVAL_MS = 1000
+const DEFAULT_DRAG_THRESHOLD_PX = 100
+const DRAG_ACTIVATION_THRESHOLD_PX = 10
+const SUPPRESS_CLICK_RESET_MS = 100
+
 export interface DragBindings {
   onPointerDownCapture: React.PointerEventHandler<HTMLElement>
   onPointerMoveCapture: React.PointerEventHandler<HTMLElement>
@@ -61,7 +67,8 @@ export function useCarouselState(
 
 export function useDragNavigation(
   api: CarouselApi | undefined,
-  thresholdPx = 100,
+  thresholdPx = DEFAULT_DRAG_THRESHOLD_PX,
+  onInteract?: () => void,
 ) {
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -81,6 +88,8 @@ export function useDragNavigation(
       return
     }
 
+    if (onInteract) onInteract()
+
     dragPointerIdRef.current = e.pointerId
     startXRef.current = e.clientX
     startYRef.current = e.clientY
@@ -93,10 +102,10 @@ export function useDragNavigation(
     const dx = e.clientX - startXRef.current
     const dy = e.clientY - startYRef.current
 
-    const DRAG_START_THRESHOLD = 10
     const draggingNow =
       isDragging ||
-      (Math.abs(dx) > DRAG_START_THRESHOLD && Math.abs(dx) > Math.abs(dy))
+      (Math.abs(dx) > DRAG_ACTIVATION_THRESHOLD_PX &&
+        Math.abs(dx) > Math.abs(dy))
 
     if (!isDragging && draggingNow) setIsDragging(true)
 
@@ -111,7 +120,7 @@ export function useDragNavigation(
         suppressClickRef.current = true
         setTimeout(() => {
           suppressClickRef.current = false
-        }, 100)
+        }, SUPPRESS_CLICK_RESET_MS)
         return
       }
 
@@ -141,7 +150,7 @@ export function useDragNavigation(
 
       setTimeout(() => {
         suppressClickRef.current = false
-      }, 100)
+      }, SUPPRESS_CLICK_RESET_MS)
     }
 
     dragPointerIdRef.current = null
@@ -167,4 +176,129 @@ export function useDragNavigation(
     },
     state: { dragOffset, isDragging },
   }
+}
+
+export interface AutoplayControls {
+  pause: () => void
+  resume: () => void
+  stop: () => void
+  isPaused: boolean
+  isStopped: boolean
+}
+
+export function useAutoplay(
+  api: CarouselApi | undefined,
+  options?: { intervalMs?: number },
+): AutoplayControls {
+  const intervalMs = Math.max(
+    MIN_AUTOPLAY_INTERVAL_MS,
+    options?.intervalMs ?? DEFAULT_AUTOPLAY_INTERVAL_MS,
+  )
+
+  const timerIdRef = useRef<number | null>(null)
+  const isPausedRef = useRef(false)
+  const isStoppedRef = useRef(false)
+  const prefersReducedMotionRef = useRef(false)
+
+  const [isPaused, setIsPaused] = useState(false)
+  const [isStopped, setIsStopped] = useState(false)
+
+  function clearTimer() {
+    if (timerIdRef.current !== null) {
+      window.clearTimeout(timerIdRef.current)
+      timerIdRef.current = null
+    }
+  }
+
+  function scheduleNext() {
+    if (!api) return
+    if (isPausedRef.current || isStoppedRef.current) return
+    if (prefersReducedMotionRef.current) return
+    if ((api.scrollSnapList()?.length ?? 0) < 2) return
+
+    clearTimer()
+    timerIdRef.current = window.setTimeout(() => {
+      api?.scrollNext()
+    }, intervalMs)
+  }
+
+  function pause() {
+    isPausedRef.current = true
+    setIsPaused(true)
+    clearTimer()
+  }
+
+  function resume() {
+    if (isStoppedRef.current) return
+    isPausedRef.current = false
+    setIsPaused(false)
+    scheduleNext()
+  }
+
+  function stop() {
+    isStoppedRef.current = true
+    setIsStopped(true)
+    clearTimer()
+  }
+
+  useEffect(() => {
+    if (!api) return
+
+    // initial schedule
+    scheduleNext()
+
+    const onSelect = () => {
+      // restart the timer after any selection (user or programmatic)
+      clearTimer()
+      scheduleNext()
+    }
+
+    const onPointerDown = () => {
+      // stop autoplay when the user starts interacting
+      stop()
+    }
+
+    const onDestroy = () => {
+      clearTimer()
+    }
+
+    api.on("select", onSelect)
+    api.on("pointerDown", onPointerDown)
+    api.on("destroy", onDestroy)
+
+    return () => {
+      api.off("select", onSelect)
+      api.off("pointerDown", onPointerDown)
+      api.off("destroy", onDestroy)
+      clearTimer()
+    }
+  }, [api, intervalMs])
+
+  useEffect(() => {
+    // Respect prefers-reduced-motion
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const handleChange = () => {
+      prefersReducedMotionRef.current = mql.matches
+      if (mql.matches) {
+        clearTimer()
+      } else if (!isPausedRef.current && !isStoppedRef.current) {
+        scheduleNext()
+      }
+    }
+    handleChange()
+    mql.addEventListener("change", handleChange)
+    return () => mql.removeEventListener("change", handleChange)
+  }, [])
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) pause()
+      else if (!isPausedRef.current && !isStoppedRef.current) scheduleNext()
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility)
+  }, [])
+
+  return { pause, resume, stop, isPaused, isStopped }
 }

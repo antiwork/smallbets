@@ -5,9 +5,16 @@ interface IndicatorsProps {
   total: number
   isReady: boolean
   goTo: (index: number) => void
+  onInteract?: () => void
 }
 
-export function Indicators({ current, total, isReady, goTo }: IndicatorsProps) {
+export function Indicators({
+  current,
+  total,
+  isReady,
+  goTo,
+  onInteract,
+}: IndicatorsProps) {
   return (
     <nav aria-label="Featured slides" className="pt-2 sm:pt-1 md:pt-0">
       <ol
@@ -24,7 +31,10 @@ export function Indicators({ current, total, isReady, goTo }: IndicatorsProps) {
                 type="button"
                 aria-label={`Go to slide ${index + 1}`}
                 aria-current={isActive ? "page" : undefined}
-                onClick={() => goTo(index)}
+                onClick={() => {
+                  onInteract?.()
+                  goTo(index)
+                }}
                 className="group flex size-6 items-center justify-center ring-0! ring-offset-0! outline-none! hover:ring-0! hover:ring-offset-0! hover:outline-none! focus:ring-0! focus:ring-offset-0! focus:outline-none! focus-visible:ring-2! focus-visible:ring-[#00ADEF]! focus-visible:ring-offset-2! focus-visible:ring-offset-transparent! focus-visible:outline-none! md:size-8 dark:focus-visible:ring-[#00ADEF]!"
               >
                 <span

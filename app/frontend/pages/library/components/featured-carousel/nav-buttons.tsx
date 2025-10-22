@@ -23,7 +23,6 @@ function ArrowButton({
   return (
     <button
       type="button"
-      tabIndex={-1}
       className={[
         "group absolute top-1/2 z-0 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-[#00ADEF]",
         className,
@@ -55,6 +54,7 @@ function ArrowButton({
 
 interface NavButtonsProps {
   api: CarouselApi | undefined
+  onInteract?: () => void
 }
 
 const PATH_PREV =
@@ -62,19 +62,25 @@ const PATH_PREV =
 const PATH_NEXT =
   "M14.3787 12L15.4393 10.8888C16.0251 10.2752 16.9749 10.2752 17.5607 10.8888C18.1464 11.5025 18.1464 12.4975 17.5607 13.1112L8.56066 22.5397C7.97487 23.1534 7.02512 23.1534 6.43934 22.5397C5.85355 21.9261 5.85355 20.9311 6.43934 20.3174L14.3787 12L6.43934 3.6826C5.85355 3.06892 5.85355 2.07395 6.43934 1.46026C7.02513 0.846584 7.97487 0.846584 8.56066 1.46026L17.5607 10.8888C18.1464 11.5025 18.1464 12.4975 17.5607 13.1112C16.9749 13.7249 16.0251 13.7249 15.4393 13.1112L14.3787 12Z"
 
-export function NavButtons({ api }: NavButtonsProps) {
+export function NavButtons({ api, onInteract }: NavButtonsProps) {
   return (
     <>
       <ArrowButton
         direction="prev"
         aria-label="Previous slide"
-        onClick={() => api?.scrollPrev()}
+        onClick={() => {
+          onInteract?.()
+          api?.scrollPrev()
+        }}
         iconPathD={PATH_PREV}
       />
       <ArrowButton
         direction="next"
         aria-label="Next slide"
-        onClick={() => api?.scrollNext()}
+        onClick={() => {
+          onInteract?.()
+          api?.scrollNext()
+        }}
         iconPathD={PATH_NEXT}
       />
     </>
