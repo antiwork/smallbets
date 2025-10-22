@@ -57,6 +57,10 @@ export default function FeaturedCarousel({
 
   const totalSlides = count || slides.length
 
+  function navigateToSession(sessionId: string) {
+    router.visit(`/library/${sessionId}`, { preserveScroll: true })
+  }
+
   useEffect(() => {
     if (count > 0 || slides.length > 0) setIsReady(true)
   }, [count, slides.length])
@@ -146,12 +150,8 @@ export default function FeaturedCarousel({
                     <div className="flex flex-wrap items-center gap-3">
                       <Button
                         size="lg"
-                        className="inline-flex items-center gap-3 rounded-lg bg-white! px-8 py-5 text-base font-semibold text-black shadow-lg transition hover:bg-white/90"
-                        onClick={() => {
-                          router.visit(`/library/${session.id}`, {
-                            preserveScroll: true,
-                          })
-                        }}
+                        className="hidden items-center gap-3 rounded-lg bg-white! px-8 py-5 text-base font-semibold text-black shadow-lg transition hover:bg-white/90 sm:inline-flex"
+                        onClick={() => navigateToSession(session.id)}
                       >
                         <svg
                           viewBox="0 0 24 24"
@@ -171,6 +171,16 @@ export default function FeaturedCarousel({
                     </div>
                   </div>
                 </div>
+                {isCurrent && (
+                  <button
+                    type="button"
+                    aria-label={`Watch ${session.title}`}
+                    className="absolute inset-0 z-30 cursor-pointer bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:hidden"
+                    onClick={() => navigateToSession(session.id)}
+                  >
+                    <span className="sr-only">Watch {session.title}</span>
+                  </button>
+                )}
               </article>
             )
           })}
