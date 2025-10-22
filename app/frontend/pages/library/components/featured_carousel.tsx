@@ -57,8 +57,8 @@ export default function FeaturedCarousel({
 
   const totalSlides = count || slides.length
 
-  function navigateToSession(sessionId: string) {
-    router.visit(`/library/${sessionId}`, { preserveScroll: true })
+  function navigateToSession(sessionId: string | number) {
+    router.visit(`/library/${String(sessionId)}`, { preserveScroll: true })
   }
 
   useEffect(() => {
@@ -135,14 +135,14 @@ export default function FeaturedCarousel({
                   <div
                     aria-hidden={!isCurrent}
                     className={cn(
-                      "relative z-20 flex flex-col gap-4 p-10 text-white transition-all duration-500",
+                      "relative z-20 flex flex-col gap-3 p-6 pb-8 text-white transition-all duration-500 sm:gap-4 sm:p-10 sm:pb-10",
                       isCurrent
                         ? "translate-y-0 opacity-100"
                         : "pointer-events-none translate-y-6 opacity-0",
                     )}
                   >
                     <div className="max-w-[30ch]">
-                      <h3 className="mt-2 text-3xl leading-tight font-semibold text-balance select-none sm:text-4xl">
+                      <h3 className="mt-2 text-xl leading-tight font-semibold text-balance select-none sm:text-3xl md:text-3xl">
                         {session.title}
                       </h3>
                     </div>
