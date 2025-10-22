@@ -8,6 +8,7 @@ export function SessionsShelfRow({
   showProgress = false,
   persistPreview = false,
   thumbnails,
+  id,
 }: {
   sessions: LibrarySessionPayload[]
   backIcon?: string
@@ -15,6 +16,7 @@ export function SessionsShelfRow({
   showProgress?: boolean
   persistPreview?: boolean
   thumbnails?: Record<string, VimeoThumbnailPayload>
+  id?: string
 }) {
   if (sessions.length === 0) return null
 
@@ -26,7 +28,12 @@ export function SessionsShelfRow({
     : undefined
 
   return (
-    <section className="flex flex-col gap-[1vw]" aria-labelledby={headingId}>
+    <section
+      id={id}
+      tabIndex={id ? -1 : undefined}
+      className="flex flex-col gap-[1vw]"
+      aria-labelledby={headingId}
+    >
       {title ? (
         <h2
           id={headingId}

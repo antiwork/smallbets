@@ -30,6 +30,8 @@ export function Slide({
       role="group"
       aria-roledescription="slide"
       aria-label={`${session.title}`}
+      aria-hidden={!isCurrent}
+      inert={!isCurrent}
       style={
         isCurrent
           ? {
@@ -130,7 +132,7 @@ export function Slide({
         <button
           type="button"
           aria-label={`Watch ${session.title}`}
-          className="absolute inset-0 z-30 cursor-pointer bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:hidden"
+          className="absolute inset-0 z-30 cursor-pointer bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00ADEF] sm:hidden"
           onClick={() => onWatch(session.id)}
         >
           <span className="sr-only">Watch {session.title}</span>

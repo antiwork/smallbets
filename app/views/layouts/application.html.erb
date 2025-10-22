@@ -65,7 +65,8 @@
         The Weekly Yap — <span data-countdown-banner-target="status"></span>
       </a>
     <% end %>
-    <a href="#main-content" class="skip-navigation btn" data-turbo="false">Skip to main content</a>
+    <% skip_target = controller_name == "library" && action_name == "index" ? "#continue-watching" : "#main-content" %>
+    <a href="<%= skip_target %>" class="skip-navigation btn" data-turbo="false">Skip to main content</a>
     <a href="#sidebar-toggle" class="skip-navigation btn" data-turbo="false">Skip to menu</a>
 
     <nav id="nav">

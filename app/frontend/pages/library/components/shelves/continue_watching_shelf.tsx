@@ -18,6 +18,7 @@ export default function ContinueWatchingShelf({
 
   return (
     <SessionsShelfRow
+      id="continue-watching"
       sessions={items}
       backIcon={backIcon}
       title="Continue Watching"

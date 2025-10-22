@@ -40,13 +40,31 @@ export function FeaturedCarousel({
 
   const drag = useDragNavigation(api)
 
+  function onRegionKeyDown(e: React.KeyboardEvent<HTMLElement>) {
+    if (e.target !== e.currentTarget) return
+    if (e.key === "ArrowLeft") {
+      e.preventDefault()
+      api?.scrollPrev()
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault()
+      api?.scrollNext()
+    }
+  }
+
   return (
     <section
+      role="region"
+      aria-roledescription="carousel"
+      aria-describedby="featured-carousel-instructions"
       aria-label="Featured sessions"
-      className="relative mx-auto w-full max-w-7xl px-8 pt-8 select-none sm:px-12 md:px-16 lg:px-20 lg:pt-4 xl:pt-0"
+      tabIndex={0}
+      onKeyDown={onRegionKeyDown}
+      className="relative mx-auto w-full max-w-7xl px-8 pt-8 select-none focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:ring-offset-2 focus-visible:outline-none sm:px-12 md:px-16 lg:px-20 lg:pt-4 xl:pt-0 dark:focus-visible:ring-[#00ADEF]"
     >
       <div className="relative">
         <Carousel
+          aria-hidden
+          tabIndex={-1}
           setApi={setApi}
           opts={{ align: "center", loop: true, skipSnaps: false }}
           className="group/carousel invisible absolute"
@@ -82,6 +100,18 @@ export function FeaturedCarousel({
 
         <NavButtons api={api} />
       </div>
+
+      <p id="featured-carousel-instructions" className="sr-only">
+        Use Left and Right arrow keys to navigate featured slides.
+      </p>
+      <p
+        id="featured-carousel-status"
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {`Slide ${current + 1} of ${totalSlides}: ${slides[current]?.session.title ?? ""}`}
+      </p>
 
       <Indicators
         current={current}
