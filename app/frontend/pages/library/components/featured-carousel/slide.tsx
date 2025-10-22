@@ -3,6 +3,15 @@ import { cn } from "@/lib/utils"
 import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../../types"
 import type { DragBindings, DragState } from "./hooks"
 
+function formatDuration(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.floor(totalSeconds))
+  const minutesTotal = Math.floor(seconds / 60)
+  const hours = Math.floor(minutesTotal / 60)
+  const minutes = minutesTotal % 60
+  if (hours > 0) return `${hours}h ${minutes}m`
+  return `${minutes}m`
+}
+
 export interface SlideProps {
   session: LibrarySessionPayload
   thumbnail?: VimeoThumbnailPayload
@@ -23,13 +32,18 @@ export function Slide({
   onWatch,
 }: SlideProps) {
   const { dragOffset, isDragging } = drag.state
+  const durationSeconds = thumbnail?.durationSeconds ?? null
+  const durationLabel =
+    typeof durationSeconds === "number" && durationSeconds > 0
+      ? formatDuration(durationSeconds)
+      : null
 
   return (
     <article
       key={session.id}
       role="group"
       aria-roledescription="slide"
-      aria-label={`${session.title}`}
+      aria-label={`${session.title} — by ${session.creator}`}
       aria-hidden={!isCurrent}
       inert={!isCurrent}
       style={
@@ -87,8 +101,6 @@ export function Slide({
           <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800" />
         )}
 
-        <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,_rgba(12,12,18,0.55)_0%,_rgba(12,12,18,0.22)_55%,_rgba(14,14,20,0.72)_100%)]" />
-
         <div
           aria-hidden={!isCurrent}
           className={cn(
@@ -98,11 +110,7 @@ export function Slide({
               : "pointer-events-none translate-y-6 opacity-0",
           )}
         >
-          <div className="max-w-[30ch]">
-            <h3 className="mt-2 text-lg leading-tight font-semibold text-balance select-none sm:text-3xl md:text-3xl">
-              {session.title}
-            </h3>
-          </div>
+          <h3 className="sr-only">{session.title}</h3>
 
           <div className="flex flex-wrap items-center gap-3">
             <Button
@@ -125,6 +133,27 @@ export function Slide({
               </svg>
               Watch Now
             </Button>
+            <div className="flex items-center justify-center gap-2">
+              <span
+                className="hidden text-xl font-bold sm:inline"
+                aria-hidden="true"
+              >
+                ·
+              </span>
+              <span className="library-muted-light text-sm font-medium">
+                {session.creator}
+              </span>
+              {durationLabel && (
+                <>
+                  <span aria-hidden="true" className="text-xl font-bold">
+                    ·
+                  </span>
+                  <span className="library-muted-light text-sm font-medium">
+                    {durationLabel}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

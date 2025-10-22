@@ -40,4 +40,5 @@ export interface VimeoThumbnailPayload {
   srcset: string
   width: number
   height: number
+  durationSeconds?: number
 }
