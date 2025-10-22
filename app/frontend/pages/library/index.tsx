@@ -184,7 +184,7 @@ export default function LibraryIndex({
   }, [sections, continueWatching])
 
   return (
-    <div className="bg-background mt-[3vw] min-h-screen py-12 min-[120ch]:pl-[5vw]">
+    <div className="bg-background mt-[3vw] min-h-screen py-12">
       <div className="pb-16">
         <Head title="Library" />
         <h1 className="sr-only">Library</h1>
@@ -194,30 +194,32 @@ export default function LibraryIndex({
             sessions={featuredSessions}
             thumbnails={thumbnails}
           />
-          <LibraryHero
-            continueWatching={continueWatching}
-            backIcon={assets?.backIcon}
-            thumbnails={thumbnails}
-          />
+          <div className="flex flex-col gap-10 sm:gap-[3vw] min-[120ch]:pl-[5vw]">
+            <LibraryHero
+              continueWatching={continueWatching}
+              backIcon={assets?.backIcon}
+              thumbnails={thumbnails}
+            />
 
-          <div className="flex flex-col gap-10 pl-3 sm:gap-[3vw]">
-            {categoryGroups.map((group) => {
-              const headingId = `category-${group.category.slug}`
-              return (
-                <section
-                  className="flex flex-col gap-[1vw]"
-                  key={group.category.slug}
-                  aria-labelledby={headingId}
-                >
-                  <SectionHeader id={headingId} title={group.category.name} />
-                  <SessionGrid
-                    sessions={group.sessions}
-                    backIcon={assets?.backIcon}
-                    thumbnails={thumbnails}
-                  />
-                </section>
-              )
-            })}
+            <div className="flex flex-col gap-10 pl-3 sm:gap-[3vw]">
+              {categoryGroups.map((group) => {
+                const headingId = `category-${group.category.slug}`
+                return (
+                  <section
+                    className="flex flex-col gap-[1vw]"
+                    key={group.category.slug}
+                    aria-labelledby={headingId}
+                  >
+                    <SectionHeader id={headingId} title={group.category.name} />
+                    <SessionGrid
+                      sessions={group.sessions}
+                      backIcon={assets?.backIcon}
+                      thumbnails={thumbnails}
+                    />
+                  </section>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
