@@ -142,7 +142,7 @@ export default function FeaturedCarousel({
                     )}
                   >
                     <div className="max-w-[30ch]">
-                      <h3 className="mt-2 text-xl leading-tight font-semibold text-balance select-none sm:text-3xl md:text-3xl">
+                      <h3 className="mt-2 text-lg leading-tight font-semibold text-balance select-none sm:text-3xl md:text-3xl">
                         {session.title}
                       </h3>
                     </div>
@@ -190,7 +190,7 @@ export default function FeaturedCarousel({
           type="button"
           aria-label="Previous slide"
           onClick={() => api?.scrollPrev()}
-          className="group absolute top-1/2 left-[-12vw] z-40 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-neutral-900/60 focus-visible:outline-none 2xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-white/70"
+          className="group absolute top-1/2 left-[-12vw] z-0 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-neutral-900/60 focus-visible:outline-none 2xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-white/70"
         >
           <svg
             viewBox="0 0 24 24"
@@ -210,7 +210,7 @@ export default function FeaturedCarousel({
           type="button"
           aria-label="Next slide"
           onClick={() => api?.scrollNext()}
-          className="group absolute top-1/2 right-[-12vw] z-40 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-neutral-900/60 focus-visible:outline-none 2xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-white/70"
+          className="group absolute top-1/2 right-[-12vw] z-0 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-neutral-900/60 focus-visible:outline-none 2xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-white/70"
         >
           <svg
             viewBox="0 0 24 24"
@@ -229,7 +229,7 @@ export default function FeaturedCarousel({
 
       <div
         className={cn(
-          "relative z-30 mt-6 flex items-center justify-center gap-0 transition-opacity duration-250",
+          "relative z-0 mt-6 flex items-center justify-center gap-0 transition-opacity duration-250",
           isReady ? "opacity-100" : "opacity-0",
         )}
       >
