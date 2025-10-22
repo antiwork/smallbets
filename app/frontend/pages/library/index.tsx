@@ -1,7 +1,7 @@
 import { Head } from "@inertiajs/react"
 import { useEffect, useMemo, useState } from "react"
 
-import FeaturedCarousel from "./components/featured_carousel"
+import FeaturedCarousel from "./components/featured-carousel"
 import LibraryHero from "./components/library_hero"
 import SectionHeader from "./components/layout/section_header"
 import SessionGrid from "./components/session_grid"
