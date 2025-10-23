@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import type { CarouselApi } from "@/components/ui/carousel"
-import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../../types"
+import type { LibrarySessionPayload } from "../../types"
 
 const DEFAULT_AUTOPLAY_INTERVAL_MS = 6000
 const MIN_AUTOPLAY_INTERVAL_MS = 1000
@@ -23,15 +23,15 @@ export interface DragState {
 
 export function useSlides(
   sessions: LibrarySessionPayload[],
-  thumbnails?: Record<string, VimeoThumbnailPayload>,
+  heroImagesById?: Record<string, string>,
 ) {
   return useMemo(
     () =>
       sessions.map((session) => ({
         session,
-        thumbnail: thumbnails?.[session.vimeoId],
+        imageSrc: heroImagesById?.[String(session.id)] ?? null,
       })),
-    [sessions, thumbnails],
+    [sessions, heroImagesById],
   )
 }
 

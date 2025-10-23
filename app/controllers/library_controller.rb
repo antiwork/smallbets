@@ -13,6 +13,18 @@ class LibraryController < AuthenticatedController
 
     props = LibraryCatalog.inertia_props(user: Current.user)
 
+    # Build hero image mapping for featured sessions from asset pipeline
+    featured_sessions = props[:featuredSessions] || []
+    featured_hero_images = {}
+    featured_sessions.each do |s|
+      id = s[:id] || s["id"]
+      next unless id
+      logical_path = "hero-carousel/hero-#{id}.webp"
+      if asset_exists?(logical_path)
+        featured_hero_images[id.to_s] = view_context.asset_path(logical_path)
+      end
+    end
+
     # Compute server-rendered thumbnails for above-the-fold cards to remove first paint placeholders
     initial_thumbnails = begin
       continue_watching = props[:continueWatching] || []
@@ -36,6 +48,7 @@ class LibraryController < AuthenticatedController
           downloadIcon: view_context.asset_path("download.svg"),
           backIcon: view_context.asset_path("arrow-left.svg"),
         },
+        featuredHeroImages: featured_hero_images,
         initialThumbnails: initial_thumbnails,
         initialSessionId: params[:id]&.to_i,
         layout: {
@@ -107,6 +120,15 @@ class LibraryController < AuthenticatedController
   def set_layout_content(nav_markup:, sidebar_markup:)
     view_context.content_for(:nav, nav_markup)
     view_context.content_for(:sidebar, sidebar_markup)
+  end
+
+  def asset_exists?(logical_path)
+    # Propshaft-safe existence check: attempt to resolve the asset path;
+    # if it raises, treat as missing.
+    view_context.asset_path(logical_path)
+    true
+  rescue StandardError
+    false
   end
 
   def library_nav_markup

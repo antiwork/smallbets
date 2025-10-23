@@ -23,6 +23,7 @@ interface LibraryPageProps {
     downloadIcon?: string
   }
   initialThumbnails?: Record<string, VimeoThumbnailPayload>
+  featuredHeroImages?: Record<string, string>
 }
 
 interface LibrarySectionPayload {
@@ -48,6 +49,7 @@ export default function LibraryIndex({
   layout,
   assets,
   initialThumbnails,
+  featuredHeroImages,
 }: LibraryPageProps) {
   useEffect(() => {
     if (!layout) return
@@ -192,9 +194,9 @@ export default function LibraryIndex({
         <div className="flex flex-col gap-10 sm:gap-[3vw]">
           <FeaturedCarousel
             sessions={featuredSessions}
-            thumbnails={thumbnails}
+            heroImagesById={featuredHeroImages}
           />
-          <div className="flex flex-col gap-10 sm:gap-[3vw] min-[120ch]:pl-[5vw]">
+          <div className="flex flex-col gap-10 min-[120ch]:pl-[5vw] sm:gap-[3vw]">
             <LibraryHero
               continueWatching={continueWatching}
               backIcon={assets?.backIcon}

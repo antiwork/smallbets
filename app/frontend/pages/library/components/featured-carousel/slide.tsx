@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../../types"
+import { useState } from "react"
+import type { LibrarySessionPayload } from "../../types"
 import type { DragBindings, DragState } from "./hooks"
 
 function formatDuration(totalSeconds: number): string {
@@ -14,7 +15,7 @@ function formatDuration(totalSeconds: number): string {
 
 export interface SlideProps {
   session: LibrarySessionPayload
-  thumbnail?: VimeoThumbnailPayload
+  imageSrc?: string | null
   isCurrent: boolean
   isPrevious: boolean
   isNext: boolean
@@ -24,15 +25,16 @@ export interface SlideProps {
 
 export function Slide({
   session,
-  thumbnail,
+  imageSrc,
   isCurrent,
   isPrevious,
   isNext,
   drag,
   onWatch,
 }: SlideProps) {
+  const [isImageError, setIsImageError] = useState(false)
   const { dragOffset, isDragging } = drag.state
-  const durationSeconds = thumbnail?.durationSeconds ?? null
+  const durationSeconds = session.watch?.durationSeconds ?? null
   const durationLabel =
     typeof durationSeconds === "number" && durationSeconds > 0
       ? formatDuration(durationSeconds)
@@ -85,18 +87,17 @@ export function Slide({
       onClickCapture={isCurrent ? drag.bindings.onClickCapture : undefined}
     >
       <div className="relative flex h-full flex-col justify-end">
-        {thumbnail ? (
+        {imageSrc && !isImageError ? (
           <picture className="absolute inset-0 z-0 h-full w-full">
-            <source srcSet={thumbnail.srcset} />
+            <source type="image/webp" srcSet={imageSrc} />
             <img
-              src={thumbnail.src}
+              src={imageSrc}
               alt=""
               loading="lazy"
               decoding="async"
-              width={thumbnail.width}
-              height={thumbnail.height}
               className="h-full w-full object-cover"
               draggable="false"
+              onError={() => setIsImageError(true)}
             />
           </picture>
         ) : (

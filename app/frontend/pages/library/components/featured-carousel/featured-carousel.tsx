@@ -10,7 +10,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel"
 
-import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../../types"
+import type { LibrarySessionPayload } from "../../types"
 import {
   useSlides,
   useCarouselState,
@@ -23,19 +23,19 @@ import { Indicators } from "./indicators"
 
 export interface FeaturedCarouselProps {
   sessions: LibrarySessionPayload[]
-  thumbnails?: Record<string, VimeoThumbnailPayload>
+  heroImagesById?: Record<string, string>
 }
 
 export function FeaturedCarousel({
   sessions,
-  thumbnails,
+  heroImagesById,
 }: FeaturedCarouselProps) {
   const [api, setApi] = useState<CarouselApi>()
 
   const hasSessions = sessions.length > 0
   if (!hasSessions) return null
 
-  const slides = useSlides(sessions, thumbnails)
+  const slides = useSlides(sessions, heroImagesById)
   const { current, count, isReady } = useCarouselState(api, slides.length)
   const totalSlides = count || slides.length
 
@@ -98,7 +98,7 @@ export function FeaturedCarousel({
         </Carousel>
 
         <div className="relative isolate mx-auto aspect-[16/9] w-full sm:w-[80%] md:w-[85%] lg:aspect-[21/9] lg:w-[88%] xl:aspect-[5/2] xl:w-[85%] 2xl:w-[90%]">
-          {slides.map(({ session, thumbnail }, index) => {
+          {slides.map(({ session, imageSrc }, index) => {
             const position = (index - current + count) % count
             const isPrevious = position === count - 1
             const isNext = position === 1
@@ -108,7 +108,7 @@ export function FeaturedCarousel({
               <Slide
                 key={session.id}
                 session={session}
-                thumbnail={thumbnail}
+                imageSrc={imageSrc}
                 isCurrent={isCurrent}
                 isPrevious={isPrevious}
                 isNext={isNext}
