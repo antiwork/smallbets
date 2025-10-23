@@ -1,7 +1,7 @@
 module Vimeo
   module ThumbnailFetcher
     API_ROOT = "https://api.vimeo.com".freeze
-    CACHE_VERSION = "v1".freeze
+    CACHE_VERSION = "v2".freeze
     # Hard/Redis TTL: keep entries for a long time to maximize cache hits
     LONG_TTL = 30.days
     # Soft TTL window: after this, entries are considered stale and should be refreshed
