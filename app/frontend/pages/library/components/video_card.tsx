@@ -4,6 +4,7 @@ import {
   type VimeoPlayerHandle,
 } from "@/pages/library/components/player"
 import { router } from "@inertiajs/react"
+import { formatHoursMinutesFromSeconds } from "@/lib/utils"
 import type {
   LibrarySessionPayload,
   LibraryWatchPayload,
@@ -23,15 +24,8 @@ function formatTimeRemaining(
   durationSeconds?: number | null,
 ): string {
   if (!durationSeconds) return ""
-
   const remaining = Math.max(0, durationSeconds - playedSeconds)
-  const hours = Math.floor(remaining / 3600)
-  const minutes = Math.floor((remaining % 3600) / 60)
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m left`
-  }
-  return `${minutes}m left`
+  return `${formatHoursMinutesFromSeconds(remaining)} left`
 }
 
 export default function VideoCard({
@@ -121,7 +115,7 @@ export default function VideoCard({
           hoverMoveStartedRef.current = false
           prefetchWatchPage()
         }}
-        onMouseMove={(e) => {
+        onMouseMove={() => {
           // Ignore early synthetic moves during initial render/reflow
           const now = performance.now?.() ?? Date.now()
           // Safari/iOS may send movementX=0; require actual pageX/pageY change from element entry

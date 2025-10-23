@@ -1,16 +1,11 @@
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatHoursMinutesFromSeconds } from "@/lib/utils"
 import { useState } from "react"
 import type { LibrarySessionPayload } from "../../types"
 import type { DragBindings, DragState } from "./hooks"
 
 function formatDuration(totalSeconds: number): string {
-  const seconds = Math.max(0, Math.floor(totalSeconds))
-  const minutesTotal = Math.floor(seconds / 60)
-  const hours = Math.floor(minutesTotal / 60)
-  const minutes = minutesTotal % 60
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
+  return formatHoursMinutesFromSeconds(totalSeconds)
 }
 
 export interface SlideProps {
