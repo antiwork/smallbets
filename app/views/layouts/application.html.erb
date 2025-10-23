@@ -51,18 +51,19 @@
   </head>
 
   <body class="<%= body_classes %>" data-controller="local-time lightbox page-title">
-    <% if controller_name == "rooms" && action_name == "show" %>
-      <a 
+    <% if controller_name == "rooms" && action_name == "show" && @current_live_event.present? %>
+      <a
         id="special-event-banner"
-        href="https://x.com/nestersk/status/1973501168312783190"
+        href="<%= @current_live_event.url %>"
         target="_blank"
         style="font-weight: 600; letter-spacing: -0.02em; text-align: center; padding: 0.5rem; display: none; width: 100%; cursor: pointer; text-decoration: none; box-sizing: border-box;"
         data-controller="countdown-banner"
         data-countdown-banner-urgent-class="banner-urgent"
-        data-countdown-banner-target-time-value="2025-10-02T16:00:00Z"
-        data-countdown-banner-duration-hours-value="2"
+        data-countdown-banner-target-time-value="<%= @current_live_event.target_time.iso8601 %>"
+        data-countdown-banner-duration-hours-value="<%= @current_live_event.duration_hours %>"
+        data-countdown-banner-show-early-hours-value="<%= @current_live_event.show_early_hours %>"
       >
-        The Weekly Yap — <span data-countdown-banner-target="status"></span>
+        <%= @current_live_event.title %> — <span data-countdown-banner-target="status"></span>
       </a>
     <% end %>
     <% skip_target = controller_name == "library" && action_name == "index" ? "#continue-watching" : "#main-content" %>

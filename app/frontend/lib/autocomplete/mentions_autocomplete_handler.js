@@ -17,12 +17,20 @@ export default class extends BaseAutocompleteHandler {
   }
 
   #createAttachmentForAutocompletable(mentionable) {
-    const mention = `
-      <span class="mention" sgid=${mentionable.sgid}>
-        <img src="${mentionable.avatar_url}" class="avatar" alt="${mentionable.name}">
-        ${mentionable.name}
-      </span>
-    `
+    let mention
+
+    if (mentionable.avatar_url) {
+      // Regular user mention with avatar
+      mention = `
+        <span class="mention" sgid=${mentionable.sgid}>
+          <img src="${mentionable.avatar_url}" class="avatar" alt="${mentionable.name}">
+          ${mentionable.name}
+        </span>
+      `
+    } else {
+      // @everyone mention without avatar
+      mention = `<span class="mention mention--everyone" sgid=${mentionable.sgid}>${mentionable.name}</span>`
+    }
 
     return new Trix.Attachment({
       content: mention,

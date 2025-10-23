@@ -13,7 +13,11 @@ module Message::Broadcasts
   end
 
   def broadcast_notifications(ignore_if_older_message: false)
-    memberships = room.memberships.where(user_id: mentionee_ids)
+    memberships = if mentions_everyone?
+      room.memberships
+    else
+      room.memberships.where(user_id: mentionee_ids)
+    end
 
     memberships.each do |membership|
       next if ignore_if_older_message && (membership.read? || membership.unread_at > created_at)
@@ -41,19 +45,19 @@ module Message::Broadcasts
   end
 
   def broadcast_to_inbox_mentions
-
     return if mentionee_ids.blank?
-    
+    return if mentions_everyone?
+
     mentionees.each do |user|
       next if user.id == creator_id
-      
+
       broadcast_remove_to user, :inbox_mentions,
                          target: ActionView::RecordIdentifier.dom_id(self)
-      
+
       broadcast_append_to user, :inbox_mentions,
                           target: "inbox",
                           partial: "messages/message",
-                          locals: { 
+                          locals: {
                             message: self,
                             current_room: nil,
                             first_unread_message: nil,

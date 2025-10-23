@@ -68,7 +68,7 @@ class RoomsController < ApplicationController
                       .with_attached_attachment
                       .preload(creator: :avatar_attachment)
                       .includes(attachment_blob: :variant_records)
-                      .includes(:mentionees, boosts: :booster)
+                      .includes(boosts: :booster)
       @first_unread_message = messages.ordered.since(@membership.unread_at).first if @membership.unread?
 
       if show_first_message = messages.find_by(id: params[:message_id]) || @first_unread_message

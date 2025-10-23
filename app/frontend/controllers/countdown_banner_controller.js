@@ -5,7 +5,8 @@ export default class extends Controller {
   static classes = [ "urgent" ]
   static values = {
     targetTime: String,
-    durationHours: Number
+    durationHours: Number,
+    showEarlyHours: { type: Number, default: 24 }
   }
 
   connect() {
@@ -49,11 +50,11 @@ export default class extends Controller {
     }
 
     const diff = this.targetDate - now;
-    const twentyFourHoursInMillis = 24 * 60 * 60 * 1000;
+    const showEarlyInMillis = this.showEarlyHoursValue * 60 * 60 * 1000;
     const twoHoursInMillis = 2 * 60 * 60 * 1000;
-    
-    // Hide if more than 24 hours away or if event is over
-    if (diff > twentyFourHoursInMillis || now >= this.endDate) {
+
+    // Hide if more than showEarlyHours away or if event is over
+    if (diff > showEarlyInMillis || now >= this.endDate) {
       this.hideBanner();
       if (now >= this.endDate && this.interval) {
         clearInterval(this.interval); // Stop interval only if event ended
@@ -75,21 +76,32 @@ export default class extends Controller {
         this.updateCountdown(now);
         this.element.classList.add(this.urgentClass);
       } else {
-        // Between 2 and 24 hours left: Show day + time
+        // Between 2 hours and showEarlyHours left: Show day + time
         const targetLocalDate = this.targetDate; // Already a Date object
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
         const targetDay = new Date(targetLocalDate.getFullYear(), targetLocalDate.getMonth(), targetLocalDate.getDate());
 
-        let dayPrefix = "Live on X"; // Default/Fallback
+        let statusText;
         if (targetDay.getTime() === today.getTime()) {
-          dayPrefix = "Live on X today";
+          const formattedTime = targetLocalDate.toLocaleString(undefined, { hour: 'numeric', minute: '2-digit' });
+          statusText = `Live today at ${formattedTime}`;
         } else if (targetDay.getTime() === tomorrow.getTime()) {
-          dayPrefix = "Live on X tomorrow";
-        } // Future dates > tomorrow are handled by the 24h check above
-        
-        const formattedTime = targetLocalDate.toLocaleString(undefined, { hour: 'numeric', minute: '2-digit' });
-        this.statusTarget.textContent = `${dayPrefix} at ${formattedTime}`;
+          const formattedTime = targetLocalDate.toLocaleString(undefined, { hour: 'numeric', minute: '2-digit' });
+          statusText = `Live tomorrow at ${formattedTime}`;
+        } else {
+          // Future dates beyond tomorrow
+          const formattedDate = targetLocalDate.toLocaleString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+          });
+          statusText = `Live on ${formattedDate}`;
+        }
+
+        this.statusTarget.textContent = statusText;
         this.element.classList.remove(this.urgentClass);
       }
     }

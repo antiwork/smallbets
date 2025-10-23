@@ -35,11 +35,11 @@ class Room::MessagePusher
     end
 
     def push_to_mentionees(payload)
-      enqueue_payload_for_delivery payload, push_subscriptions_for_mentionable_users(message.mentionees)
+      enqueue_payload_for_delivery payload, push_subscriptions_for_mentionable_users(message.mentionee_ids)
     end
 
-    def push_subscriptions_for_mentionable_users(mentionees)
-      relevant_subscriptions.where(user_id: mentionees.ids)
+    def push_subscriptions_for_mentionable_users(mentionee_ids)
+      relevant_subscriptions.where(user_id: mentionee_ids)
     end
 
     def relevant_subscriptions

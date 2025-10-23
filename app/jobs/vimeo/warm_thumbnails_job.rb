@@ -4,6 +4,8 @@ module Vimeo
 
     # Warms cache for provided video_ids or discovers from LibrarySession
     def perform(video_ids: nil, limit: nil)
+      return if Vimeo::ThumbnailFetcher.access_token.blank?
+
       ids = Array(video_ids).compact_blank.map(&:to_s)
       if ids.empty?
         ids = LibrarySession.order(:position).pluck(:vimeo_id).compact_blank.map(&:to_s)

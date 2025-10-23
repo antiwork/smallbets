@@ -94,6 +94,10 @@
   }
 }
 
+.mention--everyone {
+  padding-inline-start: 0 !important;
+}
+
 blockquote .attachment--preview {
   --avatar-size: 2.5ch;
   --avatar-border-radius: 2em;
