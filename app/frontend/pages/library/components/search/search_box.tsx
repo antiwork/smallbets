@@ -31,7 +31,7 @@ export const SearchBox = forwardRef<HTMLInputElement, SearchBoxProps>(
           containerClassName,
         )}
       >
-        <div className="w-full pt-0.5">
+        <div className="w-full">
           <label className="sr-only" htmlFor={inputId ?? "library-search"}>
             Search library
           </label>
