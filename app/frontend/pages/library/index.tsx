@@ -1,6 +1,8 @@
 import { Head } from "@inertiajs/react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
+
+import { Button } from "@/components/ui/button"
 
 import FeaturedCarousel from "./components/featured-carousel"
 import LibraryHero from "./components/library_hero"
@@ -53,6 +55,14 @@ export default function LibraryIndex({
 }: LibraryPageProps) {
   const [query, setQuery] = useState("")
   const [navSearchRoot, setNavSearchRoot] = useState<HTMLElement | null>(null)
+  // navRoot retained intentionally for potential future scoping; currently unused
+  const [navRoot, setNavRoot] = useState<HTMLElement | null>(null)
+  const [bodyRoot, setBodyRoot] = useState<HTMLElement | null>(null)
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
+  const mobileSearchButtonRef = useRef<HTMLButtonElement | null>(null)
+  const mobileSearchInputRef = useRef<HTMLInputElement | null>(null)
+  const wasMobileSearchOpen = useRef(false)
+  const [navHeight, setNavHeight] = useState<number | null>(null)
 
   useEffect(() => {
     if (!layout) return
@@ -76,7 +86,20 @@ export default function LibraryIndex({
     if (typeof window === "undefined") return
     const node = document.getElementById("library-search-root")
     setNavSearchRoot(node)
+    const nav = document.getElementById("nav")
+    setNavRoot(nav)
+    setBodyRoot(document.body)
   }, [layout?.nav])
+
+  useEffect(() => {
+    if (!isMobileSearchOpen && wasMobileSearchOpen.current) {
+      wasMobileSearchOpen.current = false
+      mobileSearchButtonRef.current?.focus()
+    }
+    if (isMobileSearchOpen) {
+      wasMobileSearchOpen.current = true
+    }
+  }, [isMobileSearchOpen])
 
   const categoryGroups = useMemo(() => {
     const categoryMap = new Map<string, CategoryGroup>()
@@ -150,6 +173,41 @@ export default function LibraryIndex({
       )
     })
   }, [isActiveSearch, trimmedQuery, searchableSessions])
+
+  useEffect(() => {
+    if (!isMobileSearchOpen) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault()
+        setIsMobileSearchOpen(false)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isMobileSearchOpen])
+
+  useEffect(() => {
+    if (!isMobileSearchOpen) {
+      return
+    }
+    const frame = requestAnimationFrame(() => {
+      mobileSearchInputRef.current?.focus()
+      mobileSearchInputRef.current?.select()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [isMobileSearchOpen])
+
+  useEffect(() => {
+    if (!isMobileSearchOpen) return
+    const navEl = document.getElementById("nav")
+    if (!navEl) return
+    const compute = () => setNavHeight(navEl.getBoundingClientRect().height)
+    compute()
+    window.addEventListener("resize", compute)
+    return () => window.removeEventListener("resize", compute)
+  }, [isMobileSearchOpen])
 
   useEffect(() => {
     const allIds = Array.from(
@@ -248,11 +306,91 @@ export default function LibraryIndex({
 
         {navSearchRoot
           ? createPortal(
-              <SearchBox
-                iconSrc={assets?.searchIcon}
-                value={query}
-                onChange={setQuery}
-              />,
+              <>
+                <SearchBox
+                  iconSrc={assets?.searchIcon}
+                  value={query}
+                  onChange={setQuery}
+                  containerClassName="hidden sm:flex"
+                />
+
+                <div className="relative mr-13 ml-auto flex items-center sm:hidden!">
+                  <Button
+                    ref={mobileSearchButtonRef}
+                    type="button"
+                    variant="ghost"
+                    size="icon-lg"
+                    className="border-input bg-background size-10 rounded-full border shadow-[0_0_0_1px_var(--control-border)]"
+                    aria-label="Open search"
+                    onClick={() => setIsMobileSearchOpen(true)}
+                  >
+                    <span
+                      aria-hidden
+                      className="size-4"
+                      style={{
+                        WebkitMaskImage: assets?.searchIcon
+                          ? `url(${assets.searchIcon})`
+                          : undefined,
+                        maskImage: assets?.searchIcon
+                          ? `url(${assets.searchIcon})`
+                          : undefined,
+                        WebkitMaskRepeat: "no-repeat",
+                        maskRepeat: "no-repeat",
+                        WebkitMaskSize: "contain",
+                        maskSize: "contain",
+                        WebkitMaskPosition: "center",
+                        maskPosition: "center",
+                        backgroundColor: "currentColor",
+                      }}
+                    />
+                  </Button>
+
+                  {isMobileSearchOpen && bodyRoot
+                    ? createPortal(
+                        <div
+                          className="bg-background/95 fixed inset-x-0 top-0 z-[10000] flex items-center gap-3 px-2 py-2 shadow-[0_1px_0_0_var(--control-border)] backdrop-blur sm:hidden!"
+                          style={{ height: navHeight ?? undefined }}
+                        >
+                          <button
+                            type="button"
+                            className="border-input bg-background flex size-10 items-center justify-center rounded-full border shadow-[0_0_0_1px_var(--control-border)]"
+                            aria-label="Close search"
+                            onClick={() => setIsMobileSearchOpen(false)}
+                          >
+                            <span
+                              aria-hidden
+                              className="size-4"
+                              style={{
+                                WebkitMaskImage: assets?.backIcon
+                                  ? `url(${assets.backIcon})`
+                                  : undefined,
+                                maskImage: assets?.backIcon
+                                  ? `url(${assets.backIcon})`
+                                  : undefined,
+                                WebkitMaskRepeat: "no-repeat",
+                                maskRepeat: "no-repeat",
+                                WebkitMaskSize: "contain",
+                                maskSize: "contain",
+                                WebkitMaskPosition: "center",
+                                maskPosition: "center",
+                                backgroundColor: "currentColor",
+                              }}
+                            />
+                          </button>
+                          <SearchBox
+                            iconSrc={assets?.searchIcon}
+                            value={query}
+                            onChange={setQuery}
+                            containerClassName="mr-0 ml-0 max-w-none flex-1"
+                            inputId="library-search-mobile"
+                            ref={mobileSearchInputRef}
+                          />
+                        </div>,
+                        bodyRoot,
+                      )
+                    : null}
+                </div>
+              </>,
               navSearchRoot,
             )
           : null}
