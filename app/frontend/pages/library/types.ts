@@ -42,3 +42,9 @@ export interface VimeoThumbnailPayload {
   height: number
   durationSeconds?: number
 }
+
+export interface LibraryAssetsPayload {
+  downloadIcon?: string
+  backIcon?: string
+  searchIcon?: string
+}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import type { HTMLAttributes } from "react"
 import { router } from "@inertiajs/react"
 
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/carousel"
 
 import type { LibrarySessionPayload } from "../../types"
+import { cn } from "@/lib/utils"
 import {
   useSlides,
   useCarouselState,
@@ -21,7 +23,7 @@ import { Slide } from "./slide"
 import { NavButtons } from "./nav-buttons"
 import { Indicators } from "./indicators"
 
-export interface FeaturedCarouselProps {
+export interface FeaturedCarouselProps extends HTMLAttributes<HTMLElement> {
   sessions: LibrarySessionPayload[]
   heroImagesById?: Record<string, string>
 }
@@ -29,6 +31,8 @@ export interface FeaturedCarouselProps {
 export function FeaturedCarousel({
   sessions,
   heroImagesById,
+  className,
+  ...sectionProps
 }: FeaturedCarouselProps) {
   const [api, setApi] = useState<CarouselApi>()
 
@@ -80,7 +84,11 @@ export function FeaturedCarousel({
       onBlur={onRegionBlur}
       onMouseEnter={() => autoplay.pause()}
       onMouseLeave={() => autoplay.resume()}
-      className="relative mx-auto w-full max-w-7xl px-8 pt-8 select-none focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:ring-offset-2 focus-visible:outline-none sm:px-12 md:px-16 lg:px-20 lg:pt-4 xl:pt-0 dark:focus-visible:ring-[#00ADEF]"
+      className={cn(
+        "relative mx-auto w-full max-w-7xl px-8 pt-8 select-none focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:ring-offset-2 focus-visible:outline-none sm:px-12 md:px-16 lg:px-20 lg:pt-4 xl:pt-0 dark:focus-visible:ring-[#00ADEF]",
+        className,
+      )}
+      {...sectionProps}
     >
       <div className="relative">
         <Carousel

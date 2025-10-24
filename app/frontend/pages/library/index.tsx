@@ -1,15 +1,18 @@
 import { Head } from "@inertiajs/react"
 import { useEffect, useMemo, useState } from "react"
+import { createPortal } from "react-dom"
 
 import FeaturedCarousel from "./components/featured-carousel"
 import LibraryHero from "./components/library_hero"
 import SectionHeader from "./components/layout/section_header"
 import SessionGrid from "./components/session_grid"
+import { SearchBox, SearchResultsGrid } from "./components/search"
 import type {
   LibrarySessionPayload,
   LibraryCategoryPayload,
   LibraryLayoutPayload,
   VimeoThumbnailPayload,
+  LibraryAssetsPayload,
 } from "./types"
 
 interface LibraryPageProps {
@@ -18,10 +21,7 @@ interface LibraryPageProps {
   sections: LibrarySectionPayload[]
   layout?: LayoutPayload
   initialSessionId?: number | null
-  assets?: {
-    backIcon?: string
-    downloadIcon?: string
-  }
+  assets?: LibraryAssetsPayload
   initialThumbnails?: Record<string, VimeoThumbnailPayload>
   featuredHeroImages?: Record<string, string>
 }
@@ -51,6 +51,9 @@ export default function LibraryIndex({
   initialThumbnails,
   featuredHeroImages,
 }: LibraryPageProps) {
+  const [query, setQuery] = useState("")
+  const [navSearchRoot, setNavSearchRoot] = useState<HTMLElement | null>(null)
+
   useEffect(() => {
     if (!layout) return
 
@@ -68,6 +71,12 @@ export default function LibraryIndex({
       if (sidebar) sidebar.innerHTML = layout.sidebar
     }
   }, [layout?.bodyClass, layout?.nav, layout?.sidebar])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const node = document.getElementById("library-search-root")
+    setNavSearchRoot(node)
+  }, [layout?.nav])
 
   const categoryGroups = useMemo(() => {
     const categoryMap = new Map<string, CategoryGroup>()
@@ -95,6 +104,52 @@ export default function LibraryIndex({
   const [thumbnails, setThumbnails] = useState<
     Record<string, VimeoThumbnailPayload>
   >(initialThumbnails ?? {})
+
+  const trimmedQuery = query.trim()
+  const normalizedQuery = trimmedQuery.replace(/\s+/g, "")
+  const hasInput = trimmedQuery.length > 0
+  const isActiveSearch = normalizedQuery.length >= 1
+
+  const searchableSessions = useMemo(() => {
+    const sessionMap = new Map<number, LibrarySessionPayload>()
+
+    const addSessions = (sessionsToAdd: LibrarySessionPayload[]) => {
+      sessionsToAdd.forEach((session) => {
+        if (!sessionMap.has(session.id)) {
+          sessionMap.set(session.id, session)
+        }
+      })
+    }
+
+    sections.forEach((section) => addSessions(section.sessions))
+    addSessions(featuredSessions)
+    addSessions(continueWatching)
+
+    return Array.from(sessionMap.values())
+  }, [sections, featuredSessions, continueWatching])
+
+  const filteredSessions = useMemo(() => {
+    if (!isActiveSearch) return []
+
+    const tokens = trimmedQuery.toLowerCase().split(/\s+/).filter(Boolean)
+
+    if (tokens.length === 0) return searchableSessions
+
+    return searchableSessions.filter((session) => {
+      const fields = [
+        session.title,
+        session.description,
+        session.creator,
+        ...session.categories.map((category) => category.name),
+      ]
+        .filter(Boolean)
+        .map((field) => field.toLowerCase())
+
+      return tokens.every((token) =>
+        fields.some((field) => field.includes(token)),
+      )
+    })
+  }, [isActiveSearch, trimmedQuery, searchableSessions])
 
   useEffect(() => {
     const allIds = Array.from(
@@ -191,12 +246,37 @@ export default function LibraryIndex({
         <Head title="Library" />
         <h1 className="sr-only">Library</h1>
 
+        {navSearchRoot
+          ? createPortal(
+              <SearchBox
+                iconSrc={assets?.searchIcon}
+                value={query}
+                onChange={setQuery}
+              />,
+              navSearchRoot,
+            )
+          : null}
+
         <div className="flex flex-col gap-10 sm:gap-[3vw]">
+          {isActiveSearch ? (
+            <SearchResultsGrid
+              sessions={filteredSessions}
+              thumbnails={thumbnails}
+              backIcon={assets?.backIcon}
+            />
+          ) : null}
           <FeaturedCarousel
             sessions={featuredSessions}
             heroImagesById={featuredHeroImages}
+            className={`transition-opacity duration-200 ${hasInput ? "pointer-events-none opacity-0" : "opacity-100"}`}
+            aria-hidden={hasInput ? "true" : undefined}
+            data-inert={hasInput ? "true" : undefined}
           />
-          <div className="flex flex-col gap-10 min-[120ch]:pl-[5vw] sm:gap-[3vw]">
+          <div
+            className={`flex flex-col gap-10 transition-opacity duration-200 min-[120ch]:pl-[5vw] sm:gap-[3vw] ${hasInput ? "pointer-events-none opacity-0" : "opacity-100"}`}
+            aria-hidden={hasInput ? "true" : undefined}
+            data-inert={hasInput ? "true" : undefined}
+          >
             <LibraryHero
               continueWatching={continueWatching}
               backIcon={assets?.backIcon}

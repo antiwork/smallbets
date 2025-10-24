@@ -47,6 +47,7 @@ class LibraryController < AuthenticatedController
         assets: {
           downloadIcon: view_context.asset_path("download.svg"),
           backIcon: view_context.asset_path("arrow-left.svg"),
+          searchIcon: view_context.asset_path("search.svg"),
         },
         featuredHeroImages: featured_hero_images,
         initialThumbnails: initial_thumbnails,
@@ -138,7 +139,8 @@ class LibraryController < AuthenticatedController
         view_context.tag.span(class: "btn btn--reversed btn--faux room--current") do
           view_context.tag.h1("Library", class: "room__contents txt-medium overflow-ellipsis")
         end,
-        view_context.link_back
+        view_context.link_back,
+        view_context.tag.div("", id: "library-search-root", class: "flex w-full")
       ].compact
     ).to_s
   end
