@@ -12,7 +12,7 @@ export function SearchBox({ iconSrc, value, onChange }: SearchBoxProps) {
   }
 
   const baseClasses =
-    "w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground transition focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30"
+    "w-full h-9 rounded-md border border-input bg-background pb-1.5 px-3 pt-1 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-[filter,box-shadow,border-color] duration-200 focus-visible:[--input-border-color:var(--color-selected-dark)] focus-visible:[--hover-color:var(--color-selected-dark)] focus-visible:[--outline-size:0] focus-visible:[border-color:var(--color-selected-dark)] focus-visible:[filter:var(--hover-filter)] focus-visible:[box-shadow:0_0_0_var(--hover-size)_var(--hover-color)] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30"
   const inputClassName = iconSrc ? `${baseClasses} pl-10` : baseClasses
 
   return (
@@ -34,10 +34,10 @@ export function SearchBox({ iconSrc, value, onChange }: SearchBoxProps) {
         {iconSrc ? (
           <span
             aria-hidden
-            className="text-muted-foreground pointer-events-none absolute inset-y-0 left-3 flex items-center"
+            className="text-muted-foreground pointer-events-none absolute inset-y-0 top-[1px] left-3 flex items-center"
           >
             <span
-              className="size-4"
+              className="size-3.5"
               style={{
                 WebkitMaskImage: `url(${iconSrc})`,
                 maskImage: `url(${iconSrc})`,
