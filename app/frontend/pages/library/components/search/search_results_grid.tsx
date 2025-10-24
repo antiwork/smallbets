@@ -25,7 +25,7 @@ export function SearchResultsGrid({
         >
           No sessions found. Try a different search.
         </div>
-        <div className="text-muted-foreground mx-auto max-w-6xl px-6 text-center text-base">
+        <div className="text-muted-foreground mx-auto max-w-6xl px-6 pt-4 text-center text-base">
           No sessions found. Try a different search.
         </div>
       </>
