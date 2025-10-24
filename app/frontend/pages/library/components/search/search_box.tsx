@@ -12,7 +12,7 @@ export function SearchBox({ iconSrc, value, onChange }: SearchBoxProps) {
   }
 
   const baseClasses =
-    "w-full h-9 rounded-md border border-input bg-background pb-1.5 px-3 pt-1 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-[filter,box-shadow,border-color] duration-200 focus-visible:[--input-border-color:var(--color-selected-dark)] focus-visible:[--hover-color:var(--color-selected-dark)] focus-visible:[--outline-size:0] focus-visible:[border-color:var(--color-selected-dark)] focus-visible:[filter:var(--hover-filter)] focus-visible:[box-shadow:0_0_0_var(--hover-size)_var(--hover-color)] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30"
+    "w-full h-9 rounded-md border-0 appearance-none shadow-[0_0_0_1px_var(--control-border)] bg-background pb-1.5 px-3 pt-1 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-[filter,box-shadow,border-color] duration-200 focus:[--hover-color:var(--color-selected-dark)] focus:[--outline-size:0] focus:[filter:var(--hover-filter)] focus:[box-shadow:0_0_0_1px_var(--hover-color),0_0_0_var(--hover-size)_var(--hover-color)] focus:hover:[--hover-color:var(--color-selected-dark)] focus:hover:[filter:var(--hover-filter)] focus:hover:[box-shadow:0_0_0_1px_var(--control-border),0_0_0_var(--hover-size)_var(--hover-color)] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30"
   const inputClassName = iconSrc ? `${baseClasses} pl-10` : baseClasses
 
   return (
