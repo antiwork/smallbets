@@ -18,7 +18,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     }
 
     return (
-      <div className="relative flex w-full items-center">
+      <div className="relative flex w-full items-center pt-[1px]">
         {icon ? (
           <span className="text-muted-foreground pointer-events-none absolute left-3 inline-flex size-4 items-center justify-center">
             {renderIcon()}
