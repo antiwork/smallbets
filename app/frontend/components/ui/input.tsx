@@ -1,33 +1,18 @@
-import * as React from "react"
+import { forwardRef, type ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
+import { MaskedIcon } from "./masked-icon"
 
 interface InputProps extends React.ComponentProps<"input"> {
-  icon?: React.ReactNode | string
+  icon?: ReactNode | string
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, icon, ...props }, ref) => {
     const renderIcon = () => {
       if (!icon) return null
       if (typeof icon === "string") {
-        return (
-          <span
-            aria-hidden
-            className="size-4"
-            style={{
-              WebkitMaskImage: `url(${icon})`,
-              maskImage: `url(${icon})`,
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-              WebkitMaskSize: "contain",
-              maskSize: "contain",
-              WebkitMaskPosition: "center",
-              maskPosition: "center",
-              backgroundColor: "currentColor",
-            }}
-          />
-        )
+        return <MaskedIcon src={icon} />
       }
       return icon
     }

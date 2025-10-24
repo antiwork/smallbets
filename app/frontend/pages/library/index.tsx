@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
 import { Button } from "@/components/ui/button"
+import { MaskedIcon } from "@/components/ui/masked-icon"
 
 import FeaturedCarousel from "./components/featured-carousel"
 import LibraryHero from "./components/library_hero"
@@ -55,8 +56,6 @@ export default function LibraryIndex({
 }: LibraryPageProps) {
   const [query, setQuery] = useState("")
   const [navSearchRoot, setNavSearchRoot] = useState<HTMLElement | null>(null)
-  // navRoot retained intentionally for potential future scoping; currently unused
-  const [navRoot, setNavRoot] = useState<HTMLElement | null>(null)
   const [bodyRoot, setBodyRoot] = useState<HTMLElement | null>(null)
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
   const mobileSearchButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -86,8 +85,6 @@ export default function LibraryIndex({
     if (typeof window === "undefined") return
     const node = document.getElementById("library-search-root")
     setNavSearchRoot(node)
-    const nav = document.getElementById("nav")
-    setNavRoot(nav)
     setBodyRoot(document.body)
   }, [layout?.nav])
 
@@ -322,32 +319,20 @@ export default function LibraryIndex({
                     size="icon-lg"
                     className="border-input bg-background size-10 rounded-full border shadow-[0_0_0_1px_var(--control-border)]"
                     aria-label="Open search"
+                    aria-expanded={isMobileSearchOpen}
+                    aria-controls="library-search-dialog"
                     onClick={() => setIsMobileSearchOpen(true)}
                   >
-                    <span
-                      aria-hidden
-                      className="size-4"
-                      style={{
-                        WebkitMaskImage: assets?.searchIcon
-                          ? `url(${assets.searchIcon})`
-                          : undefined,
-                        maskImage: assets?.searchIcon
-                          ? `url(${assets.searchIcon})`
-                          : undefined,
-                        WebkitMaskRepeat: "no-repeat",
-                        maskRepeat: "no-repeat",
-                        WebkitMaskSize: "contain",
-                        maskSize: "contain",
-                        WebkitMaskPosition: "center",
-                        maskPosition: "center",
-                        backgroundColor: "currentColor",
-                      }}
-                    />
+                    <MaskedIcon src={assets?.searchIcon} />
                   </Button>
 
                   {isMobileSearchOpen && bodyRoot
                     ? createPortal(
                         <div
+                          id="library-search-dialog"
+                          role="dialog"
+                          aria-modal="true"
+                          aria-label="Search library"
                           className="bg-background/95 fixed inset-x-0 top-0 z-[10000] flex items-center gap-3 px-2 py-2 shadow-[0_1px_0_0_var(--control-border)] backdrop-blur sm:hidden!"
                           style={{ height: navHeight ?? undefined }}
                         >
@@ -357,25 +342,7 @@ export default function LibraryIndex({
                             aria-label="Close search"
                             onClick={() => setIsMobileSearchOpen(false)}
                           >
-                            <span
-                              aria-hidden
-                              className="size-4"
-                              style={{
-                                WebkitMaskImage: assets?.backIcon
-                                  ? `url(${assets.backIcon})`
-                                  : undefined,
-                                maskImage: assets?.backIcon
-                                  ? `url(${assets.backIcon})`
-                                  : undefined,
-                                WebkitMaskRepeat: "no-repeat",
-                                maskRepeat: "no-repeat",
-                                WebkitMaskSize: "contain",
-                                maskSize: "contain",
-                                WebkitMaskPosition: "center",
-                                maskPosition: "center",
-                                backgroundColor: "currentColor",
-                              }}
-                            />
+                            <MaskedIcon src={assets?.backIcon} />
                           </button>
                           <SearchBox
                             iconSrc={assets?.searchIcon}
@@ -408,12 +375,12 @@ export default function LibraryIndex({
             heroImagesById={featuredHeroImages}
             className={`transition-opacity duration-200 ${hasInput ? "pointer-events-none opacity-0" : "opacity-100"}`}
             aria-hidden={hasInput ? "true" : undefined}
-            data-inert={hasInput ? "true" : undefined}
+            inert={hasInput ? true : undefined}
           />
           <div
             className={`flex flex-col gap-10 transition-opacity duration-200 min-[120ch]:pl-[5vw] sm:gap-[3vw] ${hasInput ? "pointer-events-none opacity-0" : "opacity-100"}`}
             aria-hidden={hasInput ? "true" : undefined}
-            data-inert={hasInput ? "true" : undefined}
+            inert={hasInput ? true : undefined}
           >
             <LibraryHero
               continueWatching={continueWatching}
