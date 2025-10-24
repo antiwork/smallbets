@@ -179,17 +179,47 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       [],
     )
 
+    // Stop autoplay when window loses focus or becomes hidden
+    useEffect(() => {
+      function handleVisibilityChange() {
+        if (document.hidden) {
+          if (hoverTimerRef.current) {
+            window.clearTimeout(hoverTimerRef.current)
+            hoverTimerRef.current = null
+          }
+          setShouldPlay(false)
+          if (isActivated) setResetPreviewSignal((value) => value + 1)
+        }
+      }
+
+      function handleWindowBlur() {
+        if (hoverTimerRef.current) {
+          window.clearTimeout(hoverTimerRef.current)
+          hoverTimerRef.current = null
+        }
+        setShouldPlay(false)
+        if (isActivated) setResetPreviewSignal((value) => value + 1)
+      }
+
+      document.addEventListener("visibilitychange", handleVisibilityChange)
+      window.addEventListener("blur", handleWindowBlur)
+
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibilityChange)
+        window.removeEventListener("blur", handleWindowBlur)
+      }
+    }, [isActivated])
+
     useEffect(() => {
       setShowControls(false)
     }, [session.id])
 
-    // Stop this preview when another instance of the same vimeoId starts
+    // Stop this preview when another preview starts anywhere
     useEffect(() => {
       const onPreviewStart = (e: Event) => {
-        const ce = e as CustomEvent<{ vimeoId: string; sourceId: string }>
+        const ce = e as CustomEvent<{ vimeoId?: string; sourceId: string }>
         const detail = ce.detail
         if (!detail) return
-        if (detail.vimeoId !== session.vimeoId) return
         if (detail.sourceId === instanceIdRef.current) return
         if (hoverTimerRef.current) {
           window.clearTimeout(hoverTimerRef.current)
@@ -200,7 +230,7 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       }
       window.addEventListener(PREVIEW_EVENT, onPreviewStart)
       return () => window.removeEventListener(PREVIEW_EVENT, onPreviewStart)
-    }, [session.vimeoId])
+    }, [])
 
     useEffect(() => {
       if (!showControls) return

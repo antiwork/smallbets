@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useHoverPreviewGuard } from "./hooks/use-hover-preview-guard"
+import { useIntersectionStop } from "./hooks/use-intersection-stop"
 import {
   VimeoPlayer,
   type VimeoPlayerHandle,
@@ -36,6 +38,7 @@ export default function VideoCard({
   persistPreview = false,
 }: VideoCardProps) {
   const playerRef = useRef<VimeoPlayerHandle>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [shouldStartOnVisible, setShouldStartOnVisible] = useState(false)
   const [iframeVisible, setIframeVisible] = useState(false)
   const [iframeReady, setIframeReady] = useState(false)
@@ -59,6 +62,23 @@ export default function VideoCard({
     setShouldStartOnVisible(false)
   }, [iframeVisible, shouldStartOnVisible])
 
+  useIntersectionStop({
+    containerRef,
+    onOutOfView: () => {
+      hoverMoveStartedRef.current = false
+      disarm()
+      playerRef.current?.stopPreview()
+    },
+  })
+
+  const { arm, disarm } = useHoverPreviewGuard({
+    containerRef,
+    onStop: () => {
+      hoverMoveStartedRef.current = false
+      playerRef.current?.stopPreview()
+    },
+  })
+
   function isDataSaverEnabled(): boolean {
     try {
       const conn = (
@@ -67,6 +87,16 @@ export default function VideoCard({
       return Boolean(conn && conn.saveData)
     } catch (_e) {
       return false
+    }
+  }
+
+  function supportsHover(): boolean {
+    try {
+      if (typeof window === "undefined" || !("matchMedia" in window))
+        return true
+      return window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    } catch (_e) {
+      return true
     }
   }
 
@@ -108,14 +138,17 @@ export default function VideoCard({
       className="relative flex w-[var(--shelf-card-w,21.5vw)] shrink-0 flex-col gap-[0.4vw] p-[4px]"
     >
       <div
+        ref={containerRef}
         className="group relative flex flex-col gap-3"
-        onMouseEnter={() => {
+        onPointerEnter={() => {
+          if (!supportsHover()) return
           if (isDataSaverEnabled()) return
           if (!iframeVisible) setIframeVisible(true)
           hoverMoveStartedRef.current = false
           prefetchWatchPage()
         }}
-        onMouseMove={() => {
+        onPointerMove={() => {
+          if (!supportsHover()) return
           // Ignore early synthetic moves during initial render/reflow
           const now = performance.now?.() ?? Date.now()
           // Safari/iOS may send movementX=0; require actual pageX/pageY change from element entry
@@ -127,10 +160,17 @@ export default function VideoCard({
             return
           if (hoverMoveStartedRef.current) return
           hoverMoveStartedRef.current = true
+          arm()
           setShouldStartOnVisible(true)
         }}
-        onMouseLeave={() => {
+        onPointerLeave={() => {
           hoverMoveStartedRef.current = false
+          disarm()
+          playerRef.current?.stopPreview()
+        }}
+        onPointerCancel={() => {
+          hoverMoveStartedRef.current = false
+          disarm()
           playerRef.current?.stopPreview()
         }}
       >
