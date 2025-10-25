@@ -75,6 +75,36 @@ body {
   }
 }
 
+body.library-collapsed #nav {
+  background-color: oklch(var(--lch-white));
+}
+
+@media (prefers-color-scheme: dark) {
+  body.library-collapsed #nav {
+    background-color: oklch(var(--lch-white) / 0);
+    background-color: #000;
+  }
+}
+
+@media (min-width: 120ch) {
+  body.library-collapsed #nav:has(.btn--faux)::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -5vw;
+    right: 0;
+    background-color: oklch(var(--lch-white));
+    z-index: -1;
+  }
+}
+
+@media (min-width: 120ch) and (prefers-color-scheme: dark) {
+  body.library-collapsed #nav:has(.btn--faux)::before {
+    background-color: #000;
+  }
+}
+
 @media (max-width: 100ch) {
   .account-has-logo .room--current .room__contents {
     --num-buttons: 2;
