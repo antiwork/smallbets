@@ -127,7 +127,6 @@ export default function LibraryIndex({
 
   const trimmedQuery = query.trim()
   const normalizedQuery = trimmedQuery.replace(/\s+/g, "")
-  const hasInput = trimmedQuery.length > 0
   const isActiveSearch = normalizedQuery.length >= 1
 
   const searchableSessions = useMemo(() => {
@@ -296,7 +295,9 @@ export default function LibraryIndex({
   }, [sections, continueWatching])
 
   return (
-    <div className="bg-background mt-[3vw] min-h-screen py-12">
+    <div
+      className={`bg-background mt-[3vw] py-12 ${isActiveSearch ? "" : "min-h-screen"}`}
+    >
       <div className="pb-16">
         <Head title="Library" />
         <h1 className="sr-only">Library</h1>
@@ -369,45 +370,45 @@ export default function LibraryIndex({
               thumbnails={thumbnails}
               backIcon={assets?.backIcon}
             />
-          ) : null}
-          <FeaturedCarousel
-            sessions={featuredSessions}
-            heroImagesById={featuredHeroImages}
-            className={`transition-opacity duration-200 ${hasInput ? "pointer-events-none opacity-0" : "opacity-100"}`}
-            aria-hidden={hasInput ? "true" : undefined}
-            inert={hasInput ? true : undefined}
-          />
-          <div
-            className={`flex flex-col gap-10 transition-opacity duration-200 min-[120ch]:pl-[5vw] sm:gap-[3vw] ${hasInput ? "pointer-events-none opacity-0" : "opacity-100"}`}
-            aria-hidden={hasInput ? "true" : undefined}
-            inert={hasInput ? true : undefined}
-          >
-            <LibraryHero
-              continueWatching={continueWatching}
-              backIcon={assets?.backIcon}
-              thumbnails={thumbnails}
-            />
+          ) : (
+            <>
+              <FeaturedCarousel
+                sessions={featuredSessions}
+                heroImagesById={featuredHeroImages}
+                className="opacity-100 transition-opacity duration-200"
+              />
+              <div className="flex flex-col gap-10 transition-opacity duration-200 min-[120ch]:pl-[5vw] sm:gap-[3vw]">
+                <LibraryHero
+                  continueWatching={continueWatching}
+                  backIcon={assets?.backIcon}
+                  thumbnails={thumbnails}
+                />
 
-            <div className="flex flex-col gap-10 pl-3 sm:gap-[3vw]">
-              {categoryGroups.map((group) => {
-                const headingId = `category-${group.category.slug}`
-                return (
-                  <section
-                    className="flex flex-col gap-[1vw]"
-                    key={group.category.slug}
-                    aria-labelledby={headingId}
-                  >
-                    <SectionHeader id={headingId} title={group.category.name} />
-                    <SessionGrid
-                      sessions={group.sessions}
-                      backIcon={assets?.backIcon}
-                      thumbnails={thumbnails}
-                    />
-                  </section>
-                )
-              })}
-            </div>
-          </div>
+                <div className="flex flex-col gap-10 pl-3 sm:gap-[3vw]">
+                  {categoryGroups.map((group) => {
+                    const headingId = `category-${group.category.slug}`
+                    return (
+                      <section
+                        className="flex flex-col gap-[1vw]"
+                        key={group.category.slug}
+                        aria-labelledby={headingId}
+                      >
+                        <SectionHeader
+                          id={headingId}
+                          title={group.category.name}
+                        />
+                        <SessionGrid
+                          sessions={group.sessions}
+                          backIcon={assets?.backIcon}
+                          thumbnails={thumbnails}
+                        />
+                      </section>
+                    )
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
