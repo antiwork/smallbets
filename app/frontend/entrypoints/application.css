@@ -26,6 +26,48 @@
   }
 }
 
+/* Shelf scope utility (low specificity via :where) */
+:where(.shelf-scope) {
+  /* Base defaults */
+  --shelf-gap: 0.8vw;
+  --shelf-items: 2;
+  --shelf-peek: 0.15;
+  --shelf-card-w: calc((100vw - var(--shelf-gap) * 2) / (2 + 0.3));
+  --shelf-peek-pad: calc(var(--shelf-card-w) * var(--shelf-peek));
+  --shelf-side-pad: var(--shelf-peek-pad);
+}
+
+@media (min-width: 768px) {
+  :where(.shelf-scope) {
+    --shelf-items: 3;
+    --shelf-card-w: calc((100vw - var(--shelf-gap) * 3) / (3 + 0.3));
+  }
+}
+
+@media (min-width: 1024px) {
+  :where(.shelf-scope) {
+    --shelf-items: 4;
+    --shelf-card-w: calc((100vw - var(--shelf-gap) * 4) / (4 + 0.3));
+  }
+}
+
+@media (min-width: 1280px) {
+  :where(.shelf-scope) {
+    --shelf-items: 5;
+    --shelf-card-w: calc((100vw - var(--shelf-gap) * 5) / (5 + 0.3));
+  }
+}
+
+@media (min-width: 1536px) {
+  :where(.shelf-scope) {
+    --shelf-card-w: calc(
+      (100vw - var(--library-left-pad, 0px) * 2 - var(--shelf-gap) * 6) / 6
+    );
+    --shelf-items: 6;
+    --shelf-side-pad: var(--library-left-pad, 0px);
+  }
+}
+
 /* Ensure black background when the Vimeo container is fullscreen */
 .vimeo-embed {
   /* Match system preference from first paint to avoid white flash */

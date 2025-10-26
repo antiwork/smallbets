@@ -10,7 +10,7 @@ export default function SectionHeader({
   id,
 }: SectionHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col !pl-[var(--shelf-side-pad)] sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h2
           id={id}

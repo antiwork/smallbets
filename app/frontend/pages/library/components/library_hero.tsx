@@ -13,12 +13,10 @@ export default function LibraryHero({
   thumbnails,
 }: LibraryHeroProps) {
   return (
-    <section className="pl-3">
-      <ContinueWatchingShelf
-        sessions={continueWatching}
-        backIcon={backIcon}
-        thumbnails={thumbnails}
-      />
-    </section>
+    <ContinueWatchingShelf
+      sessions={continueWatching}
+      backIcon={backIcon}
+      thumbnails={thumbnails}
+    />
   )
 }

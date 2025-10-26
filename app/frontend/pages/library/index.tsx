@@ -377,19 +377,19 @@ export default function LibraryIndex({
                 heroImagesById={featuredHeroImages}
                 className="opacity-100 transition-opacity duration-200"
               />
-              <div className="flex flex-col gap-10 transition-opacity duration-200 [--library-left-pad:0px] sm:gap-[3vw] 2xl:pl-[5vw] 2xl:[--library-left-pad:5vw]">
+              <div className="flex flex-col gap-10 transition-opacity duration-200 [--library-left-pad:0px] sm:gap-[3vw] 2xl:pl-0 2xl:[--library-left-pad:5vw]">
                 <LibraryHero
                   continueWatching={continueWatching}
                   backIcon={assets?.backIcon}
                   thumbnails={thumbnails}
                 />
 
-                <div className="flex flex-col gap-10 pl-3 sm:gap-[3vw]">
+                <div className="flex flex-col gap-10 sm:gap-[3vw]">
                   {categoryGroups.map((group) => {
                     const headingId = `category-${group.category.slug}`
                     return (
                       <section
-                        className="flex flex-col gap-[1vw]"
+                        className="shelf-scope flex flex-col gap-[1vw] [--shelf-gap:0.8vw] [--shelf-items:2] [--shelf-peek:0.15]"
                         key={group.category.slug}
                         aria-labelledby={headingId}
                       >
