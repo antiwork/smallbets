@@ -377,7 +377,7 @@ export default function LibraryIndex({
                 heroImagesById={featuredHeroImages}
                 className="opacity-100 transition-opacity duration-200"
               />
-              <div className="flex flex-col gap-10 transition-opacity duration-200 [--library-left-pad:0px] min-[120ch]:pl-[5vw] min-[120ch]:[--library-left-pad:5vw] sm:gap-[3vw]">
+              <div className="flex flex-col gap-10 transition-opacity duration-200 [--library-left-pad:0px] sm:gap-[3vw] 2xl:pl-[5vw] 2xl:[--library-left-pad:5vw]">
                 <LibraryHero
                   continueWatching={continueWatching}
                   backIcon={assets?.backIcon}

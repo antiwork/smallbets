@@ -100,7 +100,7 @@ export function SessionsShelfRow({
           {title}
         </h2>
       ) : null}
-      <div className="relative ml-[-0.75rem] min-[120ch]:ml-[calc(var(--library-left-pad,0px)*-1)]">
+      <div className="relative">
         <Carousel
           opts={{
             align: "start",
@@ -108,16 +108,16 @@ export function SessionsShelfRow({
             slidesToScroll: 1,
           }}
           setApi={setApi}
-          className="w-full [--shelf-card-w:calc((100vw_-_var(--library-left-pad,0px)_*_2_-_var(--shelf-gap)_*_var(--shelf-items))/var(--shelf-items))] [--shelf-gap:0.8vw] [--shelf-items:2] md:[--shelf-items:3] lg:[--shelf-items:4] xl:[--shelf-items:5] 2xl:[--shelf-items:6]"
+          className="w-full [--shelf-card-w:calc((100vw_-_var(--shelf-gap)_*_2)/(2_+_0.3))] [--shelf-gap:0.8vw] [--shelf-items:2] [--shelf-peek:0.15] md:[--shelf-card-w:calc((100vw_-_var(--shelf-gap)_*_3)/(3_+_0.3))] md:[--shelf-items:3] lg:[--shelf-card-w:calc((100vw_-_var(--shelf-gap)_*_4)/(4_+_0.3))] lg:[--shelf-items:4] xl:[--shelf-card-w:calc((100vw_-_var(--shelf-gap)_*_5)/(5_+_0.3))] xl:[--shelf-items:5] 2xl:[--shelf-card-w:calc((100vw_-_var(--library-left-pad,0px)_*_2_-_var(--shelf-gap)_*_6)/6)] 2xl:[--shelf-items:6]"
         >
-          <CarouselContent className="!ml-[0.75rem] pb-[0.4vw] min-[120ch]:!ml-[var(--library-left-pad,0px)]">
+          <CarouselContent className="!ml-[calc(var(--shelf-card-w)*var(--shelf-peek))] pb-[0.4vw] 2xl:!ml-[var(--library-left-pad,0px)]">
             {batches.map((batch, batchIndex) => {
               const isPhantomSlide = batchIndex === batches.length - 1
 
               return (
                 <CarouselItem
                   key={batchIndex}
-                  className="!basis-[calc(100vw_-_var(--library-left-pad,0px)_*_2)] !p-0"
+                  className="!basis-[calc(100vw_-_var(--shelf-card-w)_*_var(--shelf-peek)_*_2)] !p-0 2xl:!basis-[calc(100vw_-_var(--library-left-pad,0px)_*_2)]"
                   aria-hidden={isPhantomSlide ? true : undefined}
                   inert={isPhantomSlide ? true : undefined}
                 >
@@ -154,7 +154,7 @@ export function SessionsShelfRow({
             type="button"
             onClick={scrollPrev}
             aria-label="Show previous videos"
-            className="absolute top-0 bottom-[0.4vw] left-0 z-10 hidden w-[var(--library-left-pad,0.75rem)] cursor-pointer items-center justify-center bg-gradient-to-r from-black/60 to-transparent opacity-0 transition-opacity duration-200 hover:opacity-100 md:flex"
+            className="absolute top-0 bottom-[0.4vw] left-0 z-10 flex w-[calc(var(--shelf-card-w)*var(--shelf-peek))] cursor-pointer items-center justify-center bg-gradient-to-r from-black/60 to-transparent opacity-0 transition-opacity duration-200 hover:opacity-100"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -177,7 +177,7 @@ export function SessionsShelfRow({
             type="button"
             onClick={scrollNext}
             aria-label="Show next videos"
-            className="absolute top-0 right-0 bottom-[0.4vw] z-10 hidden w-[var(--library-left-pad,0.75rem)] cursor-pointer items-center justify-center bg-gradient-to-l from-black/60 to-transparent opacity-0 transition-opacity duration-200 hover:opacity-100 focus:opacity-100 md:flex"
+            className="absolute top-0 right-0 bottom-[0.4vw] z-10 flex w-[calc(var(--shelf-card-w)*var(--shelf-peek))] cursor-pointer items-center justify-center bg-gradient-to-l from-black/60 to-transparent opacity-0 transition-opacity duration-200 hover:opacity-100 focus:opacity-100"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
