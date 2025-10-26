@@ -135,7 +135,7 @@ export default function VideoCard({
   return (
     <article
       id={`session-${session.id}`}
-      className="relative flex w-[var(--shelf-card-w,21.5vw)] shrink-0 flex-col gap-[0.4vw] p-[4px]"
+      className="relative flex w-full shrink-0 flex-col gap-[0.4vw] p-[4px]"
     >
       <div
         ref={containerRef}

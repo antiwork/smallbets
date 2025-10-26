@@ -378,7 +378,7 @@ export default function LibraryIndex({
             inert={hasInput ? true : undefined}
           />
           <div
-            className={`flex flex-col gap-10 transition-opacity duration-200 min-[120ch]:pl-[5vw] sm:gap-[3vw] ${hasInput ? "pointer-events-none opacity-0" : "opacity-100"}`}
+            className={`flex flex-col gap-10 transition-opacity duration-200 [--library-left-pad:0px] min-[120ch]:pl-[5vw] min-[120ch]:[--library-left-pad:5vw] sm:gap-[3vw] ${hasInput ? "pointer-events-none opacity-0" : "opacity-100"}`}
             aria-hidden={hasInput ? "true" : undefined}
             inert={hasInput ? true : undefined}
           >
