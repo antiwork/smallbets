@@ -31,11 +31,13 @@ export function SessionsShelfRow({
   const [canScrollNext, setCanScrollNext] = useState(false)
   const batchSize = useShelfItems()
 
-  // Group sessions into batches for batch-based sliding
   const batches = useMemo(() => {
     const result: LibrarySessionPayload[][] = []
     for (let i = 0; i < sessions.length; i += batchSize) {
       result.push(sessions.slice(i, i + batchSize))
+    }
+    if (result.length > 0 && sessions.length > 0) {
+      result.push([sessions[0]])
     }
     return result
   }, [sessions, batchSize])
@@ -45,7 +47,8 @@ export function SessionsShelfRow({
 
     const updateScrollState = () => {
       setCanScrollPrev(api.canScrollPrev())
-      setCanScrollNext(api.canScrollNext())
+      const isOnSecondToLast = api.selectedScrollSnap() === batches.length - 2
+      setCanScrollNext(api.canScrollNext() && !isOnSecondToLast)
     }
 
     // Ensure carousel is fully initialized
@@ -63,7 +66,7 @@ export function SessionsShelfRow({
       api.off("reInit", updateScrollState)
       api.off("settle", updateScrollState)
     }
-  }, [api])
+  }, [api, batches.length])
 
   const scrollPrev = () => {
     api?.scrollPrev()
@@ -108,29 +111,41 @@ export function SessionsShelfRow({
           className="w-full [--shelf-card-w:calc((100vw_-_var(--library-left-pad,0px)_*_2_-_var(--shelf-gap)_*_var(--shelf-items))/var(--shelf-items))] [--shelf-gap:0.8vw] [--shelf-items:2] md:[--shelf-items:3] lg:[--shelf-items:4] xl:[--shelf-items:5] 2xl:[--shelf-items:6]"
         >
           <CarouselContent className="!ml-[0.75rem] pb-[0.4vw] min-[120ch]:!ml-[var(--library-left-pad,0px)]">
-            {batches.map((batch, batchIndex) => (
-              <CarouselItem
-                key={batchIndex}
-                className="!basis-[calc(100vw_-_var(--library-left-pad,0px)_*_2)] !p-0"
-              >
-                <div className="flex gap-[var(--shelf-gap)]">
-                  {batch.map((session) => (
-                    <div
-                      key={session.id}
-                      className="w-[var(--shelf-card-w)] shrink-0"
-                    >
-                      <VideoCard
-                        session={session}
-                        backIcon={backIcon}
-                        showProgress={showProgress}
-                        persistPreview={persistPreview}
-                        thumbnail={thumbnails?.[session.vimeoId]}
-                      />
+            {batches.map((batch, batchIndex) => {
+              const isPhantomSlide = batchIndex === batches.length - 1
+
+              return (
+                <CarouselItem
+                  key={batchIndex}
+                  className="!basis-[calc(100vw_-_var(--library-left-pad,0px)_*_2)] !p-0"
+                  aria-hidden={isPhantomSlide ? true : undefined}
+                  inert={isPhantomSlide ? true : undefined}
+                >
+                  {isPhantomSlide ? (
+                    <div className="pointer-events-none opacity-0">
+                      <div className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0" />
                     </div>
-                  ))}
-                </div>
-              </CarouselItem>
-            ))}
+                  ) : (
+                    <div className="flex gap-[var(--shelf-gap)]">
+                      {batch.map((session) => (
+                        <div
+                          key={session.id}
+                          className="w-[var(--shelf-card-w)] shrink-0"
+                        >
+                          <VideoCard
+                            session={session}
+                            backIcon={backIcon}
+                            showProgress={showProgress}
+                            persistPreview={persistPreview}
+                            thumbnail={thumbnails?.[session.vimeoId]}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CarouselItem>
+              )
+            })}
           </CarouselContent>
         </Carousel>
 
