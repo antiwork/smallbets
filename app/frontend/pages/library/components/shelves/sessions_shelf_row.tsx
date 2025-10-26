@@ -101,7 +101,7 @@ export function SessionsShelfRow({
         <Carousel
           opts={{
             align: "start",
-            loop: true,
+            loop: false,
             slidesToScroll: 1,
           }}
           setApi={setApi}
