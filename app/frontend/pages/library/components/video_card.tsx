@@ -135,7 +135,7 @@ function VideoCard({
   return (
     <article
       id={`session-${session.id}`}
-      className="relative flex w-full shrink-0 flex-col gap-[0.4vw] p-[4px]"
+      className="relative flex w-full shrink-0 flex-col gap-[0.4vw] p-[4px] select-none"
     >
       <div
         ref={containerRef}
@@ -174,7 +174,7 @@ function VideoCard({
           playerRef.current?.stopPreview()
         }}
       >
-        <figure className="relative order-1 aspect-[16/9] w-full overflow-hidden rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
+        <figure className="relative order-1 aspect-[16/9] w-full overflow-hidden rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 select-none group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
           {thumbnail ? (
             <picture className="absolute inset-0 block h-full w-full">
               <source
@@ -186,6 +186,7 @@ function VideoCard({
                 alt=""
                 decoding="async"
                 loading="lazy"
+                draggable={false}
                 width={thumbnail.width}
                 height={thumbnail.height}
                 className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${iframeReady ? "opacity-0" : "opacity-100"}`}
@@ -255,7 +256,7 @@ function VideoCard({
             e.preventDefault()
             handleTitleClick()
           }}
-          className="absolute inset-0 z-[1] cursor-pointer rounded bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00ADEF]"
+          className="absolute inset-0 z-[1] cursor-pointer rounded bg-transparent select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00ADEF]"
         />
       </div>
     </article>
