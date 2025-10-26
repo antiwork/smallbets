@@ -134,6 +134,13 @@ export function SessionsShelfRow({
             {batches.map((batch, batchIndex) => {
               const isPhantomSlide = batchIndex === batches.length - 1
 
+              // Only render current slide and immediate neighbors to reduce DOM/update work
+              const isVisibleSlide =
+                batchIndex === selectedIndex ||
+                batchIndex === selectedIndex - 1 ||
+                batchIndex === selectedIndex + 1 ||
+                isPhantomSlide
+
               return (
                 <CarouselItem
                   key={batchIndex}
@@ -144,7 +151,7 @@ export function SessionsShelfRow({
                     <div className="pointer-events-none opacity-0">
                       <div className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0" />
                     </div>
-                  ) : (
+                  ) : isVisibleSlide ? (
                     <div className="flex gap-[var(--shelf-gap)]">
                       {batch.map((session) => (
                         <div
@@ -159,6 +166,15 @@ export function SessionsShelfRow({
                             thumbnail={thumbnails?.[session.vimeoId]}
                           />
                         </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex gap-[var(--shelf-gap)]">
+                      {batch.map((session) => (
+                        <div
+                          key={session.id}
+                          className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0"
+                        />
                       ))}
                     </div>
                   )}

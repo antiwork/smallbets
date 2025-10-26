@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { memo, useEffect, useMemo, useRef, useState } from "react"
 import { useHoverPreviewGuard } from "./hooks/use-hover-preview-guard"
 import { useIntersectionStop } from "./hooks/use-intersection-stop"
 import {
@@ -30,7 +30,7 @@ function formatTimeRemaining(
   return `${formatHoursMinutesFromSeconds(remaining)} left`
 }
 
-export default function VideoCard({
+function VideoCard({
   session,
   thumbnail,
   showProgress = false,
@@ -261,3 +261,22 @@ export default function VideoCard({
     </article>
   )
 }
+
+function arePropsEqual(prev: VideoCardProps, next: VideoCardProps): boolean {
+  if (prev.session !== next.session) return false
+  if (prev.showProgress !== next.showProgress) return false
+  if (prev.persistPreview !== next.persistPreview) return false
+  if (prev.backIcon !== next.backIcon) return false
+  const prevThumb = prev.thumbnail
+  const nextThumb = next.thumbnail
+  if (!prevThumb && !nextThumb) return true
+  if (!prevThumb || !nextThumb) return false
+  return (
+    prevThumb.src === nextThumb.src &&
+    prevThumb.width === nextThumb.width &&
+    prevThumb.height === nextThumb.height &&
+    prevThumb.srcset === nextThumb.srcset
+  )
+}
+
+export default memo(VideoCard, arePropsEqual)
