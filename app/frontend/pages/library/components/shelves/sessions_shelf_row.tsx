@@ -100,7 +100,7 @@ export function SessionsShelfRow({
           {title}
         </h2>
       ) : null}
-      <div className="relative">
+      <div className="group/shelf relative">
         <Carousel
           opts={{
             align: "start",
@@ -154,7 +154,7 @@ export function SessionsShelfRow({
             type="button"
             onClick={scrollPrev}
             aria-label="Show previous videos"
-            className="absolute top-0 bottom-[0.4vw] left-0 z-10 flex w-[var(--shelf-side-pad)] cursor-pointer items-center justify-center bg-gradient-to-r from-black/60 to-transparent opacity-0 transition-opacity duration-200 hover:opacity-100"
+            className="absolute top-0 bottom-[0.4vw] left-0 z-10 flex w-[var(--shelf-side-pad)] cursor-pointer items-center justify-center bg-gradient-to-r from-white/90 to-white/50 shadow-none! transition-opacity duration-200 dark:from-black/90 dark:to-black/50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -164,7 +164,7 @@ export function SessionsShelfRow({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-8 w-8 text-white"
+              className="size-9 text-gray-800 opacity-0 transition-opacity duration-200 group-hover/shelf:opacity-100 dark:text-white"
               aria-hidden="true"
             >
               <polyline points="15 18 9 12 15 6" />
@@ -177,7 +177,7 @@ export function SessionsShelfRow({
             type="button"
             onClick={scrollNext}
             aria-label="Show next videos"
-            className="absolute top-0 right-0 bottom-[0.4vw] z-10 flex w-[var(--shelf-side-pad)] cursor-pointer items-center justify-center bg-gradient-to-l from-black/60 to-transparent opacity-0 transition-opacity duration-200 hover:opacity-100 focus:opacity-100"
+            className="absolute top-0 right-0 bottom-[0.4vw] z-10 flex w-[var(--shelf-side-pad)] cursor-pointer items-center justify-center bg-gradient-to-l from-white/90 to-white/50 shadow-none! transition-opacity duration-200 dark:from-black/90 dark:to-black/50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -187,7 +187,7 @@ export function SessionsShelfRow({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-8 w-8 text-white"
+              className="size-9 text-gray-800 opacity-0 transition-opacity duration-200 group-hover/shelf:opacity-100 dark:text-white"
               aria-hidden="true"
             >
               <polyline points="9 18 15 12 9 6" />
