@@ -27,8 +27,6 @@ class Stylesheets
     Rails.application.config.assets.paths.each do |asset_path|
       asset_path = asset_path.to_s
       next if asset_path == Rails.root.join("app/assets/stylesheets").to_s
-      # Exclude Vite entrypoints from Rails vendor styles to avoid duplicate CSS and 404s
-      next if asset_path == Rails.root.join("app", "frontend").to_s
 
       Dir.glob(File.join(asset_path, "**", "*.css")).sort.each do |file|
         vendor_assets << Pathname.new(file).relative_path_from(asset_path).to_s.sub(/\.css\z/, "")
