@@ -29,6 +29,7 @@ export function SessionsShelfRow({
   const [api, setApi] = useState<CarouselApi>()
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
   const batchSize = useShelfItems()
 
   const batches = useMemo(() => {
@@ -49,6 +50,9 @@ export function SessionsShelfRow({
       setCanScrollPrev(api.canScrollPrev())
       const isOnSecondToLast = api.selectedScrollSnap() === batches.length - 2
       setCanScrollNext(api.canScrollNext() && !isOnSecondToLast)
+      const totalReal = Math.max(0, batches.length - 1)
+      const selected = api.selectedScrollSnap()
+      setSelectedIndex(Math.min(selected, Math.max(0, totalReal - 1)))
     }
 
     // Ensure carousel is fully initialized
@@ -89,9 +93,20 @@ export function SessionsShelfRow({
     <section
       id={id}
       tabIndex={id ? -1 : undefined}
-      className="shelf-scope flex flex-col gap-[1vw] [--shelf-gap:0.8vw] [--shelf-items:2] [--shelf-peek:0.15]"
+      className="shelf-scope flex flex-col gap-[1vw]"
       aria-labelledby={headingId}
     >
+      {/* Live region announcing the current batch for screen readers */}
+      {batches.length > 1 ? (
+        <div
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {`${Math.min(selectedIndex + 1, Math.max(1, batches.length - 1))} of ${Math.max(1, batches.length - 1)}`}
+        </div>
+      ) : null}
       {title ? (
         <h2
           id={headingId}
@@ -100,7 +115,10 @@ export function SessionsShelfRow({
           {title}
         </h2>
       ) : null}
-      <div className="group/shelf relative">
+      <div
+        className="group/shelf relative"
+        style={{ ["--shelf-container-w" as any]: "100%" }}
+      >
         <Carousel
           opts={{
             align: "start",
@@ -109,8 +127,10 @@ export function SessionsShelfRow({
           }}
           setApi={setApi}
           className="w-full"
+          aria-roledescription="carousel"
+          aria-label={title ? `${title} videos` : "Videos"}
         >
-          <CarouselContent className="!ml-[var(--shelf-side-pad)] pb-[0.4vw]">
+          <CarouselContent className="!mr-[var(--shelf-side-pad)] !ml-[var(--shelf-side-pad)] pb-[0.4vw]">
             {batches.map((batch, batchIndex) => {
               const isPhantomSlide = batchIndex === batches.length - 1
 
@@ -119,7 +139,6 @@ export function SessionsShelfRow({
                   key={batchIndex}
                   className="!basis-[calc(100vw_-_var(--shelf-side-pad)_*_2)] !p-0"
                   aria-hidden={isPhantomSlide ? true : undefined}
-                  inert={isPhantomSlide ? true : undefined}
                 >
                   {isPhantomSlide ? (
                     <div className="pointer-events-none opacity-0">
@@ -154,7 +173,7 @@ export function SessionsShelfRow({
             type="button"
             onClick={scrollPrev}
             aria-label="Show previous videos"
-            className="absolute top-0 bottom-0 left-0 z-10 flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-r from-white/90 to-white/50 shadow-none! transition-opacity duration-200 dark:from-black/90 dark:to-black/50"
+            className="absolute top-0 bottom-0 left-0 z-10 flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-r from-white/90 to-white/50 !shadow-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:from-black/90 dark:to-black/50"
             style={{
               paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 8px)",
             }}
@@ -180,7 +199,7 @@ export function SessionsShelfRow({
             type="button"
             onClick={scrollNext}
             aria-label="Show next videos"
-            className="absolute top-0 right-0 bottom-0 z-10 flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-l from-white/90 to-white/50 shadow-none! transition-opacity duration-200 dark:from-black/90 dark:to-black/50"
+            className="absolute top-0 right-0 bottom-0 z-10 flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-l from-white/90 to-white/50 !shadow-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:from-black/90 dark:to-black/50"
             style={{
               paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 8px)",
             }}

@@ -34,12 +34,23 @@ export function useShelfItems(): number {
 
     const mediaQueryLists = queries.map(({ media }) => window.matchMedia(media))
     mediaQueryLists.forEach((mql) => {
-      mql.addEventListener("change", updateItemCount)
+      // Safari < 14 fallback
+      if ("addEventListener" in mql) {
+        mql.addEventListener("change", updateItemCount)
+      } else if ("addListener" in mql) {
+        // @ts-expect-error older Safari
+        mql.addListener(updateItemCount)
+      }
     })
 
     return () => {
       mediaQueryLists.forEach((mql) => {
-        mql.removeEventListener("change", updateItemCount)
+        if ("removeEventListener" in mql) {
+          mql.removeEventListener("change", updateItemCount)
+        } else if ("removeListener" in mql) {
+          // @ts-expect-error older Safari
+          mql.removeListener(updateItemCount)
+        }
       })
     }
   }, [])

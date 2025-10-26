@@ -32,6 +32,7 @@
   --shelf-gap: 0.8vw;
   --shelf-items: 2;
   --shelf-peek: 0.15;
+  /* Match original viewport-based sizing with a fixed peek fraction */
   --shelf-card-w: calc((100vw - var(--shelf-gap) * 2) / (2 + 0.3));
   --shelf-peek-pad: calc(var(--shelf-card-w) * var(--shelf-peek));
   --shelf-side-pad: var(--shelf-peek-pad);
@@ -60,10 +61,16 @@
 
 @media (min-width: 1536px) {
   :where(.shelf-scope) {
-    --shelf-card-w: calc(
-      (100vw - var(--library-left-pad, 0px) * 2 - var(--shelf-gap) * 6) / 6
-    );
+    /* At 2xl, show full items without peek and align to page padding */
     --shelf-items: 6;
+    --shelf-peek: 0;
+    --shelf-card-w: calc(
+      (
+          100vw - var(--library-left-pad, 0px) * 2 - var(--shelf-gap) *
+            var(--shelf-items)
+        ) /
+        var(--shelf-items)
+    );
     --shelf-side-pad: var(--library-left-pad, 0px);
   }
 }

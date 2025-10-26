@@ -565,7 +565,7 @@ export function VimeoEmbed({
           onMouseEnter={handleButtonEnter}
           onMouseLeave={handleButtonLeave}
           className={[
-            "text-foreground pointer-events-auto absolute top-2.5 right-2.5 z-[2] flex size-9 items-center justify-center overflow-hidden rounded-full hover:shadow-none!",
+            "text-foreground pointer-events-auto absolute top-2.5 right-2.5 z-[2] flex size-9 items-center justify-center overflow-hidden rounded-full hover:!shadow-none",
             "before:bg-background before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:transition-opacity before:ease-out before:content-['']",
             isBgVisible || isButtonHovered
               ? "before:opacity-60 before:duration-150"

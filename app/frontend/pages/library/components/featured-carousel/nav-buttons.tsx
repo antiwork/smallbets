@@ -24,7 +24,7 @@ function ArrowButton({
     <button
       type="button"
       className={[
-        "group absolute top-1/2 z-0 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:shadow-none! focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-[#00ADEF]",
+        "group absolute top-1/2 z-0 hidden size-25 -translate-y-1/2 items-center justify-center bg-neutral-100 transition-all duration-200 ease-out hover:bg-neutral-200 hover:!shadow-none focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none xl:flex dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus-visible:ring-[#00ADEF]",
         className,
         sideClass,
       ]

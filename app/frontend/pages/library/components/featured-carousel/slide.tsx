@@ -42,7 +42,6 @@ export function Slide({
       aria-roledescription="slide"
       aria-label={`${session.title} — by ${session.creator}`}
       aria-hidden={!isCurrent}
-      inert={!isCurrent}
       tabIndex={isCurrent ? 0 : -1}
       style={
         isCurrent
@@ -65,7 +64,7 @@ export function Slide({
         !isCurrent && !isPrevious && !isNext && "pointer-events-none opacity-0",
         isCurrent && "cursor-grab active:cursor-grabbing",
         isCurrent &&
-          "shadow-none! hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]! focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent focus-visible:outline-none",
+          "!shadow-none hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]! focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent focus-visible:outline-none",
       )}
       onPointerDownCapture={
         isCurrent ? drag.bindings.onPointerDownCapture : undefined
