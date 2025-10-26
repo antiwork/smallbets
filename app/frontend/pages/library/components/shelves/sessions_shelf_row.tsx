@@ -9,6 +9,40 @@ import VideoCard from "../video_card"
 import type { LibrarySessionPayload, VimeoThumbnailPayload } from "../../types"
 import { useShelfItems } from "./use-shelf-items"
 
+interface SessionCellProps {
+  session: LibrarySessionPayload
+  visible: boolean
+  backIcon?: string
+  showProgress: boolean
+  persistPreview: boolean
+  thumbnails?: Record<string, VimeoThumbnailPayload>
+}
+
+function SessionCell({
+  session,
+  visible,
+  backIcon,
+  showProgress,
+  persistPreview,
+  thumbnails,
+}: SessionCellProps) {
+  return (
+    <div className="w-[var(--shelf-card-w)] shrink-0">
+      {visible ? (
+        <VideoCard
+          session={session}
+          backIcon={backIcon}
+          showProgress={showProgress}
+          persistPreview={persistPreview}
+          thumbnail={thumbnails?.[session.vimeoId]}
+        />
+      ) : (
+        <div className="aspect-[16/9] w-full" />
+      )}
+    </div>
+  )
+}
+
 export function SessionsShelfRow({
   sessions,
   backIcon,
@@ -151,29 +185,17 @@ export function SessionsShelfRow({
                     <div className="pointer-events-none opacity-0">
                       <div className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0" />
                     </div>
-                  ) : isVisibleSlide ? (
-                    <div className="flex gap-[var(--shelf-gap)]">
-                      {batch.map((session) => (
-                        <div
-                          key={session.id}
-                          className="w-[var(--shelf-card-w)] shrink-0"
-                        >
-                          <VideoCard
-                            session={session}
-                            backIcon={backIcon}
-                            showProgress={showProgress}
-                            persistPreview={persistPreview}
-                            thumbnail={thumbnails?.[session.vimeoId]}
-                          />
-                        </div>
-                      ))}
-                    </div>
                   ) : (
                     <div className="flex gap-[var(--shelf-gap)]">
                       {batch.map((session) => (
-                        <div
+                        <SessionCell
                           key={session.id}
-                          className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0"
+                          session={session}
+                          visible={isVisibleSlide}
+                          backIcon={backIcon}
+                          showProgress={showProgress}
+                          persistPreview={persistPreview}
+                          thumbnails={thumbnails}
                         />
                       ))}
                     </div>
@@ -191,7 +213,7 @@ export function SessionsShelfRow({
             aria-label="Show previous videos"
             className="absolute top-0 bottom-0 left-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-r from-white/90 to-white/50 !shadow-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:from-black/90 dark:to-black/50"
             style={{
-              paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 8px)",
+              paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 12px)",
             }}
           >
             <svg
@@ -217,7 +239,7 @@ export function SessionsShelfRow({
             aria-label="Show next videos"
             className="absolute top-0 right-0 bottom-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-l from-white/90 to-white/50 !shadow-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:from-black/90 dark:to-black/50"
             style={{
-              paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 8px)",
+              paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 12px)",
             }}
           >
             <svg
