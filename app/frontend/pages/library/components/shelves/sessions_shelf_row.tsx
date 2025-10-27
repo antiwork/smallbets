@@ -86,11 +86,20 @@ export function SessionsShelfRow({
     if (!api) return
 
     const updateScrollState = () => {
+      const lastIndex = batches.length - 1
+      const lastRealIndex = Math.max(0, lastIndex - 1)
+      const selected = api.selectedScrollSnap()
+
+      // Prevent selecting the phantom last slide when dragging
+      if (selected === lastIndex) {
+        api.scrollTo(lastRealIndex)
+        return
+      }
+
       setCanScrollPrev(api.canScrollPrev())
-      const isOnSecondToLast = api.selectedScrollSnap() === batches.length - 2
+      const isOnSecondToLast = selected === batches.length - 2
       setCanScrollNext(api.canScrollNext() && !isOnSecondToLast)
       const totalReal = Math.max(0, batches.length - 1)
-      const selected = api.selectedScrollSnap()
       setSelectedIndex(Math.min(selected, Math.max(0, totalReal - 1)))
 
       // Persist previously seen slides to avoid unmounting their content
@@ -174,6 +183,7 @@ export function SessionsShelfRow({
             loop: false,
             slidesToScroll: 1,
             duration: 20,
+            containScroll: "trimSnaps",
           }}
           setApi={setApi}
           className="w-full"
