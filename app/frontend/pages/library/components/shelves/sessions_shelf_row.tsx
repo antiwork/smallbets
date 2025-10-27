@@ -45,6 +45,53 @@ function SessionCell({
   )
 }
 
+interface NavigationButtonProps {
+  direction: "prev" | "next"
+  onClick: () => void
+}
+
+function NavigationButton({ direction, onClick }: NavigationButtonProps) {
+  const isPrev = direction === "prev"
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={isPrev ? "Show previous videos" : "Show next videos"}
+      className={`shelf-nav-btn absolute top-0 bottom-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center !shadow-none transition-opacity duration-250 ease-out before:absolute before:inset-0 group-hover/shelf:before:opacity-0 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:before:from-black/90 dark:before:to-black/50 ${
+        isPrev
+          ? "left-0 before:bg-gradient-to-r before:from-white/90 before:to-white/50"
+          : "right-0 before:bg-gradient-to-l before:from-white/90 before:to-white/50"
+      }`}
+      style={{
+        paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 12px)",
+        WebkitMaskImage: isPrev
+          ? "linear-gradient(to right, black 0%, black 92%, transparent 100%)"
+          : "linear-gradient(to right, transparent 0%, black 8%, black 100%)",
+        maskImage: isPrev
+          ? "linear-gradient(to right, black 0%, black 92%, transparent 100%)"
+          : "linear-gradient(to right, transparent 0%, black 8%, black 100%)",
+      }}
+    >
+      <div className="relative z-[1] hidden size-8 items-center justify-center rounded-full bg-white opacity-0 transition-opacity duration-150 ease-out group-hover/shelf:opacity-100 sm:flex dark:bg-black">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="size-6 text-black dark:text-white"
+          aria-hidden="true"
+        >
+          <polyline points={isPrev ? "15 18 9 12 15 6" : "9 18 15 12 9 6"} />
+        </svg>
+      </div>
+    </button>
+  )
+}
+
 export function SessionsShelfRow({
   sessions,
   backIcon,
@@ -243,63 +290,10 @@ export function SessionsShelfRow({
         </Carousel>
 
         {canScrollPrev && (
-          <button
-            type="button"
-            onClick={scrollPrev}
-            aria-label="Show previous videos"
-            className="absolute top-0 bottom-0 left-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-r from-white/90 to-white/50 !shadow-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:from-black/90 dark:to-black/50"
-            style={{
-              paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 12px)",
-              WebkitMaskImage:
-                "linear-gradient(to right, black 0%, black 92%, transparent 100%)",
-              maskImage:
-                "linear-gradient(to right, black 0%, black 92%, transparent 100%)",
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="hidden size-9 text-gray-800 opacity-0 transition-opacity duration-200 group-hover/shelf:opacity-100 sm:block dark:text-white"
-              aria-hidden="true"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
+          <NavigationButton direction="prev" onClick={scrollPrev} />
         )}
-
         {canScrollNext && (
-          <button
-            type="button"
-            onClick={scrollNext}
-            aria-label="Show next videos"
-            className="absolute top-0 right-0 bottom-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-l from-white/90 to-white/50 !shadow-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:from-black/90 dark:to-black/50"
-            style={{
-              paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 12px)",
-              WebkitMaskImage:
-                "linear-gradient(to right, transparent 0%, black 8%, black 100%)",
-              maskImage:
-                "linear-gradient(to right, transparent 0%, black 8%, black 100%)",
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="hidden size-9 text-gray-800 opacity-0 transition-opacity duration-200 group-hover/shelf:opacity-100 sm:block dark:text-white"
-              aria-hidden="true"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
+          <NavigationButton direction="next" onClick={scrollNext} />
         )}
       </div>
     </section>

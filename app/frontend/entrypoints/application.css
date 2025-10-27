@@ -127,3 +127,11 @@ main#main-content:focus {
     color: inherit;
   }
 }
+
+.shelf-nav-btn::before {
+  transition: opacity 250ms ease-out;
+}
+
+.group\/shelf:hover .shelf-nav-btn::before {
+  transition: opacity 900ms ease-out;
+}
