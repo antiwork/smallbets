@@ -58,19 +58,13 @@ function NavigationButton({ direction, onClick }: NavigationButtonProps) {
       type="button"
       onClick={onClick}
       aria-label={isPrev ? "Show previous videos" : "Show next videos"}
-      className={`shelf-nav-btn absolute top-0 bottom-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center !shadow-none transition-opacity duration-250 ease-out before:absolute before:inset-0 group-hover/shelf:before:opacity-0 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:before:from-black/90 dark:before:to-black/50 ${
+      className={`shelf-nav-btn absolute top-0 bottom-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center !shadow-none transition-opacity duration-250 ease-out before:absolute before:inset-0 before:from-white/80 before:to-white/10 group-hover/shelf:before:opacity-0 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:before:from-black/80 dark:before:to-black/20 ${
         isPrev
-          ? "left-0 before:bg-gradient-to-r before:from-white/90 before:to-white/5"
-          : "right-0 before:bg-gradient-to-l before:from-white/90 before:to-white/5"
+          ? "left-0 before:bg-gradient-to-r"
+          : "right-0 before:bg-gradient-to-l"
       }`}
       style={{
         paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 12px)",
-        WebkitMaskImage: isPrev
-          ? "linear-gradient(to right, black 0%, black 90%, transparent 100%)"
-          : "linear-gradient(to right, transparent 0%, black 0%, black 90%)",
-        maskImage: isPrev
-          ? "linear-gradient(to right, black 0%, black 90%, transparent 100%)"
-          : "linear-gradient(to right, transparent 0%, black 0%, black 90%)",
       }}
     >
       <div className="relative z-[1] hidden size-8 items-center justify-center rounded-full bg-white opacity-0 shadow-[0_0_0_1px_var(--control-border)] transition-opacity duration-150 ease-out group-hover/shelf:opacity-100 sm:flex dark:bg-black">
