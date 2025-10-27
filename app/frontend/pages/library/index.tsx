@@ -351,6 +351,7 @@ export default function LibraryIndex({
                             onChange={setQuery}
                             containerClassName="mr-0 ml-0 max-w-none flex-1"
                             inputId="library-search-mobile"
+                            autoFocus
                             ref={mobileSearchInputRef}
                           />
                         </div>,
