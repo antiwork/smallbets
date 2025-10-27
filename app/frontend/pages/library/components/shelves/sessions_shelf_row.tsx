@@ -222,9 +222,13 @@ export function SessionsShelfRow({
             {batches.map((batch, batchIndex) => {
               const isPhantomSlide = batchIndex === batches.length - 1
 
+              const itemKey = isPhantomSlide
+                ? "phantom"
+                : `batch-${batch[0]?.id ?? batchIndex}-${batch.length}`
+
               return (
                 <CarouselItem
-                  key={batchIndex}
+                  key={itemKey}
                   className="!basis-[calc(100vw_-_var(--shelf-side-pad)_*_2)] !p-0"
                   aria-hidden={isPhantomSlide ? true : undefined}
                 >

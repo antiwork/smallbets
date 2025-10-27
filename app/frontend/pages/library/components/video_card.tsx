@@ -41,6 +41,9 @@ function VideoCard({
   imageLoading = "lazy",
   fetchPriority = "auto",
 }: VideoCardProps) {
+  const [stickyThumbnail, setStickyThumbnail] = useState<
+    VimeoThumbnailPayload | undefined
+  >(thumbnail)
   const playerRef = useRef<VimeoPlayerHandle>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [shouldStartOnVisible, setShouldStartOnVisible] = useState(false)
@@ -60,6 +63,12 @@ function VideoCard({
   )
 
   useEffect(() => {
+    if (thumbnail) setStickyThumbnail(thumbnail)
+  }, [thumbnail])
+
+  const activeThumbnail = stickyThumbnail ?? thumbnail
+
+  useEffect(() => {
     if (!iframeVisible) return
     if (!shouldStartOnVisible) return
     playerRef.current?.startPreview()
@@ -72,6 +81,8 @@ function VideoCard({
       hoverMoveStartedRef.current = false
       disarm()
       playerRef.current?.stopPreview()
+      setIframeVisible(false)
+      setIframeReady(false)
     },
   })
 
@@ -147,7 +158,6 @@ function VideoCard({
         onPointerEnter={() => {
           if (!supportsHover()) return
           if (isDataSaverEnabled()) return
-          if (!iframeVisible) setIframeVisible(true)
           hoverMoveStartedRef.current = false
           prefetchWatchPage()
         }}
@@ -164,6 +174,7 @@ function VideoCard({
             return
           if (hoverMoveStartedRef.current) return
           hoverMoveStartedRef.current = true
+          if (!iframeVisible) setIframeVisible(true)
           arm()
           setShouldStartOnVisible(true)
         }}
@@ -171,29 +182,33 @@ function VideoCard({
           hoverMoveStartedRef.current = false
           disarm()
           playerRef.current?.stopPreview()
+          setIframeVisible(false)
+          setIframeReady(false)
         }}
         onPointerCancel={() => {
           hoverMoveStartedRef.current = false
           disarm()
           playerRef.current?.stopPreview()
+          setIframeVisible(false)
+          setIframeReady(false)
         }}
       >
         <figure className="relative order-1 aspect-[16/9] w-full overflow-hidden rounded shadow-[0_0_0_0px_transparent] transition-shadow duration-150 select-none group-hover:shadow-[0_0_0_1px_transparent,0_0_0_3px_#00ADEF]">
-          {thumbnail ? (
+          {activeThumbnail ? (
             <picture className="absolute inset-0 block h-full w-full">
               <source
-                srcSet={thumbnail.srcset}
+                srcSet={activeThumbnail.srcset}
                 sizes="(min-width: 768px) 33vw, 100vw"
               />
               <img
-                src={thumbnail.src}
+                src={activeThumbnail.src}
                 alt=""
                 decoding="async"
                 loading={imageLoading}
                 fetchPriority={fetchPriority}
                 draggable={false}
-                width={thumbnail.width}
-                height={thumbnail.height}
+                width={activeThumbnail.width}
+                height={activeThumbnail.height}
                 className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${iframeVisible && iframeReady ? "opacity-0" : "opacity-100"}`}
               />
             </picture>
