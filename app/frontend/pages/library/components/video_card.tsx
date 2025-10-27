@@ -194,7 +194,7 @@ function VideoCard({
                 draggable={false}
                 width={thumbnail.width}
                 height={thumbnail.height}
-                className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${iframeReady ? "opacity-0" : "opacity-100"}`}
+                className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${iframeVisible && iframeReady ? "opacity-0" : "opacity-100"}`}
               />
             </picture>
           ) : (

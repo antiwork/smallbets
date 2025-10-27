@@ -113,9 +113,6 @@ export function SessionsShelfRow({
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [mountedSlides, setMountedSlides] = useState<Set<number>>(
-    () => new Set([0]),
-  )
   const batchSize = useShelfItems()
 
   const batches = useMemo(() => {
@@ -148,16 +145,6 @@ export function SessionsShelfRow({
       setCanScrollNext(api.canScrollNext() && !isOnSecondToLast)
       const totalReal = Math.max(0, batches.length - 1)
       setSelectedIndex(Math.min(selected, Math.max(0, totalReal - 1)))
-
-      // Persist previously seen slides to avoid unmounting their content
-      setMountedSlides((prev) => {
-        const next = new Set(prev)
-        const clamped = Math.min(selected, Math.max(0, totalReal - 1))
-        next.add(clamped)
-        if (clamped - 1 >= 0) next.add(clamped - 1)
-        if (clamped + 1 <= Math.max(0, totalReal - 1)) next.add(clamped + 1)
-        return next
-      })
     }
 
     // Ensure carousel is fully initialized
@@ -241,19 +228,6 @@ export function SessionsShelfRow({
             {batches.map((batch, batchIndex) => {
               const isPhantomSlide = batchIndex === batches.length - 1
 
-              // Only render current slide and immediate neighbors to reduce DOM/update work
-              const isVisibleSlide =
-                batchIndex === selectedIndex ||
-                batchIndex === selectedIndex - 1 ||
-                batchIndex === selectedIndex + 1 ||
-                isPhantomSlide
-
-              // Keep previously seen slides mounted to avoid reloading on return
-              const isMountedSlide =
-                isPhantomSlide ||
-                isVisibleSlide ||
-                mountedSlides.has(batchIndex)
-
               return (
                 <CarouselItem
                   key={batchIndex}
@@ -264,7 +238,7 @@ export function SessionsShelfRow({
                     <div className="pointer-events-none opacity-0">
                       <div className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0" />
                     </div>
-                  ) : isMountedSlide ? (
+                  ) : (
                     <div className="flex gap-[var(--shelf-gap)]">
                       {batch.map((session) => (
                         <SessionCell
@@ -277,10 +251,6 @@ export function SessionsShelfRow({
                           thumbnails={thumbnails}
                         />
                       ))}
-                    </div>
-                  ) : (
-                    <div className="pointer-events-none opacity-0">
-                      <div className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0" />
                     </div>
                   )}
                 </CarouselItem>
