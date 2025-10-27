@@ -11,7 +11,7 @@ import { useShelfItems } from "./use-shelf-items"
 
 interface SessionCellProps {
   session: LibrarySessionPayload
-  visible: boolean
+  mounted: boolean
   backIcon?: string
   showProgress: boolean
   persistPreview: boolean
@@ -20,7 +20,7 @@ interface SessionCellProps {
 
 function SessionCell({
   session,
-  visible,
+  mounted,
   backIcon,
   showProgress,
   persistPreview,
@@ -28,13 +28,15 @@ function SessionCell({
 }: SessionCellProps) {
   return (
     <div className="w-[var(--shelf-card-w)] shrink-0">
-      {visible ? (
+      {mounted ? (
         <VideoCard
           session={session}
           backIcon={backIcon}
           showProgress={showProgress}
           persistPreview={persistPreview}
           thumbnail={thumbnails?.[session.vimeoId]}
+          imageLoading={"eager"}
+          fetchPriority={"high"}
         />
       ) : (
         <div className="aspect-[16/9] w-full" />
@@ -64,6 +66,9 @@ export function SessionsShelfRow({
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [mountedSlides, setMountedSlides] = useState<Set<number>>(
+    () => new Set([0]),
+  )
   const batchSize = useShelfItems()
 
   const batches = useMemo(() => {
@@ -87,6 +92,16 @@ export function SessionsShelfRow({
       const totalReal = Math.max(0, batches.length - 1)
       const selected = api.selectedScrollSnap()
       setSelectedIndex(Math.min(selected, Math.max(0, totalReal - 1)))
+
+      // Persist previously seen slides to avoid unmounting their content
+      setMountedSlides((prev) => {
+        const next = new Set(prev)
+        const clamped = Math.min(selected, Math.max(0, totalReal - 1))
+        next.add(clamped)
+        if (clamped - 1 >= 0) next.add(clamped - 1)
+        if (clamped + 1 <= Math.max(0, totalReal - 1)) next.add(clamped + 1)
+        return next
+      })
     }
 
     // Ensure carousel is fully initialized
@@ -176,6 +191,12 @@ export function SessionsShelfRow({
                 batchIndex === selectedIndex + 1 ||
                 isPhantomSlide
 
+              // Keep previously seen slides mounted to avoid reloading on return
+              const isMountedSlide =
+                isPhantomSlide ||
+                isVisibleSlide ||
+                mountedSlides.has(batchIndex)
+
               return (
                 <CarouselItem
                   key={batchIndex}
@@ -186,19 +207,23 @@ export function SessionsShelfRow({
                     <div className="pointer-events-none opacity-0">
                       <div className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0" />
                     </div>
-                  ) : (
+                  ) : isMountedSlide ? (
                     <div className="flex gap-[var(--shelf-gap)]">
                       {batch.map((session) => (
                         <SessionCell
                           key={session.id}
                           session={session}
-                          visible={isVisibleSlide}
+                          mounted={true}
                           backIcon={backIcon}
                           showProgress={showProgress}
                           persistPreview={persistPreview}
                           thumbnails={thumbnails}
                         />
                       ))}
+                    </div>
+                  ) : (
+                    <div className="pointer-events-none opacity-0">
+                      <div className="aspect-[16/9] w-[var(--shelf-card-w)] shrink-0" />
                     </div>
                   )}
                 </CarouselItem>

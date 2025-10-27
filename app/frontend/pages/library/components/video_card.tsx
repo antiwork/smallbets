@@ -19,6 +19,8 @@ interface VideoCardProps {
   showProgress?: boolean
   backIcon?: string
   persistPreview?: boolean
+  imageLoading?: "eager" | "lazy"
+  fetchPriority?: "auto" | "high" | "low"
 }
 
 function formatTimeRemaining(
@@ -36,6 +38,8 @@ function VideoCard({
   showProgress = false,
   backIcon,
   persistPreview = false,
+  imageLoading = "lazy",
+  fetchPriority = "auto",
 }: VideoCardProps) {
   const playerRef = useRef<VimeoPlayerHandle>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -185,7 +189,8 @@ function VideoCard({
                 src={thumbnail.src}
                 alt=""
                 decoding="async"
-                loading="lazy"
+                loading={imageLoading}
+                fetchPriority={fetchPriority}
                 draggable={false}
                 width={thumbnail.width}
                 height={thumbnail.height}
