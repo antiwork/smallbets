@@ -73,7 +73,7 @@ function NavigationButton({ direction, onClick }: NavigationButtonProps) {
           : "linear-gradient(to right, transparent 0%, black 8%, black 100%)",
       }}
     >
-      <div className="relative z-[1] hidden size-8 items-center justify-center rounded-full bg-white opacity-0 transition-opacity duration-150 ease-out group-hover/shelf:opacity-100 sm:flex dark:bg-black">
+      <div className="relative z-[1] hidden size-8 items-center justify-center rounded-full bg-white opacity-0 shadow-[0_0_0_1px_var(--control-border)] transition-opacity duration-150 ease-out group-hover/shelf:opacity-100 sm:flex dark:bg-black">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
