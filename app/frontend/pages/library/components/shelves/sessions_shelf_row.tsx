@@ -158,6 +158,7 @@ export function SessionsShelfRow({
             align: "start",
             loop: false,
             slidesToScroll: 1,
+            duration: 20,
           }}
           setApi={setApi}
           className="w-full"
@@ -214,6 +215,10 @@ export function SessionsShelfRow({
             className="absolute top-0 bottom-0 left-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-r from-white/90 to-white/50 !shadow-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:from-black/90 dark:to-black/50"
             style={{
               paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 12px)",
+              WebkitMaskImage:
+                "linear-gradient(to right, black 0%, black 92%, transparent 100%)",
+              maskImage:
+                "linear-gradient(to right, black 0%, black 92%, transparent 100%)",
             }}
           >
             <svg
@@ -240,6 +245,10 @@ export function SessionsShelfRow({
             className="absolute top-0 right-0 bottom-0 z-[2] flex w-[var(--shelf-side-pad)] cursor-pointer items-start justify-center bg-gradient-to-l from-white/90 to-white/50 !shadow-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-[#00ADEF] focus-visible:outline-none dark:from-black/90 dark:to-black/50"
             style={{
               paddingTop: "calc(var(--shelf-card-w) * 9 / 16 / 2 - 12px)",
+              WebkitMaskImage:
+                "linear-gradient(to right, transparent 0%, black 8%, black 100%)",
+              maskImage:
+                "linear-gradient(to right, transparent 0%, black 8%, black 100%)",
             }}
           >
             <svg
