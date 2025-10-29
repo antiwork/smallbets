@@ -22,7 +22,7 @@
     <%= tag.link rel: "preconnect", href: "https://i.vimeocdn.com", crossorigin: "anonymous" %>
     <%= tag.link rel: "preconnect", href: "https://player.vimeo.com", crossorigin: "anonymous" %>
 
-    <%= stylesheet_link_tag "tailwind", *(Stylesheets.from("application") + Stylesheets.vendor_stylesheets), "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag *(Stylesheets.from("application") + Stylesheets.vendor_stylesheets), "data-turbo-track": "reload" %>
     <% if hotwire_native_app? %>
       <%= stylesheet_link_tag "native", "data-turbo-track": "reload" %>
     <% end %>
@@ -32,7 +32,7 @@
     <%= javascript_importmap_tags %>
 
     <%= yield :head %>
-    <%= vite_stylesheet_tag "application" %>
+    
     <%= vite_react_refresh_tag %>
     <%= vite_client_tag %>
     <%= vite_typescript_tag "inertia" %>

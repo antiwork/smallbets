@@ -3,6 +3,9 @@
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
+@source "../../views";
+@source "../../helpers";
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
