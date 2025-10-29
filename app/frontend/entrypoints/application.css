@@ -91,11 +91,21 @@
   --hover-filter: brightness(1);
   --outline-size: min(0.2em, 2px);
 
-  /* Legacy compatibility aliases */
-  --background: var(--color-bg);
-  --foreground: var(--color-text);
-  --border: var(--color-border);
-  --control-border: #b1adae;
+  /* Tailwind color utilities - reference CSS variables that respond to media queries */
+  /* These generate utilities like bg-background, text-foreground, etc. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
 
 :root {
@@ -116,6 +126,24 @@
   --lch-green: 65.59% 0.234 142.49;
   --lch-purple: 45% 0.32 282;
   --lch-always-black: 0% 0 0;
+
+  /* Color values for Tailwind utilities (light mode) */
+  /* These CSS variables are referenced by the theme above */
+  --background: oklch(100% 0 0);
+  --foreground: oklch(14.5% 0 0);
+  --primary: oklch(20.5% 0 0);
+  --primary-foreground: oklch(98.5% 0 0);
+  --secondary: oklch(97% 0 0);
+  --secondary-foreground: oklch(20.5% 0 0);
+  --accent: oklch(97% 0 0);
+  --accent-foreground: oklch(20.5% 0 0);
+  --muted: oklch(97% 0 0);
+  --muted-foreground: oklch(55.6% 0 0);
+  --destructive: oklch(57.7% 0.245 27.325);
+  --input: oklch(92.2% 0 0);
+  --ring: oklch(70.8% 0 0);
+  --border: var(--color-border);
+  --control-border: #b1adae;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -135,6 +163,23 @@
     --lch-green: 75% 0.21 141.89;
     --lch-purple: 70% 0.32 282;
     --control-border: #555;
+
+    /* Color values for Tailwind utilities (dark mode) */
+    /* These update via CSS cascade when prefers-color-scheme: dark */
+    --background: oklch(0% 0 0);
+    --foreground: oklch(98.5% 0 0);
+    --primary: oklch(92.2% 0 0);
+    --primary-foreground: oklch(20.5% 0 0);
+    --secondary: oklch(26.9% 0 0);
+    --secondary-foreground: oklch(98.5% 0 0);
+    --accent: oklch(26.9% 0 0);
+    --accent-foreground: oklch(98.5% 0 0);
+    --muted: oklch(26.9% 0 0);
+    --muted-foreground: oklch(70.8% 0 0);
+    --destructive: oklch(70.4% 0.191 22.216);
+    --input: oklch(100% 0 0 / 15%);
+    --ring: oklch(55.6% 0 0);
+    --border: oklch(1 0 0 / 10%);
 
     /* Dark mode code syntax colors */
     --color-keyword: oklch(73.45% 0.16260514269909043 25.78369140372489);
