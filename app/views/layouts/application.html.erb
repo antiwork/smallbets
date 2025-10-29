@@ -75,12 +75,12 @@
     </nav>
 
     <% if notice = flash[:notice] || flash[:alert] %>
-      <div class="flash" data-controller="element-removal" data-action="animationend->element-removal#remove">
-        <div class="flash__inner shadow" style="<%= "--flash-background: var(--color-negative)" if flash[:alert] %>">
+      <div class="fixed top-[var(--block-space)] left-1/2 -translate-x-1/2 z-[6] flex justify-center" data-controller="element-removal" data-action="animationend->element-removal#remove">
+        <div class="animate-[appear-then-fade_3s_300ms_both] aspect-square bg-[var(--flash-background,var(--color-positive))] rounded-full grid p-[var(--block-space)] place-items-center shadow" style="<%= "--flash-background: var(--color-negative)" if flash[:alert] %>">
           <% if flash[:alert] %>
-            <%= image_tag "alert.svg", aria: { hidden: true }, size: 24, class: "colorize--white" %></span>
+            <%= image_tag "alert.svg", aria: { hidden: true }, size: 24, class: "colorize--white col-start-1 row-start-1" %></span>
           <% else %>
-            <%= image_tag "check.svg", aria: { hidden: true }, size: 24, class: "colorize--white" %></span>
+            <%= image_tag "check.svg", aria: { hidden: true }, size: 24, class: "colorize--white col-start-1 row-start-1" %></span>
           <% end %>
         </div>
         <span class="for-screen-reader" role="alert" aria-atomic="true"><%= notice %></span>

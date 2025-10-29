@@ -313,3 +313,20 @@ main#main-content:focus {
 .gap {
   @apply gap-x-[var(--spacing-inline)] gap-y-[var(--spacing-block)];
 }
+
+/* Input component classes - migrated from inputs.css */
+/* Base input styling maintained in CSS file for complex pseudo-classes and nested selectors */
+/* These utility classes complement the CSS base classes */
+
+/* Code input variant - migrated from inputs.css */
+.input--code {
+  @apply font-mono break-words whitespace-pre-wrap;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monaco, monospace;
+}
+
+/* Button component classes - migrated from buttons.css */
+/* Complex button styling with nested selectors and pseudo-classes maintained in CSS file */
+/* Base button class maintains core functionality via CSS, modifiers use Tailwind utilities */
+/* NOTE: Switch classes remain in inputs.css due to complex pseudo-elements and nested selectors */

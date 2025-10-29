@@ -1,3 +1,7 @@
+/* PHASE 2 MIGRATION STATUS: Complex classes with nested selectors, CSS custom properties, and pseudo-classes */
+/* NOTE: Base button classes remain in CSS due to complexity (nested selectors, pseudo-classes, CSS variables) */
+/* Button modifier classes (.btn--reversed, .btn--negative, etc.) primarily set CSS variables */
+/* These work together with the base .btn class which handles the complex styling */
 :root {
   --btn-size: 2.65em;
   /* Define a slightly smaller size for the navbar action buttons */
