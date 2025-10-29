@@ -45,8 +45,8 @@
                   <tr class="<%= 'current-user' if is_current %>">
                     <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
                     <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
                           <% if user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
@@ -74,8 +74,8 @@
                   <tr class="current-user">
                     <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= @current_user_today_rank %></td>
                     <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(Current.user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(Current.user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
                           <% if Current.user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag Current.user.avatar, alt: Current.user.name, loading: "lazy" %>
@@ -127,8 +127,8 @@
                   <tr class="<%= 'current-user' if is_current %>">
                     <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
                     <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
                           <% if user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
@@ -156,8 +156,8 @@
                   <tr class="current-user">
                     <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= @current_user_month_rank %></td>
                     <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(Current.user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(Current.user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
                           <% if Current.user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag Current.user.avatar, alt: Current.user.name, loading: "lazy" %>
@@ -209,8 +209,8 @@
                   <tr class="<%= 'current-user' if is_current %>">
                     <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
                     <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
                           <% if user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
@@ -238,8 +238,8 @@
                   <tr class="current-user">
                     <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= @current_user_year_rank %></td>
                     <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(Current.user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(Current.user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
                           <% if Current.user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag Current.user.avatar, alt: Current.user.name, loading: "lazy" %>
@@ -291,8 +291,8 @@
                   <tr class="<%= 'current-user' if is_current %>">
                     <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
                     <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
                           <% if user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
@@ -320,8 +320,8 @@
                   <tr class="current-user">
                     <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= @current_user_all_time_rank %></td>
                     <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(Current.user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(Current.user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
                           <% if Current.user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag Current.user.avatar, alt: Current.user.name, loading: "lazy" %>
@@ -495,7 +495,7 @@
                   <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
                   <td style="max-width: 0; width: 100%;">
                     <div class="flex gap-inline align-center">
-                      <%= link_to user_path(user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0; width: 100%;" do %>
+                      <%= link_to user_path(user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0; width: 100%;" do %>
                         <% if user.avatar.attached? %>
                           <div class="avatar avatar-xs">
                             <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
@@ -692,8 +692,8 @@
                 <% @blocked_members.each do |user| %>
                   <tr>
                     <td style="max-width: 0; width: 100%;">
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(user, from: "/stats"), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0; width: 100%;" do %>
+                      <div class="flex gap-inline items-center">
+                        <%= link_to user_path(user, from: "/stats"), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0; width: 100%;" do %>
                           <% if user.avatar.attached? %>
                             <div class="avatar avatar-xs">
                               <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
