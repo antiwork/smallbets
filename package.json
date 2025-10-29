@@ -1,7 +1,6 @@
 {
   "private": true,
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.13",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.0",
     "tailwindcss": "^4.1.14",
