@@ -30,6 +30,7 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
+    "build": "vite build",
     "check": "tsc -p tsconfig.app.json"
   }
 }

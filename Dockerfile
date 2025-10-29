@@ -16,7 +16,7 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM --platform=$TARGETPLATFORM base as build
 
-# Install packages need to build gems and Node.js for Tailwind
+# Install packages need to build gems and Node.js for Vite
 RUN apt-get update -qq && \
     apt-get install -y build-essential git pkg-config nodejs npm
 
@@ -27,9 +27,9 @@ RUN bundle install && \
 
 COPY . .
 
-# Install Node dependencies and build Tailwind CSS
+# Install Node dependencies and build assets with Vite
 RUN npm install && \
-    npx @tailwindcss/cli -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/tailwind.css
+    npm run build
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN mkdir -p /rails/storage/logs

@@ -28,23 +28,15 @@ bin/setup
 Start the app in development:
 
 ```bash
-bin/rails server
+bin/dev
 ```
 
-`vite_rails` is configured with `autoBuild: true`, and the layout includes the Vite tags; assets are compiled and served automatically, so Inertia and Tailwind work without a separate Vite process.
+This starts both the Rails server and Vite dev server using Foreman (via Procfile.dev).
 
-The `bin/setup` script installs Ruby gems and Node packages (via `npm install`), prepares the database, builds Tailwind CSS once, and configures the application.
+The `bin/setup` script installs Ruby gems and Node packages (via `npm install`), prepares the database, and configures the application.
 If you skip `bin/setup`, install frontend dependencies manually with `npm install`.
 
-Tailwind in this app is used in two places:
-
-- For Rails views (asset pipeline): if you edit files under `app/assets/stylesheets/**`, run:
-
-  ```bash
-  bin/tailwind-build --watch
-  ```
-
-- For Inertia/React pages (Vite): styles under `app/frontend/**` are processed automatically by Vite through `vite_rails` during development — no separate Tailwind watch needed.
+All CSS is managed through Vite. Tailwind processes styles from `app/frontend/entrypoints/application.css`, which is automatically rebuilt during development.
 
 ## Running in production
 
