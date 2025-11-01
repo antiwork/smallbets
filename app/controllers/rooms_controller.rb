@@ -64,6 +64,7 @@ class RoomsController < ApplicationController
 
     def find_messages
       messages = @room.messages
+                      .with_threads
                       .with_rich_text_body_and_embeds
                       .with_attached_attachment
                       .preload(creator: :avatar_attachment)
@@ -81,13 +82,13 @@ class RoomsController < ApplicationController
       if @room.thread? && @room.parent_message.present?
         if result.empty?
           # Empty thread - show just the parent message
-          result = [@room.parent_message]
+          result = [ @room.parent_message ]
         elsif result.any?
           # Thread has messages - prepend parent if we're showing the first message
           first_thread_message = @room.messages.ordered.first
           messages_array = result.to_a
           if first_thread_message && messages_array.first.id == first_thread_message.id
-            result = [@room.parent_message] + messages_array
+            result = [ @room.parent_message ] + messages_array
           end
         end
       end

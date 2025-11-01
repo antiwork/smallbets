@@ -163,6 +163,14 @@ class Room < ApplicationRecord
     end
   end
 
+  def unread_for?(user)
+    memberships
+      .where(user_id: user.id)
+      .where.not(involvement: :invisible)
+      .where.not(unread_at: nil)
+      .exists?
+  end
+
   private
     def set_sortable_name
       self.sortable_name = name.to_s.gsub(/[[:^ascii:]\p{So}]/, "").strip.downcase
