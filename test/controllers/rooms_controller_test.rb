@@ -21,8 +21,8 @@ class RoomsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroy" do
-    assert_turbo_stream_broadcasts :rooms, count: 1 do
-      assert_difference -> { Room.count }, -1 do
+    assert_turbo_stream_broadcasts :rooms, count: 2 do
+      assert_difference -> { Room.active.count }, -1 do
         delete room_url(rooms(:designers))
       end
     end
@@ -38,8 +38,29 @@ class RoomsControllerTest < ActionDispatch::IntegrationTest
 
     rooms(:designers).update! creator: users(:jz)
 
-    assert_difference -> { Room.count }, -1 do
+    assert_difference -> { Room.active.count }, -1 do
       delete room_url(rooms(:designers))
     end
+  end
+
+  test "non-admin users are redirected away from conversation rooms" do
+    conversation = Rooms::Open.create!(name: "Digest Conversation", source_room: rooms(:hq), creator: users(:david))
+    conversation.memberships.grant_to([users(:david), users(:kevin)])
+
+    sign_in :kevin
+
+    get room_url(conversation)
+
+    assert_redirected_to talk_path
+    assert_equal 303, response.status
+  end
+
+  test "administrators can view conversation rooms" do
+    conversation = Rooms::Open.create!(name: "Digest Conversation (Admin)", source_room: rooms(:hq), creator: users(:david))
+    conversation.memberships.grant_to(users(:david))
+
+    get room_url(conversation)
+
+    assert_response :success
   end
 end

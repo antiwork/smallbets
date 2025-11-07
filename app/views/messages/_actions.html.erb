@@ -10,7 +10,7 @@
   <% end %>
 
   <%= tag.details class: "position-relative",
-      data: { controller: "popup", action: "keydown.esc->popup#close toggle->popup#toggle click@document->popup#closeOnClickOutside", popup_orientation_top_class: "popup-orientation-top" } do %>
+      data: { controller: "popup", action: "keydown.esc->popup#close toggle->popup#toggle click@document->popup#closeOnClickOutside turbo:submit-start->popup#close", popup_orientation_top_class: "popup-orientation-top" } do %>
     <summary class="btn message__action-btn message__options-btn options-btn">
       <%= image_tag "menu-dots-horizontal.svg", size: 20, class: "colorize--black", aria: { hidden: "true" } %>
       <span class="for-screen-reader">Message options</span>
@@ -82,6 +82,12 @@
         <% end %>
 
         <%= render "messages/actions/bookmark", message: message %>
+
+        <% if Current.user&.administrator? && !message.room.conversation_room? %>
+          <%= button_to promotions_path, method: :post, params: { message_id: message.id }, class: "btn message__action-btn full-width", data: { controller: "promote" } do %>
+            <span>Promote</span>
+          <% end %>
+        <% end %>
 
         <% if current_room.present? %>
           <%= button_to room_message_unreads_path(current_room, message), class: "btn message__action-btn full-width" do %>

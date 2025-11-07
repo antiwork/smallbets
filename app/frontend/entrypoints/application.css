@@ -106,6 +106,8 @@
   --color-destructive: var(--destructive);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 }
 
 :root {
@@ -144,6 +146,8 @@
   --ring: oklch(70.8% 0 0);
   --border: var(--color-border);
   --control-border: #b1adae;
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(14.5% 0 0);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -180,6 +184,8 @@
     --input: oklch(100% 0 0 / 15%);
     --ring: oklch(55.6% 0 0);
     --border: oklch(1 0 0 / 10%);
+    --popover: oklch(0% 0 0);
+    --popover-foreground: oklch(98.5% 0 0);
 
     /* Dark mode code syntax colors */
     --color-keyword: oklch(73.45% 0.16260514269909043 25.78369140372489);

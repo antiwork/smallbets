@@ -11,6 +11,10 @@ export function useHoverPreviewGuard<T extends HTMLElement>({
 }: HoverPreviewGuardOptions<T>) {
   const docListenersActiveRef = useRef(false)
   const lastPointerPosRef = useRef<{ x: number; y: number } | null>(null)
+  const listenerOptions: AddEventListenerOptions = {
+    capture: true,
+    passive: true,
+  }
 
   const isPointerOverElement = useCallback(
     (x: number, y: number, el: HTMLElement): boolean => {
@@ -51,23 +55,17 @@ export function useHoverPreviewGuard<T extends HTMLElement>({
 
   function setup() {
     if (docListenersActiveRef.current) return
-    document.addEventListener("pointermove", onDocPointerMove as any, {
-      capture: true,
-      passive: true,
-    })
-    document.addEventListener("scroll", onDocScroll as any, {
-      capture: true,
-      passive: true,
-    })
-    window.addEventListener("resize", onResize as any)
+    document.addEventListener("pointermove", onDocPointerMove, listenerOptions)
+    document.addEventListener("scroll", onDocScroll, listenerOptions)
+    window.addEventListener("resize", onResize)
     docListenersActiveRef.current = true
   }
 
   function teardown() {
     if (!docListenersActiveRef.current) return
-    document.removeEventListener("pointermove", onDocPointerMove as any, true)
-    document.removeEventListener("scroll", onDocScroll as any, true)
-    window.removeEventListener("resize", onResize as any)
+    document.removeEventListener("pointermove", onDocPointerMove, listenerOptions)
+    document.removeEventListener("scroll", onDocScroll, listenerOptions)
+    window.removeEventListener("resize", onResize)
     docListenersActiveRef.current = false
   }
 

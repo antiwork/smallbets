@@ -1,0 +1,2 @@
+class AutomatedFeedCard < FeedCard
+end

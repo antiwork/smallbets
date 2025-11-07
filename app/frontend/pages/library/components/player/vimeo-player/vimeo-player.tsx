@@ -264,7 +264,8 @@ export const VimeoPlayer = forwardRef<VimeoPlayerHandle, VimeoPlayerProps>(
       startPreview: handlePointerEnter,
       stopPreview: handlePointerLeave,
       getCurrentWatch: () => {
-        return (watchOverride ?? session.watch ?? null) as any
+        const watch = watchOverride ?? session.watch ?? null
+        return watch
       },
     }))
 

@@ -26,6 +26,14 @@ class ActionText::Attachment::OpengraphEmbed
 
   attr_accessor :href, :url, :filename, :description
 
+  def caption
+    description
+  end
+
+  def caption=(value)
+    self.description = value
+  end
+
   def attachable_content_type
     OPENGRAPH_EMBED_CONTENT_TYPE
   end

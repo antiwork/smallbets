@@ -76,6 +76,15 @@
 
   <div class="sidebar__tools d-hotwire-native-none">
     <div class="sidebar__tool-container">
+      <%# TODO: Remove once the feed becomes available to everyone. %>
+      <% if Current.user&.administrator? %>
+        <%= link_to root_path, class: "btn sidebar__tool" do %>
+          <%= image_tag "home.svg", size: 20, aria: { hidden: "true" } %>
+          <span class="for-screen-reader">Home</span>
+          <span class="sidebar__tool-label">Home</span>
+        <% end %>
+      <% end %>
+
       <%= link_to inbox_path, class: "btn sidebar__tool", data: { mentions_indicator_target: "icon" } do %>
         <%= image_tag "mentions.svg", size: 20, aria: { hidden: "true" } %>
         <span class="for-screen-reader">Mentions</span>

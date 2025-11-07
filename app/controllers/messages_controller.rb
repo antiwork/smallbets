@@ -71,11 +71,11 @@ class MessagesController < ApplicationController
     def find_paged_messages
       messages = case
       when params[:before].present?
-        @room.messages.with_threads.with_creator.page_before(@room.messages.find(params[:before]))
+        @room.messages.with_threads.with_creator.with_original_message.page_before(@room.messages.find(params[:before]))
       when params[:after].present?
-        @room.messages.with_threads.with_creator.page_after(@room.messages.find(params[:after]))
+        @room.messages.with_threads.with_creator.with_original_message.page_after(@room.messages.find(params[:after]))
       else
-        @room.messages.with_threads.with_creator.last_page
+        @room.messages.with_threads.with_creator.with_original_message.last_page
       end
 
       # If this is a thread and we've loaded the very first message, prepend the parent message

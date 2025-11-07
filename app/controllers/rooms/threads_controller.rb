@@ -6,7 +6,20 @@ class Rooms::ThreadsController < RoomsController
     existing_thread = @parent_message.threads.active.find_by(type: 'Rooms::Thread')
 
     if existing_thread
-      redirect_to room_url(existing_thread)
+      # Reload to get updated counter cache
+      existing_thread.reload
+      
+      # Check active messages count (counter cache may not reflect active-only count)
+      active_count = existing_thread.messages.active.count
+      
+      # If thread is empty, deactivate it and create a new one
+      if active_count == 0
+        existing_thread.deactivate
+        @room = Rooms::Thread.create_for({ parent_message_id: @parent_message.id }, users: parent_room.users)
+        redirect_to room_url(@room)
+      else
+        redirect_to room_url(existing_thread)
+      end
     else
       @room = Rooms::Thread.create_for({ parent_message_id: @parent_message.id }, users: parent_room.users)
       redirect_to room_url(@room)

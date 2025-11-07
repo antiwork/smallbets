@@ -168,8 +168,8 @@ function VideoCard({
           // Safari/iOS may send movementX=0; require actual pageX/pageY change from element entry
           // Use a short debounce from mount to avoid triggers before thumbs are visible
           if (
-            (window as any).__sb_page_boot_ts &&
-            now - (window as any).__sb_page_boot_ts < 300
+            window.__sb_page_boot_ts &&
+            now - window.__sb_page_boot_ts < 300
           )
             return
           if (hoverMoveStartedRef.current) return

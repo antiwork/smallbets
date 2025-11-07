@@ -74,6 +74,7 @@ class Membership < ApplicationRecord
   scope :shared, -> { joins(:room).where(rooms: { type: %w[Rooms::Open Rooms::Closed] }) }
   scope :without_direct_rooms, -> { joins(:room).where.not(rooms: { type: "Rooms::Direct" }) }
   scope :without_thread_rooms, -> { joins(:room).where.not(rooms: { type: "Rooms::Thread" }) }
+  scope :without_conversation_rooms, -> { joins(:room).where(rooms: { source_room_id: nil }) }
 
   scope :notifications_on, -> { where(involvement: :everything) }
   scope :visible, -> { where.not(involvement: :invisible) }

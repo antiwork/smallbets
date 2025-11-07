@@ -3,9 +3,49 @@ require "test_helper"
 class MessageTest < ActiveSupport::TestCase
   include ActionCable::TestHelper, ActiveJob::TestHelper
 
+  def setup
+    AutomatedFeed::ActivityTracker.stubs(:record).returns(default_tracker_result)
+  end
+
+  def teardown
+    AutomatedFeed::ActivityTracker.unstub(:record)
+  end
+
   test "creating a message enqueues to push later" do
     assert_enqueued_jobs 1, only: [ Room::PushMessageJob ] do
       create_new_message_in rooms(:designers)
+    end
+  end
+
+  test "creating a message enqueues room scan job when tracker triggers" do
+    room = rooms(:pets)
+    payload = {
+      trigger?: true,
+      status: :message_threshold,
+      room_id: room.id,
+      message_count: 15,
+      participant_count: 3
+    }
+
+    assert_enqueued_with(job: AutomatedFeed::RoomScanJob, args: [room.id, { trigger_status: :message_threshold }]) do
+      AutomatedFeed::ActivityTracker.stubs(:record).returns(payload)
+      room.messages.create!(creator: users(:jason), body: "Digest trigger", client_message_id: SecureRandom.uuid)
+    end
+  end
+
+  test "creating a message does not enqueue room scan when tracker ignores" do
+    room = rooms(:pets)
+    payload = {
+      trigger?: false,
+      status: :ignored,
+      room_id: nil,
+      message_count: 0,
+      participant_count: 0
+    }
+
+    assert_no_enqueued_jobs only: [AutomatedFeed::RoomScanJob] do
+      AutomatedFeed::ActivityTracker.stubs(:record).returns(payload)
+      room.messages.create!(creator: users(:jason), body: "No trigger", client_message_id: SecureRandom.uuid)
     end
   end
 
@@ -188,7 +228,83 @@ class MessageTest < ActiveSupport::TestCase
     assert_includes mentioning_messages, message
   end
 
+  test "deactivating original message deactivates copied messages" do
+    source_room = rooms(:pets)
+    conversation_room = Rooms::Open.create!(name: "Test Digest", source_room: source_room, creator: users(:jason))
+    
+    # Create original message
+    original_message = source_room.messages.create!(
+      creator: users(:jason),
+      body: "Original message",
+      client_message_id: "original123"
+    )
+    
+    # Create copied message
+    copied_message = conversation_room.messages.create!(
+      creator: original_message.creator,
+      original_message: original_message,
+      created_at: original_message.created_at,
+      updated_at: original_message.updated_at,
+      client_message_id: original_message.client_message_id,
+      body: original_message.body
+    )
+    
+    assert original_message.active?
+    assert copied_message.active?
+    
+    # Deactivate original message
+    original_message.deactivate
+    
+    # Copied message should also be deactivated
+    copied_message.reload
+    assert_not copied_message.active?
+  end
+
+  test "reactivating original message reactivates copied messages" do
+    source_room = rooms(:pets)
+    conversation_room = Rooms::Open.create!(name: "Test Digest", source_room: source_room, creator: users(:jason))
+    
+    # Create original message
+    original_message = source_room.messages.create!(
+      creator: users(:jason),
+      body: "Original message",
+      client_message_id: "original456"
+    )
+    
+    # Create copied message
+    copied_message = conversation_room.messages.create!(
+      creator: original_message.creator,
+      original_message: original_message,
+      created_at: original_message.created_at,
+      updated_at: original_message.updated_at,
+      client_message_id: original_message.client_message_id,
+      body: original_message.body
+    )
+    
+    # Deactivate both messages
+    original_message.deactivate
+    copied_message.reload
+    assert_not original_message.active?
+    assert_not copied_message.active?
+    
+    # Reactivate original message
+    original_message.activate
+    
+    # Copied message should also be reactivated
+    copied_message.reload
+    assert copied_message.active?
+  end
+
   private
+    def default_tracker_result
+      {
+        trigger?: false,
+        status: :ignored,
+        room_id: nil,
+        message_count: 0,
+        participant_count: 0
+      }
+    end
     def create_new_message_in(room)
       room.messages.create!(creator: users(:jason), body: "Hello", client_message_id: "123")
     end

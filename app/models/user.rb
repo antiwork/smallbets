@@ -28,6 +28,7 @@ class User < ApplicationRecord
 
   has_many :boosts, -> { active }, foreign_key: :booster_id, class_name: "Boost"
   has_many :searches, dependent: :delete_all
+  has_many :promoted_feed_cards, class_name: "AutomatedFeedCard", foreign_key: :promoted_by_user_id
 
   has_many :sessions, dependent: :destroy
   has_many :auth_tokens, dependent: :destroy

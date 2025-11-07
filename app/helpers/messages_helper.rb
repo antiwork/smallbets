@@ -19,7 +19,8 @@ module MessagesHelper
       messages_threaded_class: "message--threaded",
       messages_loading_up_class: "message--loading-up",
       messages_loading_down_class: "message--loading-down",
-      messages_page_url_value: room_messages_url(room)
+      messages_page_url_value: room_messages_url(room),
+      messages_conversation_room_value: room.conversation_room?
     }, &
   end
 
@@ -87,7 +88,9 @@ module MessagesHelper
       message.creator,
       is_first_unread_message,
       is_parent,
-      show_room_name
+      show_room_name,
+      message.original_message&.room,
+      Current.user&.administrator?
     ]
   end
 

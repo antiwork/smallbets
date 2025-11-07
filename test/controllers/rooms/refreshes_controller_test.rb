@@ -29,4 +29,16 @@ class Rooms::RefreshesControllerTest < ActionDispatch::IntegrationTest
       assert_select "template", count: 1
     end
   end
+
+  test "non-admin users are redirected from conversation refreshes" do
+    conversation = Rooms::Open.create!(name: "Digest Conversation Refresh", source_room: rooms(:hq), creator: users(:david))
+    conversation.memberships.grant_to([users(:david), users(:kevin)])
+
+    sign_in :kevin
+
+    get room_refresh_url(conversation, format: :turbo_stream), params: { since: Time.current.to_fs(:epoch) }
+
+    assert_redirected_to talk_path
+    assert_equal 303, response.status
+  end
 end

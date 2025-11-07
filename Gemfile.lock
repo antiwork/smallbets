@@ -161,12 +161,15 @@ GEM
     erubi (1.13.1)
     et-orbi (1.2.11)
       tzinfo
+    event_stream_parser (1.0.0)
     faker (3.2.2)
       i18n (>= 1.8.11, < 2)
     faraday (2.13.4)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
+    faraday-multipart (1.1.1)
+      multipart-post (~> 2.0)
     faraday-net_http (3.4.1)
       net-http (>= 0.5.0)
     ffi (1.16.3)
@@ -235,6 +238,7 @@ GEM
     multi_json (1.15.0)
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
+    multipart-post (2.4.1)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
     mutex_m (0.3.0)
@@ -364,6 +368,10 @@ GEM
       rubocop-minitest
       rubocop-performance
       rubocop-rails
+    ruby-openai (8.3.0)
+      event_stream_parser (>= 0.3.0, < 2.0.0)
+      faraday (>= 1)
+      faraday-multipart (>= 1)
     ruby-progressbar (1.13.0)
     ruby-vips (2.2.0)
       ffi (~> 1.12)
@@ -467,6 +475,7 @@ DEPENDENCIES
   resque-scheduler (~> 4.11.0)
   rqrcode
   rubocop-rails-omakase
+  ruby-openai
   rufus-scheduler
   selenium-webdriver
   sentry-rails

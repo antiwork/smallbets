@@ -30,16 +30,31 @@
               </span>
               <%= link_to message_timestamp(message, style: timestamp_style, class: "message__timestamp"), room_at_message_path(message.room, message), target: "_top",
                     class: "message__permalink" %>
-              <span class="message__meta-block message__room <%= "message__original-room" if current_room.nil? || (current_room.present? && current_room != message.room) %>">
-                <% if current_room.nil? %>
+              <% if message.original_message&.room && current_room.present? && current_room.conversation_room? && current_room != message.original_message.room %>
+                <span class="message__meta-block message__original-room">
                   <span class="message__room-in">in</span>
-                <% end %>
-                <% if message.room.thread? && message.room.parent_message %>
-                  <%= link_to "🧵 #{room_display_name(message.room.parent_message.room, for_user: nil)}", room_at_message_path(message.room, message), target: "_top", data: { reply_target: "link" } %>
-                <% else %>
-                  <%= link_to room_display_name(message.room, for_user: nil), room_at_message_path(message.room, message), target: "_top", data: { reply_target: "link" } %>
-                <% end %>
-              </span>
+                  <% original_room = message.original_message.room %>
+                  <% if original_room.thread? && original_room.parent_message&.room %>
+                    <% parent_room_name = strip_emoji_from_name(room_display_name(original_room.parent_message.room, for_user: nil)) %>
+                    <%= link_to "🧵 #{parent_room_name} thread", room_at_message_path(original_room, message.original_message), target: "_top", data: { reply_target: "link" }, class: "message__original-room-link" %>
+                  <% elsif original_room %>
+                    <% room_name = strip_emoji_from_name(room_display_name(original_room, for_user: nil)) %>
+                    <%= link_to "##{room_name}", room_at_message_path(original_room, message.original_message), target: "_top", data: { reply_target: "link" }, class: "message__original-room-link" %>
+                  <% end %>
+                  <span class="message__external-link">↗</span>
+                </span>
+              <% else %>
+                <span class="message__meta-block message__room <%= "message__original-room" if current_room.nil? || (current_room.present? && current_room != message.room) %>">
+                  <% if current_room.nil? %>
+                    <span class="message__room-in">in</span>
+                  <% end %>
+                  <% if message.room.thread? && message.room.parent_message %>
+                    <%= link_to "🧵 #{room_display_name(message.room.parent_message.room, for_user: nil)}", room_at_message_path(message.room, message), target: "_top", data: { reply_target: "link" } %>
+                  <% else %>
+                    <%= link_to room_display_name(message.room, for_user: nil), room_at_message_path(message.room, message), target: "_top", data: { reply_target: "link" } %>
+                  <% end %>
+                </span>
+              <% end %>
               <%= render "messages/answered_by", message: %>
             </h3>
             <%= render "messages/actions", message:, current_room: %>

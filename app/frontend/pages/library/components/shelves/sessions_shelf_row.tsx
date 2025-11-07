@@ -203,7 +203,7 @@ export function SessionsShelfRow({
       ) : null}
       <div
         className="group/shelf relative z-0"
-        style={{ ["--shelf-container-w" as any]: "100%" }}
+        style={{ "--shelf-container-w": "100%" }}
       >
         <Carousel
           opts={{

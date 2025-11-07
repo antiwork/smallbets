@@ -45,6 +45,7 @@ class RoomsController < ApplicationController
 
       if room
         @room = room
+        return if enforce_feed_conversation_access!(@room)
       else
         redirect_to root_url, alert: "Room not found or inaccessible"
       end
@@ -69,10 +70,14 @@ class RoomsController < ApplicationController
                       .preload(creator: :avatar_attachment)
                       .includes(attachment_blob: :variant_records)
                       .includes(boosts: :booster)
+                      .with_original_message
       @first_unread_message = messages.ordered.since(@membership.unread_at).first if @membership.unread?
 
       if show_first_message = messages.find_by(id: params[:message_id]) || @first_unread_message
         result = messages.page_around(show_first_message)
+      elsif @room.conversation_room?
+        # For conversation/feed rooms, show first page to start at the beginning
+        result = messages.first_page
       else
         result = messages.last_page
       end

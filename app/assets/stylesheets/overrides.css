@@ -105,6 +105,36 @@ body.library-collapsed #nav {
   }
 }
 
+body.feed-home #nav {
+  background-color: transparent !important;
+  pointer-events: none;
+}
+
+body.feed-home.sidebar #nav::before {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+@media (min-width: 120ch) {
+  body.feed-home #nav:has(.btn--faux)::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -5vw;
+    right: 0;
+    background-color: transparent !important;
+    z-index: -1;
+  }
+}
+
+body.feed-home #nav a,
+body.feed-home #nav button,
+body.feed-home #nav [role="button"],
+body.feed-home #nav [role="link"] {
+  pointer-events: auto;
+}
+
 @media (max-width: 100ch) {
   .account-has-logo .room--current .room__contents {
     --num-buttons: 2;

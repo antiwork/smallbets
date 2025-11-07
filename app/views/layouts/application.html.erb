@@ -75,16 +75,7 @@
     </nav>
 
     <% if notice = flash[:notice] || flash[:alert] %>
-      <div class="fixed top-[var(--block-space)] left-1/2 -translate-x-1/2 z-[6] flex justify-center" data-controller="element-removal" data-action="animationend->element-removal#remove">
-        <div class="animate-[appear-then-fade_3s_300ms_both] aspect-square bg-[var(--flash-background,var(--color-positive))] rounded-full grid p-[var(--block-space)] place-items-center shadow" style="<%= "--flash-background: var(--color-negative)" if flash[:alert] %>">
-          <% if flash[:alert] %>
-            <%= image_tag "alert.svg", aria: { hidden: true }, size: 24, class: "colorize--white col-start-1 row-start-1" %></span>
-          <% else %>
-            <%= image_tag "check.svg", aria: { hidden: true }, size: 24, class: "colorize--white col-start-1 row-start-1" %></span>
-          <% end %>
-        </div>
-        <span class="for-screen-reader" role="alert" aria-atomic="true"><%= notice %></span>
-      </div>
+      <div data-flash-container data-flash-<%= flash[:alert] ? "alert" : "notice" %>="<%= notice %>" style="display: none;"></div>
     <% end %>
 
     <main id="main-content" tabindex="-1">
@@ -104,6 +95,8 @@
     </aside>
 
     <%= render "layouts/lightbox" %>
+
+    <div id="toast-portal" data-turbo-permanent="true"></div>
 
     <a href="https://once.com" id="app-logo" target="_blank" aria-label="Once software from 37signals home page">
       <%= image_tag "campfire-icon.png", alt: "Campfire logo", width: 256, height: 216 %>

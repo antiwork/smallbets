@@ -496,7 +496,7 @@ export function VimeoEmbed({
           aria-modal="true"
           aria-labelledby={dialogTitleId}
           className="bg-background fixed inset-0 z-[999] flex flex-col"
-          style={{ ["--bar-h" as any]: "72px" }}
+          style={{ "--bar-h": "72px" }}
         >
           <button
             ref={backButtonRef}
