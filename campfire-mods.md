@@ -118,6 +118,16 @@ For us, threads work like message boards in Basecamp, and they've been great at 
 - https://github.com/antiwork/smallbets/compare/7333c40abc545c1900d4e23cfcef0fb557b2290e...9ad6e5d0a57957907a5911a30778212dabfa5e48
 
 
+## Unread thread indicators
+Members can see which threads have unread messages by looking for a bold "Last reply" timestamp. This only shows for threads they participate in (authored parent message, replied, mentioned, or starred the parent room). Users who star a room are automatically added as participants in all threads in that room.
+
+- [`app/models/room.rb`](app/models/room.rb) - `unread_for?(user)` method
+- [`app/models/rooms/thread.rb`](app/models/rooms/thread.rb) - Promotion callback
+- [`app/models/membership.rb`](app/models/membership.rb) - Starring promotion + broadcasts
+- [`app/views/messages/_threads.html.erb`](app/views/messages/_threads.html.erb) - Data attribute
+- [`app/assets/stylesheets/application/messages.css`](app/assets/stylesheets/application/messages.css) - Styling
+
+
 ## Block pings
 Members can block users from sending them direct messages. Admins can monitor which members are getting blocked.
 

@@ -441,6 +441,11 @@
       color: var(--color-text-muted, #666);
       font-size: 0.95em;
     }
+
+    &[data-unread="true"] .txt-muted {
+      color: var(--color-text);
+      font-weight: 800;
+    }
   }
 
   .thread__avatar {
