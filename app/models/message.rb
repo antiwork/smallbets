@@ -83,6 +83,15 @@ class Message < ApplicationRecord
     end
   end
 
+  def thread_has_unread_for?(user, thread)
+    return false unless thread.present?
+    
+    membership = thread.memberships.active.visible.find_by(user: user)
+    return false unless membership 
+    
+    membership.unread?
+  end
+
   private
 
   def track_automated_feed_activity
