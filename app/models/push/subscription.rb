@@ -2,6 +2,9 @@ class Push::Subscription < ApplicationRecord
   belongs_to :user
 
   def notification(**params)
-    WebPush::Notification.new(**params, badge: user.memberships.unread.select(&:has_unread_notifications?).count, endpoint: endpoint, p256dh_key: p256dh_key, auth_key: auth_key)
+    unread_memberships = user.memberships.unread.with_has_unread_notifications.includes(:room)
+    badge = unread_memberships.count { |m| m.has_unread_notifications? }
+    
+    WebPush::Notification.new(**params, badge: badge, endpoint: endpoint, p256dh_key: p256dh_key, auth_key: auth_key)
   end
 end

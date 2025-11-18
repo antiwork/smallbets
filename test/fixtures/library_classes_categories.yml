@@ -1,0 +1,12 @@
+# Join table for library classes and categories
+design_systems_design:
+  library_class_id: <%= ActiveRecord::FixtureSet.identify(:design_systems) %>
+  library_category_id: <%= ActiveRecord::FixtureSet.identify(:design) %>
+
+design_systems_development:
+  library_class_id: <%= ActiveRecord::FixtureSet.identify(:design_systems) %>
+  library_category_id: <%= ActiveRecord::FixtureSet.identify(:development) %>
+
+indie_hacking_business:
+  library_class_id: <%= ActiveRecord::FixtureSet.identify(:indie_hacking) %>
+  library_category_id: <%= ActiveRecord::FixtureSet.identify(:business) %>

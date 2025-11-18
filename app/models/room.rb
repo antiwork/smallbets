@@ -34,6 +34,9 @@ class Room < ApplicationRecord
   has_many :threads, through: :messages, class_name: "Rooms::Thread"
   belongs_to :parent_message, class_name: "Message", optional: true, touch: true
   has_one :parent_room, through: :parent_message, source: :room, class_name: "Room"
+  belongs_to :source_room, class_name: "Room", optional: true
+  has_many :conversation_rooms, class_name: "Room", foreign_key: :source_room_id
+  has_one :automated_feed_card, class_name: "AutomatedFeedCard"
 
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
@@ -84,7 +87,7 @@ class Room < ApplicationRecord
 
   def receive(message)
     unread_memberships(message)
-    push_later(message)
+    push_later(message) unless message.original_message_id.present?
   end
 
   def involve_user(user, unread: false)
@@ -119,6 +122,10 @@ class Room < ApplicationRecord
     is_a?(Rooms::Thread)
   end
 
+  def conversation_room?
+    source_room_id.present?
+  end
+
   def default_involvement(user: nil)
     "mentions"
   end
@@ -148,6 +155,7 @@ class Room < ApplicationRecord
       memberships.update_all(active: false)
       messages.update_all(active: false)
       threads.update_all(active: false)
+      automated_feed_card&.destroy
 
       deactivate!
     end

@@ -6,14 +6,15 @@
   <%= tag.span class: "btn btn--reversed btn--faux room--current" do %>
     <h1 class="room__contents txt-medium overflow-ellipsis">Library</h1>
   <% end %>
-  <%= link_home %>
+  <%= link_back %>
 <% end %>
 
 <% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
 
 <div class="library">
   <% @sections.each do |section| %>
-    <section id="<%= section.slug %>" class="library__section">
+    <% primary_category = section.library_sessions.first&.library_class&.library_categories&.first %>
+    <section id="<%= section.slug %>" class="library__section" data-library-category="<%= primary_category&.slug %>">
       <header class="library__header">
         <h2 class="library__section-title"><%= section.title %> - <%= section.creator %></h2>
       </header>

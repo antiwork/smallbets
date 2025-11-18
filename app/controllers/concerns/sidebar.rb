@@ -13,7 +13,7 @@ module Sidebar
     @direct_memberships   = filter_direct_memberships(all_direct_memberships)
 
     # Get other memberships using the without_direct_rooms scope
-    other_memberships     = Current.user.memberships.visible.without_thread_rooms.without_direct_rooms.joins(:room).where(rooms: { active: true }).with_has_unread_notifications.includes(:room)
+    other_memberships     = Current.user.memberships.visible.without_thread_rooms.without_direct_rooms.without_conversation_rooms.joins(:room).where(rooms: { active: true }).with_has_unread_notifications.includes(:room)
     @all_memberships      = other_memberships
     @starred_memberships  = other_memberships
 

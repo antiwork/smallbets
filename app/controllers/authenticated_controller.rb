@@ -1,3 +1,3 @@
 class AuthenticatedController < ApplicationController
-  before_action :authenticate!
+  before_action :require_authentication
 end

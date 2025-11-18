@@ -25,7 +25,9 @@
       }
 
       .account-logo {
-        margin-inline-start: calc((var(--btn-size) / 2 + var(--inline-space)) * -1);
+        margin-inline-start: calc(
+          (var(--btn-size) / 2 + var(--inline-space)) * -1
+        );
       }
     }
   }
@@ -35,7 +37,11 @@
       padding-block: var(--block-space-half);
 
       &::before {
-        background: linear-gradient(180deg, oklch(var(--lch-white)) 20%, oklch(var(--lch-white) / 0) 100%);
+        background: linear-gradient(
+          180deg,
+          oklch(var(--lch-white)) 20%,
+          oklch(var(--lch-white) / 0) 100%
+        );
         content: "";
         inset: 0;
         position: absolute;
@@ -47,16 +53,16 @@
 
 /* Styles for the countdown banner */
 #special-event-banner {
-  color: #CC0000;
+  color: #cc0000;
   background-color: white;
   border-bottom: 1px solid var(--color-border-darker);
   border-right: 1px solid var(--color-border-darker);
-  font-size: 90%; 
-  font-weight: 600; 
-  text-align: center; 
-  padding: 0.5rem; 
-  width: 100%; 
-  cursor: pointer; 
+  font-size: 90%;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.5rem;
+  width: 100%;
+  cursor: pointer;
   text-decoration: none;
   box-sizing: border-box;
 }
@@ -65,34 +71,35 @@
 /* Increase specificity by adding tag name 'a' */
 a#special-event-banner:hover {
   background-color: white !important; /* Force override */
-  color: #CC0000 !important;      /* Force override */
-  opacity: 1 !important;         /* Force override */
-  filter: none !important;        /* Force override */
+  color: #cc0000 !important; /* Force override */
+  opacity: 1 !important; /* Force override */
+  filter: none !important; /* Force override */
 }
 
-a#special-event-banner:hover span { /* Ensure span keeps color too */
-  color: #CC0000 !important;      /* Force override */
+a#special-event-banner:hover span {
+  /* Ensure span keeps color too */
+  color: #cc0000 !important; /* Force override */
 }
 
 #special-event-banner.banner-urgent {
-  background-color: #CC0000;
+  background-color: #cc0000;
   color: white;
-  border-color: #CC0000; /* Match border to background */
+  border-color: #cc0000; /* Match border to background */
 }
 
 /* Ensure text inside also changes color */
 #special-event-banner.banner-urgent,
-#special-event-banner.banner-urgent span { 
-  color: white; 
+#special-event-banner.banner-urgent span {
+  color: white;
 }
 
 /* Explicitly define hover state for urgent banner */
 /* Increase specificity by adding tag name 'a' */
 a#special-event-banner.banner-urgent:hover {
-  background-color: #CC0000 !important; /* Match urgent background */
-  color: white !important;           /* Match urgent text color */
-  opacity: 1 !important;             /* Force override */
-  filter: none !important;            /* Force override */
+  background-color: #cc0000 !important; /* Match urgent background */
+  color: white !important; /* Match urgent text color */
+  opacity: 1 !important; /* Force override */
+  filter: none !important; /* Force override */
 }
 
 /* Also ensure the span inside keeps the correct color on hover */

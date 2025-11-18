@@ -1,7 +1,9 @@
 /* Sidebar */
 :root {
   --sidebar-inline-space: max(calc(var(--inline-space) * 1.5), 1vw);
-  --sidebar-tools-height: calc(var(--block-space) + var(--btn-size) + (var(--block-space) * 2));
+  --sidebar-tools-height: calc(
+    var(--block-space) + var(--btn-size) + (var(--block-space) * 2)
+  );
   --sidebar-tools-width: 70px;
 }
 
@@ -141,7 +143,9 @@
 
 .sidebar__toggle {
   inset-block-start: var(--block-space-half);
-  inset-inline-start: calc((var(--btn-size) + max(var(--inline-space), 1vw)) * -1);
+  inset-inline-start: calc(
+    (var(--btn-size) + max(var(--inline-space), 1vw)) * -1
+  );
   position: absolute;
   transition:
     inset-inline-start 300ms ease,
@@ -149,7 +153,14 @@
     background-color 300ms ease;
   z-index: 5;
 
-  #sidebar:where(:not(.open):has(#sidebar_inbox [data-type=list_node]:not([hidden]), #starred_rooms [data-type=list_node]:not([hidden]) .unread, .direct.unread)) & {
+  #sidebar:where(
+      :not(.open):has(
+        #sidebar_inbox [data-type="list_node"]:not([hidden]),
+        #starred_rooms [data-type="list_node"]:not([hidden]) .unread,
+        .direct.unread
+      )
+    )
+    & {
     &::after {
       --size: 1em;
 
@@ -168,7 +179,7 @@
 
   #sidebar:where(:not(.open):has(.badge, .direct.unread)) & {
     &::after {
-       background-color: var(--color-negative);
+      background-color: var(--color-negative);
     }
   }
 
@@ -196,6 +207,64 @@
   }
 }
 
+/* Library: show hamburger only when closed on desktop */
+@media (min-width: 120ch) {
+  body.library-collapsed .sidebar__toggle {
+    display: flex;
+    animation: hamburger-scale-in 250ms ease-out;
+    /* when sidebar is open on desktop, keep the toggle visible inside panel */
+    .open & {
+      display: none;
+    }
+  }
+}
+
+@keyframes hamburger-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Library desktop: standard right padding for directs row (no extra hamburger space) */
+@media (min-width: 120ch) {
+  body.library-collapsed .open .directs {
+    padding-inline-end: calc(var(--sidebar-inline-space) + var(--column-gap));
+  }
+}
+
+/* Library desktop: ensure Ping input expands normally */
+@media (min-width: 120ch) {
+  body.library-collapsed .directs.directs--new {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+  }
+  body.library-collapsed .directs.directs--new form {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--inline-space);
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+  body.library-collapsed .directs.directs--new .autocomplete__container,
+  body.library-collapsed .directs.directs--new .autocomplete__input {
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+  body.library-collapsed
+    .directs.directs--new
+    .autocomplete__input
+    input[type="text"] {
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+}
+
 /* Direct messsages */
 .directs {
   --btn-border-color: var(--color-border-darker);
@@ -211,15 +280,27 @@
   overscroll-behavior: auto;
   margin-block-end: var(--block-space-half);
   padding-block: var(--block-space) var(--block-space-half);
-  padding-inline: var(--sidebar-inline-space) calc(var(--sidebar-inline-space) + var(--column-gap));
+  padding-inline: var(--sidebar-inline-space)
+    calc(var(--sidebar-inline-space) + var(--column-gap));
   position: sticky;
   z-index: 3;
 
   .open & {
     @media (max-width: 120ch) {
-      -webkit-mask-image: linear-gradient(to left, oklch(0% 0 0 / 1) 85%, oklch(0% 0 0 / 0) 99%);
-      mask-image: linear-gradient(to left, oklch(0% 0 0 / 1) 85%, oklch(0% 0 0 / 0) 99%);
-      padding-inline-start: calc(var(--btn-size) + var(--sidebar-inline-space) + (var(--column-gap) * 2.5));
+      -webkit-mask-image: linear-gradient(
+        to left,
+        oklch(0% 0 0 / 1) 85%,
+        oklch(0% 0 0 / 0) 99%
+      );
+      mask-image: linear-gradient(
+        to left,
+        oklch(0% 0 0 / 1) 85%,
+        oklch(0% 0 0 / 0) 99%
+      );
+      padding-inline-start: calc(
+        var(--btn-size) + var(--sidebar-inline-space) +
+          (var(--column-gap) * 2.5)
+      );
     }
   }
 
@@ -233,7 +314,7 @@
   }
 }
 
-.directs--edit  {
+.directs--edit {
   display: grid;
   gap: var(--inline-space);
   grid-template-columns: repeat(auto-fit, minmax(33%, 1fr));
@@ -385,29 +466,30 @@
   time {
     opacity: 0.4;
     font-weight: 500;
-  
-    .sidebar__list:not(#shared_rooms) .room.unread &, .sidebar__list .room.unread.badge & {
+
+    .sidebar__list:not(#shared_rooms) .room.unread &,
+    .sidebar__list .room.unread.badge & {
       opacity: 1;
       font-weight: 800;
     }
-  
+
     .sidebar__list .room.unread.badge & {
       padding-inline-start: calc(var(--inline-space) * 4 / 3);
-    
+
       &::after {
-         --size: 0.5em;
-      
-         aspect-ratio: 1;
-         background-color: var(--color-negative);
-         block-size: var(--size);
-         border-radius: calc(var(--size) * 2);
-         content: "";
-         flex-shrink: 0;
-         inline-size: var(--size);
-         position: absolute;
-         left: 0;
-         top: 50%;
-         transform: translateY(-50%);
+        --size: 0.5em;
+
+        aspect-ratio: 1;
+        background-color: var(--color-negative);
+        block-size: var(--size);
+        border-radius: calc(var(--size) * 2);
+        content: "";
+        flex-shrink: 0;
+        inline-size: var(--size);
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
       }
     }
   }
@@ -425,7 +507,12 @@
       --num-buttons: 2;
     }
 
-    max-inline-size: calc(100dvw - (var(--btn-size) * var(--num-buttons)) - (var(--btn-size) + max(var(--inline-space), 1vw)) - ((var(--inline-space) + 1.8em) * 2) - var(--sidebar-width) - var(--inline-space) * var(--num-buttons) - 1.2em);
+    max-inline-size: calc(
+      100dvw - (var(--btn-size) * var(--num-buttons)) -
+        (var(--btn-size) + max(var(--inline-space), 1vw)) -
+        ((var(--inline-space) + 1.8em) * 2) - var(--sidebar-width) -
+        var(--inline-space) * var(--num-buttons) - 1.2em
+    );
 
     @media (max-width: 120ch) {
       --num-buttons: 2;
@@ -456,7 +543,11 @@
 }
 
 .searches__recents {
-  --mask: linear-gradient(to left, oklch(0% 0 0 / 1) 97%, oklch(0% 0 0 / 0) 99%);
+  --mask: linear-gradient(
+    to left,
+    oklch(0% 0 0 / 1) 97%,
+    oklch(0% 0 0 / 0) 99%
+  );
 
   -webkit-mask-image: var(--mask);
   display: none;
@@ -502,7 +593,7 @@
     [open] .options-btn {
       opacity: 1;
     }
-    
+
     [open] .popup-menu {
       display: block;
     }
@@ -517,20 +608,20 @@
   .actions-menu {
     --arrow-size: 1.5em;
     --btn-size: 2em;
-  
+
     inset: var(--btn-size) auto auto 50%;
     transform: translateX(-50%);
     transform-origin: top left;
     z-index: 3;
   }
 
-.actions-menu .action-btn {
+  .actions-menu .action-btn {
     font-size: 0.85rem;
     --width: 100%;
-    --btn-padding: calc(var(--inline-space) * 2/3) var(--inline-space);
+    --btn-padding: calc(var(--inline-space) * 2 / 3) var(--inline-space);
     --btn-border-radius: calc(var(--arrow-size) / 2 - var(--inline-space-half));
     --busy-inset: calc(var(--inline-space) * 1.5);
-  
+
     white-space: nowrap;
     justify-content: start;
     font-weight: 500;

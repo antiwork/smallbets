@@ -5,8 +5,8 @@ class Rooms::RefreshesController < ApplicationController
   before_action :set_unread_at_message
 
   def show
-    @new_messages = Bookmark.populate_for(@room.messages.with_threads.with_creator.page_created_since(@last_updated_at))
-    @updated_messages = Bookmark.populate_for(@room.messages.without(@new_messages).with_threads.with_creator.page_updated_since(@last_updated_at))
+    @new_messages = Bookmark.populate_for(@room.messages.with_threads.with_creator.with_original_message.page_created_since(@last_updated_at))
+    @updated_messages = Bookmark.populate_for(@room.messages.without(@new_messages).with_threads.with_creator.with_original_message.page_updated_since(@last_updated_at))
   end
 
   private

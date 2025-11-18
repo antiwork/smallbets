@@ -11,8 +11,13 @@ Rails.application.routes.draw do
     }, via: :all
   end
 
+  constraints(AdminConstraint.new) do
+    root to: "feed#index"
+  end
+
   constraints(lambda { |req| req.session[:user_id].present? }) do
-    root to: "welcome#show"
+    # TODO: Remove once the temporary feed gating is no longer needed.
+    root to: "feed#index", as: :authenticated_root
   end
 
   constraints(lambda { |req| req.session[:user_id].blank? }) do
@@ -22,6 +27,13 @@ Rails.application.routes.draw do
   get "/join", to: "marketing#join", as: :join_now
   get "/api/stats", to: "marketing#stats", defaults: { format: :json }
   get "/chat", to: "welcome#show"
+  get "/talk", to: "welcome#show", as: :talk
+
+  namespace :api, defaults: { format: :json }, module: :api do
+    namespace :videos do
+      resources :thumbnails, only: :index
+    end
+  end
 
   resource :first_run
 
@@ -189,9 +201,16 @@ Rails.application.routes.draw do
   get "webmanifest"    => "pwa#manifest"
   get "service-worker" => "pwa#service_worker"
 
-  get "library" => "library#index"
+  get "library" => "library#index", as: :library
   get "library/download/:id" => "library#download", as: :library_download
   get "library/downloads/:id" => "library#downloads", as: :library_downloads
+  get "library/:id" => "library#show", as: :library_watch
+  resources :library_sessions, only: [] do
+    resource :watch_history, only: [ :create, :update ], controller: "library/watch_histories"
+  end
+
+  resources :promotions, only: [:create]
+  resources :feed, only: [:destroy], controller: "feed"
 
   get "experts" => "experts#show"
 

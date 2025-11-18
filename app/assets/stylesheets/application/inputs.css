@@ -1,9 +1,14 @@
+/* PHASE 2 MIGRATION STATUS: Complex classes with nested selectors and CSS custom properties */
+/* NOTE: .input--code has been migrated to Tailwind in application.css */
+/* These base classes need to remain in CSS for complex pseudo-classes, nested selectors, and CSS variables */
+/* Switch classes (.switch, .switch__input, .switch__btn) remain in CSS due to complex pseudo-elements */
 /* Text inputs */
 .input {
   accent-color: var(--input-accent-color, var(--color-text));
   background-color: var(--input-background, transparent);
   border-radius: var(--input-border-radius, 0.5em);
-  border: var(--input-border-size, 1px) solid var(--input-border-color, var(--color-border-darker));
+  border: var(--input-border-size, 1px) solid
+    var(--input-border-color, var(--color-border-darker));
   color: var(--input-color, var(--color-text));
   font-size: max(16px, 1em);
   inline-size: 100%;
@@ -61,7 +66,9 @@
 }
 
 .input--actor {
-  transition: box-shadow 150ms ease, outline-offset 150ms ease;
+  transition:
+    box-shadow 150ms ease,
+    outline-offset 150ms ease;
 
   &:focus-within {
     --input-border-color: var(--color-selected-dark);
@@ -84,11 +91,14 @@
     outline: 0;
   }
 
-  &:has(.input:is(
-    :autofill,
-    :-webkit-autofill,
-    :-webkit-autofill:hover,
-    :-webkit-autofill:focus)) {
+  &:has(
+    .input:is(
+      :autofill,
+      :-webkit-autofill,
+      :-webkit-autofill:hover,
+      :-webkit-autofill:focus
+    )
+  ) {
     -webkit-text-fill-color: var(--color-text);
     -webkit-box-shadow: 0 0 0px 1000px var(--color-selected) inset;
   }
@@ -131,11 +141,7 @@
   }
 }
 
-.input--code {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monaco, monospace;
-  white-space: pre-wrap !important;
-  word-wrap: break-word;
-}
+/* .input--code migrated to Tailwind in application.css */
 
 /* Switches */
 .switch {
@@ -205,7 +211,8 @@ select {
   accent-color: var(--input-accent-color, var(--color-text));
   background-color: var(--input-background, transparent);
   border-radius: var(--input-border-radius, 0.5em);
-  border: var(--input-border-size, 1px) solid var(--input-border-color, var(--color-border-darker));
+  border: var(--input-border-size, 1px) solid
+    var(--input-border-color, var(--color-border-darker));
   color: var(--input-color, var(--color-text));
   font-size: max(16px, 1em);
   inline-size: 100%;

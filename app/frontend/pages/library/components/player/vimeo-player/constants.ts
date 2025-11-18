@@ -1,0 +1,4 @@
+export const ACTIVATION_ROOT_MARGIN = "200px"
+export const AUTOPLAY_PREVIEW_DELAY_MS = 1000
+export const MUTE_OVERLAY_HOLD_MS = 2500
+export const PROGRESS_THROTTLE_MS = 10_000

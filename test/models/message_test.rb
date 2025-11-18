@@ -3,9 +3,49 @@ require "test_helper"
 class MessageTest < ActiveSupport::TestCase
   include ActionCable::TestHelper, ActiveJob::TestHelper
 
+  def setup
+    AutomatedFeed::ActivityTracker.stubs(:record).returns(default_tracker_result)
+  end
+
+  def teardown
+    AutomatedFeed::ActivityTracker.unstub(:record)
+  end
+
   test "creating a message enqueues to push later" do
     assert_enqueued_jobs 1, only: [ Room::PushMessageJob ] do
       create_new_message_in rooms(:designers)
+    end
+  end
+
+  test "creating a message enqueues room scan job when tracker triggers" do
+    room = rooms(:pets)
+    payload = {
+      trigger?: true,
+      status: :message_threshold,
+      room_id: room.id,
+      message_count: 15,
+      participant_count: 3
+    }
+
+    assert_enqueued_with(job: AutomatedFeed::RoomScanJob, args: [room.id, { trigger_status: :message_threshold }]) do
+      AutomatedFeed::ActivityTracker.stubs(:record).returns(payload)
+      room.messages.create!(creator: users(:jason), body: "Digest trigger", client_message_id: SecureRandom.uuid)
+    end
+  end
+
+  test "creating a message does not enqueue room scan when tracker ignores" do
+    room = rooms(:pets)
+    payload = {
+      trigger?: false,
+      status: :ignored,
+      room_id: nil,
+      message_count: 0,
+      participant_count: 0
+    }
+
+    assert_no_enqueued_jobs only: [AutomatedFeed::RoomScanJob] do
+      AutomatedFeed::ActivityTracker.stubs(:record).returns(payload)
+      room.messages.create!(creator: users(:jason), body: "No trigger", client_message_id: SecureRandom.uuid)
     end
   end
 
@@ -77,27 +117,194 @@ class MessageTest < ActiveSupport::TestCase
     user2 = users(:jason)
     membership1 = room.memberships.find_by(user: user1)
     membership2 = room.memberships.find_by(user: user2)
-    
+
     # Create two messages
     message1 = room.messages.create!(creator: users(:jason), body: "First message", client_message_id: "msg1")
     message2 = room.messages.create!(creator: users(:jason), body: "Second message", client_message_id: "msg2")
-    
+
     # Mark memberships with different unread_at timestamps
     membership1.update!(unread_at: message1.created_at)
     membership2.update!(unread_at: message2.created_at)
-    
+
     # Deactivate message1
     message1.deactivate
-    
+
     # Only membership1 should be affected
     membership1.reload
     membership2.reload
-    
+
     assert_equal message2.created_at, membership1.unread_at  # Updated to next message
     assert_equal message2.created_at, membership2.unread_at  # Unchanged
   end
 
+  test "@everyone mention sets mentions_everyone flag" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div>Hey <action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    admin = users(:jason)  # jason is already an administrator
+
+    message = Message.create!(
+      room: rooms(:pets),
+      body: body_html,
+      creator: admin,
+      client_message_id: "test123"
+    )
+
+    assert message.mentions_everyone?
+    assert_equal 0, message.mentions.count  # No individual mention records created
+  end
+
+  test "@everyone returns all room users as mentionees" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    admin = users(:jason)  # jason is already an administrator
+
+    room = rooms(:pets)
+    message = Message.create!(
+      room: room,
+      body: body_html,
+      creator: admin,
+      client_message_id: "test456"
+    )
+
+    assert_equal room.users.count, message.mentionees.count
+    assert_includes message.mentionees, users(:david)
+  end
+
+  test "only admins can use @everyone" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    non_admin = users(:jz)  # jz is not an administrator
+
+    message = Message.new(
+      room: rooms(:pets),
+      body: body_html,
+      creator: non_admin,
+      client_message_id: "test789"
+    )
+
+    assert_not message.valid?
+    assert_includes message.errors[:base], "Only admins can mention @everyone"
+  end
+
+  test "@everyone only allowed in open rooms" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    admin = users(:jason)  # jason is already an administrator
+
+    # Test that @everyone is not allowed in direct messages
+    direct_room = rooms(:david_and_jason)
+    message = Message.new(
+      room: direct_room,
+      body: body_html,
+      creator: admin,
+      client_message_id: "test999"
+    )
+
+    assert_not message.valid?
+    assert_includes message.errors[:base], "@everyone is only allowed in open rooms"
+  end
+
+  test "Message.mentioning scope includes @everyone messages" do
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    admin = users(:jason)  # jason is already an administrator
+
+    room = rooms(:pets)
+    message = Message.create!(
+      room: room,
+      body: body_html,
+      creator: admin,
+      client_message_id: "scope_test"
+    )
+
+    user = users(:david)
+    mentioning_messages = Message.where(room: room).mentioning(user.id)
+
+    assert_includes mentioning_messages, message
+  end
+
+  test "deactivating original message deactivates copied messages" do
+    source_room = rooms(:pets)
+    conversation_room = Rooms::Open.create!(name: "Test Digest", source_room: source_room, creator: users(:jason))
+    
+    # Create original message
+    original_message = source_room.messages.create!(
+      creator: users(:jason),
+      body: "Original message",
+      client_message_id: "original123"
+    )
+    
+    # Create copied message
+    copied_message = conversation_room.messages.create!(
+      creator: original_message.creator,
+      original_message: original_message,
+      created_at: original_message.created_at,
+      updated_at: original_message.updated_at,
+      client_message_id: original_message.client_message_id,
+      body: original_message.body
+    )
+    
+    assert original_message.active?
+    assert copied_message.active?
+    
+    # Deactivate original message
+    original_message.deactivate
+    
+    # Copied message should also be deactivated
+    copied_message.reload
+    assert_not copied_message.active?
+  end
+
+  test "reactivating original message reactivates copied messages" do
+    source_room = rooms(:pets)
+    conversation_room = Rooms::Open.create!(name: "Test Digest", source_room: source_room, creator: users(:jason))
+    
+    # Create original message
+    original_message = source_room.messages.create!(
+      creator: users(:jason),
+      body: "Original message",
+      client_message_id: "original456"
+    )
+    
+    # Create copied message
+    copied_message = conversation_room.messages.create!(
+      creator: original_message.creator,
+      original_message: original_message,
+      created_at: original_message.created_at,
+      updated_at: original_message.updated_at,
+      client_message_id: original_message.client_message_id,
+      body: original_message.body
+    )
+    
+    # Deactivate both messages
+    original_message.deactivate
+    copied_message.reload
+    assert_not original_message.active?
+    assert_not copied_message.active?
+    
+    # Reactivate original message
+    original_message.activate
+    
+    # Copied message should also be reactivated
+    copied_message.reload
+    assert copied_message.active?
+  end
+
   private
+    def default_tracker_result
+      {
+        trigger?: false,
+        status: :ignored,
+        room_id: nil,
+        message_count: 0,
+        participant_count: 0
+      }
+    end
     def create_new_message_in(room)
       room.messages.create!(creator: users(:jason), body: "Hello", client_message_id: "123")
     end

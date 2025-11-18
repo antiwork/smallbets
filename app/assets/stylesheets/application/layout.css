@@ -22,6 +22,39 @@ body {
   }
 }
 
+/* Library: force collapsed sidebar (overlay) on all breakpoints */
+body.library-collapsed {
+  --sidebar-width: 0vw;
+}
+
+body.library-collapsed #sidebar {
+  -webkit-backdrop-filter: blur(66px);
+  backdrop-filter: blur(66px);
+  background-color: oklch(var(--lch-white) / 0.66);
+  block-size: 100dvh;
+  max-block-size: 100dvh;
+  z-index: 3;
+  inset: 0;
+  position: fixed;
+  inline-size: 100vw; /* mobile default: full width */
+  transform: translate(100%);
+
+  @media (min-width: 120ch) {
+    /* desktop: show a narrower overlay panel aligned to the right */
+    inset: 0 0 0 auto;
+    inline-size: calc(26vw + var(--sidebar-tools-width));
+  }
+}
+
+body.library-collapsed #sidebar.open {
+  transform: translate(0);
+}
+
+/* When the Library sidebar overlay is open, block interactions with underlying content */
+body.library-collapsed:has(#sidebar.open) #main-content {
+  pointer-events: none;
+}
+
 #app-logo {
   display: none;
 
@@ -35,7 +68,9 @@ body {
     padding-inline: 1vw;
     place-items: center;
     position: absolute;
-    transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
+    transition:
+      opacity 500ms ease-in-out,
+      filter 500ms ease-in-out;
 
     & img {
       block-size: auto;
@@ -71,6 +106,10 @@ body {
       margin-inline: 5vw 0;
     }
   }
+}
+
+#main-content > #app {
+  overflow: auto;
 }
 
 #sidebar {

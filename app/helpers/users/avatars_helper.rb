@@ -17,8 +17,32 @@ module Users::AvatarsHelper
   end
 
   def avatar_tag(user, **options)
-    tag.span(title: user.title, class: "btn avatar") do
-      avatar_image_tag(user, size: 48, **options)
+    span_attributes = {}
+
+    span_attributes[:title] = options.delete(:title) || user.title
+    span_attributes[:class] = ["btn avatar", options.delete(:class)].compact.join(" ")
+
+    span_data = options.delete(:data)
+    span_attributes[:data] = span_data if span_data.present?
+
+    existing_style = options.delete(:style)
+    image_url = user_image_path(user)
+
+    style_fragments = []
+    if image_url.present?
+      safe_url = ERB::Util.html_escape(image_url)
+      style_fragments << "background-image: url('#{safe_url}')"
+      style_fragments << "background-size: cover"
+      style_fragments << "background-position: center"
+    end
+    style_fragments << existing_style if existing_style.present?
+    span_attributes[:style] = style_fragments.compact.join("; ") if style_fragments.any?
+
+    image_options = options.dup
+    image_size = image_options.delete(:size) || 48
+
+    tag.span(**span_attributes) do
+      avatar_image_tag(user, size: image_size, **image_options)
     end
   end
 

@@ -30,7 +30,7 @@
       </div>
     </turbo-frame>
 
-    <div class="rooms position-relative flex flex-column gap overflow-y" 
+    <div class="rooms position-relative flex flex-col gap overflow-y" 
          data-controller="search-rooms"
          data-search-rooms-target="container"
          data-search-rooms-filter-class="display-none">
@@ -43,9 +43,9 @@
       </div>
       <div data-controller="sidebar-starred-rooms sorted-list" data-sorted-list-attribute-value="updatedAt" data-sorted-list-order-value="desc"
            data-action="rooms-list:involved@window->sidebar-starred-rooms#toggleRooms rooms-list:unread@window->sorted-list#reSort rooms-list:read@window->sorted-list#reSort rooms-list:renamed@window->sorted-list#reSort"
-           class="flex position-relative flex-column rooms-list overflow margin-block-end">
-        <div class="flex gap-half margin-block-end align-center">
-          <h1 class="txt-medium">My Rooms</h1>
+           class="flex position-relative flex-col rooms-list overflow margin-block-end">
+        <div class="flex items-center gap-half mb-4">
+          <h1 class="text-base font-medium">My Rooms</h1>
         </div>
 
         <%= render "users/sidebars/rooms/shared_rooms_list", list_name: :starred_rooms, memberships: @starred_memberships %>
@@ -53,29 +53,38 @@
         <div class="margin-block"></div>
       </div>
 
-      <div class="flex gap-half margin-block-end align-center">
-        <h1 class="txt-medium">All Rooms</h1>
+      <div class="flex items-center gap-half mb-4">
+        <h1 class="text-base font-medium">All Rooms</h1>
         <%= render "users/sidebars/all_rooms_actions" %>
       </div>
       <div data-controller="sorted-list" <%= all_rooms_sort_order %>
            data-action="rooms-list:unread@window->sorted-list#reSort rooms-list:read@window->sorted-list#reSort rooms-list:renamed@window->sorted-list#reSort"
-           class="flex position-relative flex-column rooms-list overflow">
+           class="flex position-relative flex-col rooms-list overflow">
         <%= render "users/sidebars/rooms/shared_rooms_list", list_name: :shared_rooms, memberships: @all_memberships %>
       </div>
 
-      <%= link_to new_rooms_open_path, class: "rooms__new-btn btn room align-center gap txt-reversed", aria: { label: "New Chat Room" } do %>
+      <%= link_to new_rooms_open_path, class: "rooms__new-btn btn room items-center gap txt-reversed", aria: { label: "New Chat Room" } do %>
         <%= image_tag "add.svg", size: 20, aria: { hidden: "true" }, style: "view-transition-name: new-room" %>
       <% end %>
     </div>
   </div>
 
-  <button class="btn sidebar__toggle" data-action="click->toggle-class#toggle">
+  <button id="sidebar-toggle" class="btn sidebar__toggle" data-action="click->toggle-class#toggle">
     <%= image_tag "menu.svg", size: 20, aria: { hidden: "true" } %>
     <span class="for-screen-reader">Open menu</span>
   </button>
 
   <div class="sidebar__tools d-hotwire-native-none">
     <div class="sidebar__tool-container">
+      <%# TODO: Remove once the feed becomes available to everyone. %>
+      <% if Current.user&.administrator? %>
+        <%= link_to root_path, class: "btn sidebar__tool" do %>
+          <%= image_tag "home.svg", size: 20, aria: { hidden: "true" } %>
+          <span class="for-screen-reader">Home</span>
+          <span class="sidebar__tool-label">Home</span>
+        <% end %>
+      <% end %>
+
       <%= link_to inbox_path, class: "btn sidebar__tool", data: { mentions_indicator_target: "icon" } do %>
         <%= image_tag "mentions.svg", size: 20, aria: { hidden: "true" } %>
         <span class="for-screen-reader">Mentions</span>

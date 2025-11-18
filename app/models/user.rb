@@ -15,12 +15,20 @@ class User < ApplicationRecord
   has_many :messages, -> { active }, foreign_key: :creator_id, class_name: "Message"
 
   has_many :mentions
-  has_many :mentioning_messages, ->(user) { active.where(room_id: user.room_ids) }, through: :mentions, source: :message
+
+  def mentioning_messages
+    Message.active
+      .where(room_id: room_ids)
+      .left_joins(:mentions, :room)
+      .where("mentions.user_id = ? OR messages.mentions_everyone = ? OR rooms.type = ?", id, true, "Rooms::Direct")
+      .distinct
+  end
 
   has_many :push_subscriptions, class_name: "Push::Subscription", dependent: :delete_all
 
   has_many :boosts, -> { active }, foreign_key: :booster_id, class_name: "Boost"
   has_many :searches, dependent: :delete_all
+  has_many :promoted_feed_cards, class_name: "AutomatedFeedCard", foreign_key: :promoted_by_user_id
 
   has_many :sessions, dependent: :destroy
   has_many :auth_tokens, dependent: :destroy

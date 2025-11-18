@@ -73,6 +73,15 @@ module RoomsHelper
     room.display_name(for_user: for_user)
   end
 
+  def strip_emoji_from_name(room_name)
+    return room_name if room_name.blank?
+
+    # Remove emoji from the start of the room name (same pattern as extract_room_icon)
+    emoji_pattern = /\A([\p{Emoji_Presentation}\p{Extended_Pictographic}]|[\p{Emoji}]\uFE0F)\s*/
+    
+    room_name.gsub(emoji_pattern, "").strip
+  end
+
   private
     def composer_data_options(room)
       {

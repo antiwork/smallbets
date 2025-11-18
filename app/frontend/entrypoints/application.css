@@ -1,0 +1,383 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
+
+@source "../../views";
+@source "../../helpers";
+
+@theme inline {
+  /* Colors - Base LCH values (light mode) */
+  --color-lch-black: oklch(0% 0 0);
+  --color-lch-white: oklch(100% 0 0);
+  --color-lch-gray: oklch(96% 0.005 96);
+  --color-lch-gray-dark: oklch(92% 0.005 96);
+  --color-lch-gray-darker: oklch(75% 0.005 96);
+  --color-lch-gray-darkest: oklch(65% 0.005 96);
+  --color-lch-almost-black: oklch(35% 0.005 96);
+  --color-lch-blue: oklch(54% 0.23 255);
+  --color-lch-blue-light: oklch(95% 0.03 255);
+  --color-lch-blue-dark: oklch(80% 0.08 255);
+  --color-lch-orange: oklch(70% 0.2 44);
+  --color-lch-red: oklch(51% 0.2 31);
+  --color-lch-red-light: oklch(98% 0.08 22);
+  --color-lch-green: oklch(65.59% 0.234 142.49);
+  --color-lch-purple: oklch(45% 0.32 282);
+  --color-lch-always-black: oklch(0% 0 0);
+
+  /* Colors - Semantic abstractions (reference LCH values via CSS variables) */
+  --color-negative: var(--color-lch-red);
+  --color-positive: var(--color-lch-green);
+  --color-bg: var(--color-lch-white);
+  --color-bg-negative: var(--color-lch-red-light);
+  --color-message-bg: var(--color-lch-gray);
+  --color-text: var(--color-lch-black);
+  --color-text-lighter: var(--color-lch-almost-black);
+  --color-text-reversed: var(--color-lch-white);
+  --color-link: var(--color-lch-blue);
+  --color-border: var(--color-lch-gray);
+  --color-border-dark: var(--color-lch-gray-dark);
+  --color-border-darker: var(--color-lch-gray-darker);
+  --color-border-darkest: var(--color-lch-gray-darkest);
+  --color-selected: var(--color-lch-blue-light);
+  --color-selected-dark: var(--color-lch-blue-dark);
+  --color-alert: var(--color-lch-orange);
+  --color-contrast: var(--color-lch-purple);
+
+  /* Colors - Code syntax highlighting */
+  --color-keyword: oklch(58.79% 0.193 20.47);
+  --color-entity: oklch(50.15% 0.188 294.99);
+  --color-constant: oklch(49.49% 0.18 257.6);
+  --color-string: oklch(31.08% 0.101 255.87);
+  --color-variable: oklch(64.82% 0.18 45.87);
+  --color-comment: oklch(55.14% 0.019 250.98);
+  --color-entity-tag: oklch(54.64% 0.144 147.32);
+  --color-markup-heading: oklch(49.49% 0.18 257.6);
+  --color-markup-list: oklch(48.46% 0.093 90.48);
+  --color-markup-inserted: oklch(54.64% 0.144 147.32);
+  --color-markup-deleted: oklch(49.59% 0.183 24.19);
+
+  /* Spacing */
+  --spacing-inline: 1ch;
+  --spacing-inline-half: 0.5ch;
+  --spacing-inline-double: 2ch;
+  --spacing-block: 1rem;
+  --spacing-block-half: 0.5rem;
+  --spacing-block-double: 2rem;
+
+  /* Typography */
+  --font-family:
+    -apple-system, BlinkMacSystemFont, Aptos, Roboto, "Segoe UI", Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-size-x-small: 0.7rem;
+  --font-size-small: 0.8rem;
+  --font-size-medium: 1rem;
+  --font-size-large: 1.4rem;
+  --font-size-x-large: 1.8rem;
+  --font-size-xx-large: 2.4rem;
+
+  /* Shadows */
+  --shadow-base:
+    0 0 0 1px oklch(var(--lch-always-black) / 0.02),
+    0 0.2em 1.6em -0.8em oklch(var(--lch-always-black) / 0.2),
+    0 0.4em 2.4em -1em oklch(var(--lch-always-black) / 0.3),
+    0 0.4em 0.8em -1.2em oklch(var(--lch-always-black) / 0.4),
+    0 0.8em 1.2em -1.6em oklch(var(--lch-always-black) / 0.5),
+    0 1.2em 1.6em -2em oklch(var(--lch-always-black) / 0.6);
+
+  /* Interactive states */
+  --hover-color: var(--color-border-darker);
+  --hover-size: 0.15em;
+  --hover-filter: brightness(1);
+  --outline-size: min(0.2em, 2px);
+
+  /* Tailwind color utilities - reference CSS variables that respond to media queries */
+  /* These generate utilities like bg-background, text-foreground, etc. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+}
+
+:root {
+  color-scheme: light dark;
+  --lch-black: 0% 0 0;
+  --lch-white: 100% 0 0;
+  --lch-gray: 96% 0.005 96;
+  --lch-gray-dark: 92% 0.005 96;
+  --lch-gray-darker: 75% 0.005 96;
+  --lch-gray-darkest: 65% 0.005 96;
+  --lch-almost-black: 35% 0.005 96;
+  --lch-blue: 54% 0.23 255;
+  --lch-blue-light: 95% 0.03 255;
+  --lch-blue-dark: 80% 0.08 255;
+  --lch-orange: 70% 0.2 44;
+  --lch-red: 51% 0.2 31;
+  --lch-red-light: 98% 0.08 22;
+  --lch-green: 65.59% 0.234 142.49;
+  --lch-purple: 45% 0.32 282;
+  --lch-always-black: 0% 0 0;
+
+  /* Color values for Tailwind utilities (light mode) */
+  /* These CSS variables are referenced by the theme above */
+  --background: oklch(100% 0 0);
+  --foreground: oklch(14.5% 0 0);
+  --primary: oklch(20.5% 0 0);
+  --primary-foreground: oklch(98.5% 0 0);
+  --secondary: oklch(97% 0 0);
+  --secondary-foreground: oklch(20.5% 0 0);
+  --accent: oklch(97% 0 0);
+  --accent-foreground: oklch(20.5% 0 0);
+  --muted: oklch(97% 0 0);
+  --muted-foreground: oklch(55.6% 0 0);
+  --destructive: oklch(57.7% 0.245 27.325);
+  --input: oklch(92.2% 0 0);
+  --ring: oklch(70.8% 0 0);
+  --border: var(--color-border);
+  --control-border: #b1adae;
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(14.5% 0 0);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --lch-black: 100% 0 0;
+    --lch-white: 0% 0 0;
+    --lch-gray: 25.2% 0 0;
+    --lch-gray-dark: 30.12% 0 0;
+    --lch-gray-darker: 44.95% 0 0;
+    --lch-gray-darkest: 64.95% 0 0;
+    --lch-almost-black: 85% 0 0;
+    --lch-blue: 72.25% 0.16 248;
+    --lch-blue-light: 28.11% 0.053 248;
+    --lch-blue-dark: 42.25% 0.07 248;
+    --lch-red: 73.8% 0.184 29.18;
+    --lch-red-light: 28% 0.05 20;
+    --lch-green: 75% 0.21 141.89;
+    --lch-purple: 70% 0.32 282;
+    --control-border: #555;
+
+    /* Color values for Tailwind utilities (dark mode) */
+    /* These update via CSS cascade when prefers-color-scheme: dark */
+    --background: oklch(0% 0 0);
+    --foreground: oklch(98.5% 0 0);
+    --primary: oklch(92.2% 0 0);
+    --primary-foreground: oklch(20.5% 0 0);
+    --secondary: oklch(26.9% 0 0);
+    --secondary-foreground: oklch(98.5% 0 0);
+    --accent: oklch(26.9% 0 0);
+    --accent-foreground: oklch(98.5% 0 0);
+    --muted: oklch(26.9% 0 0);
+    --muted-foreground: oklch(70.8% 0 0);
+    --destructive: oklch(70.4% 0.191 22.216);
+    --input: oklch(100% 0 0 / 15%);
+    --ring: oklch(55.6% 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --popover: oklch(0% 0 0);
+    --popover-foreground: oklch(98.5% 0 0);
+
+    /* Dark mode code syntax colors */
+    --color-keyword: oklch(73.45% 0.16260514269909043 25.78369140372489);
+    --color-entity: oklch(80.05% 0.127 305.86);
+    --color-constant: oklch(78.57% 0.115 246.66);
+    --color-string: oklch(78.57% 0.115 246.66);
+    --color-variable: oklch(79.91% 0.141 60.1);
+    --color-comment: oklch(66.25% 0.018 250.92);
+    --color-entity-tag: oklch(84.16% 0.164 145.75);
+    --color-markup-heading: oklch(56.86% 0.202 259.67);
+    --color-markup-list: oklch(85.74% 0.133 89.95);
+    --color-markup-inserted: oklch(90.72% 0.112 146.34);
+    --color-markup-deleted: oklch(
+      92.23% 0.03967766015913856 27.493308249746637
+    );
+
+    /* Dark mode shadow */
+    --shadow-base:
+      0 0 0 1px oklch(var(--lch-always-black) / 0.42),
+      0 0.2em 1.6em -0.8em oklch(var(--lch-always-black) / 0.6),
+      0 0.4em 2.4em -1em oklch(var(--lch-always-black) / 0.7),
+      0 0.4em 0.8em -1.2em oklch(var(--lch-always-black) / 0.8),
+      0 0.8em 1.2em -1.6em oklch(var(--lch-always-black) / 0.9),
+      0 1.2em 1.6em -2em oklch(var(--lch-always-black) / 1);
+  }
+}
+
+/* Shelf scope utility (low specificity via :where) */
+:where(.shelf-scope) {
+  /* Base defaults */
+  --shelf-gap: 0.8vw;
+  --shelf-items: 2;
+  --shelf-peek: 0.15;
+  /* Match original viewport-based sizing with a fixed peek fraction */
+  --shelf-card-w: calc((100vw - var(--shelf-gap) * 2) / (2 + 0.3));
+  --shelf-peek-pad: calc(var(--shelf-card-w) * var(--shelf-peek));
+  --shelf-side-pad: var(--shelf-peek-pad);
+}
+
+@media (min-width: 768px) {
+  :where(.shelf-scope) {
+    --shelf-items: 3;
+    --shelf-card-w: calc((100vw - var(--shelf-gap) * 3) / (3 + 0.3));
+  }
+}
+
+@media (min-width: 1024px) {
+  :where(.shelf-scope) {
+    --shelf-items: 4;
+    --shelf-card-w: calc((100vw - var(--shelf-gap) * 4) / (4 + 0.3));
+  }
+}
+
+@media (min-width: 1280px) {
+  :where(.shelf-scope) {
+    --shelf-items: 5;
+    --shelf-card-w: calc((100vw - var(--shelf-gap) * 5) / (5 + 0.3));
+  }
+}
+
+@media (min-width: 1536px) {
+  :where(.shelf-scope) {
+    /* At 2xl, show full items without peek and align to page padding */
+    --shelf-items: 6;
+    --shelf-peek: 0;
+    --shelf-card-w: calc(
+      (
+          100vw - var(--library-left-pad, 0px) * 2 - var(--shelf-gap) *
+            var(--shelf-items)
+        ) /
+        var(--shelf-items)
+    );
+    --shelf-side-pad: var(--library-left-pad, 0px);
+  }
+}
+
+/* Ensure black background when the Vimeo container is fullscreen */
+.vimeo-embed {
+  /* Match system preference from first paint to avoid white flash */
+  background-color: var(--background);
+}
+
+.vimeo-fullscreen:fullscreen {
+  background-color: var(--background);
+}
+
+.vimeo-fullscreen:-webkit-full-screen {
+  background-color: var(--background);
+}
+
+.vimeo-fullscreen:fullscreen::backdrop {
+  background-color: var(--background);
+}
+
+.vimeo-fullscreen:-webkit-full-screen::backdrop {
+  background-color: var(--background);
+}
+
+/* Ensure black background if the iframe itself is fullscreen */
+.vimeo-embed:fullscreen {
+  background-color: var(--background);
+}
+
+.vimeo-embed:-webkit-full-screen {
+  background-color: var(--background);
+}
+
+.vimeo-embed:fullscreen::backdrop {
+  background-color: var(--background);
+}
+
+.vimeo-embed:-webkit-full-screen::backdrop {
+  background-color: var(--background);
+}
+
+main#main-content:focus {
+  outline: none;
+}
+
+.library-muted-light {
+  color: #6b6b6b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .library-muted-light {
+    color: inherit;
+  }
+}
+
+.shelf-nav-btn::before {
+  transition: opacity 250ms ease-out;
+}
+
+.group\/shelf:hover .shelf-nav-btn::before {
+  transition: opacity 900ms ease-out;
+}
+
+/* Text utilities */
+.txt-x-small {
+  @apply text-[var(--font-size-x-small)];
+}
+
+.txt-small {
+  @apply text-[var(--font-size-small)];
+}
+
+.txt-medium {
+  @apply text-[var(--font-size-medium)];
+}
+
+.txt-large {
+  @apply text-[var(--font-size-large)];
+}
+
+.txt-primary {
+  @apply text-[var(--color-text)];
+}
+
+.txt-negative {
+  @apply text-[var(--color-negative)];
+}
+
+.txt-muted {
+  @apply text-[var(--color-border-darkest)];
+}
+
+/* Spacing utilities */
+.pad {
+  @apply px-[var(--spacing-inline)] py-[var(--spacing-block)];
+}
+
+.margin-block {
+  @apply my-[var(--spacing-block)];
+}
+
+.gap {
+  @apply gap-x-[var(--spacing-inline)] gap-y-[var(--spacing-block)];
+}
+
+/* Input component classes - migrated from inputs.css */
+/* Base input styling maintained in CSS file for complex pseudo-classes and nested selectors */
+/* These utility classes complement the CSS base classes */
+
+/* Code input variant - migrated from inputs.css */
+.input--code {
+  @apply font-mono break-words whitespace-pre-wrap;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monaco, monospace;
+}
+
+/* Button component classes - migrated from buttons.css */
+/* Complex button styling with nested selectors and pseudo-classes maintained in CSS file */
+/* Base button class maintains core functionality via CSS, modifiers use Tailwind utilities */
+/* NOTE: Switch classes remain in inputs.css due to complex pseudo-elements and nested selectors */

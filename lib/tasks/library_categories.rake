@@ -57,6 +57,7 @@ namespace :library do
       "marketing-fundamentals-for-non-marketers" => [3],
       "notion-for-creators-and-entrepreneurs" => [1, 13],
       "publish-a-best-selling-course-on-udemy" => [1, 5],
+      "product-management-in-the-age-of-ai" => [8],
       "reproducible-success-strategies-and-ergodicity" => [10, 12],
       "self-sponsor-your-own-us-green-card" => [13],
       "seo-keyword-research" => [3, 9],
@@ -67,6 +68,7 @@ namespace :library do
       "the-basics-of-buying-and-selling-businesses" => [6],
       "understanding-linkedin" => [1, 2, 4],
       "understanding-the-x-algorithm" => [1, 2, 4],
+      "vibe-code-with-devin-cursor-codex-and-more" => [8],
       "wandering-the-pathless-path" => [10, 13],
       "what-to-expect-when-you-go-self-employed" => [6]
     }
