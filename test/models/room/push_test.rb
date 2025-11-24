@@ -36,25 +36,13 @@ class Room::PushTest < ActiveSupport::TestCase
     wait_for_web_push_delivery_pool_tasks(2)
   end
 
-  test "does not notify for invisible rooms" do
-    memberships(:kevin_designers).update! involvement: "invisible"
-
-    perform_enqueued_jobs only: Room::PushMessageJob do
-      WebPush.expects(:payload_send).times(2)
-      rooms(:designers).messages.create! body: "Hey @kevin", client_message_id: "earth", creator: users(:david)
-    end
-    wait_for_web_push_delivery_pool_tasks(2)
-  end
-
   test "destroys invalid subscriptions" do
-    memberships(:kevin_designers).update! involvement: "invisible"
-
     assert_difference -> { Push::Subscription.count }, -2 do
       perform_enqueued_jobs only: Room::PushMessageJob do
-        WebPush.expects(:payload_send).times(2).raises(WebPush::ExpiredSubscription.new(Struct.new(:body).new, "example.com"))
+        WebPush.expects(:payload_send).times(3).raises(WebPush::ExpiredSubscription.new(Struct.new(:body).new, "example.com"))
         rooms(:designers).messages.create! body: "Hey @kevin", client_message_id: "earth", creator: users(:david)
       end
-      wait_for_web_push_delivery_pool_tasks(2)
+      wait_for_web_push_delivery_pool_tasks(3)
       wait_for_invalidation_pool_tasks(2)
     end
   end

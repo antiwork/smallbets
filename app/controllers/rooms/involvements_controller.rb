@@ -48,17 +48,7 @@ class Rooms::InvolvementsController < ApplicationController
     end
 
     def add_or_remove_rooms_in_sidebar
-      case
-      when @membership.involved_in_invisible?
-        for_each_sidebar_section do |list_name|
-          broadcast_remove_to @membership.user, :rooms, target: [ @room, helpers.dom_prefix(list_name, :list_node) ]
-        end
-      when @membership.involvement_previously_was.inquiry.invisible?
-        for_each_sidebar_section do |list_name|
-          broadcast_append_to @membership.user, :rooms, target: list_name,
-                              partial: "users/sidebars/rooms/shared", locals: { list_name:, membership: @membership },
-                              attributes: { maintain_scroll: true }
-        end
-      end
+      # No longer needed - rooms are always visible in sidebar (either in "My Rooms" or "All Rooms")
+      # The involvement state (mentions vs everything) is handled by broadcast_involvement_change_to_sidebar
     end
 end
