@@ -171,6 +171,8 @@ class Message < ApplicationRecord
   end
 
   def involve_mentionees_in_room(unread:)
+    return if copy?
+
     # Skip auto-involvement for @everyone to avoid creating thousands of membership updates
     # Users already in the room will be notified via the updated queries
     return if mentions_everyone?

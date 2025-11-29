@@ -67,6 +67,45 @@ class MessageTest < ActiveSupport::TestCase
     assert_equal [], message_mentioning_a_non_member.mentionees
   end
 
+  test "referenced messages do not create mention records" do
+    room = rooms(:pets)
+    conversation_room = Rooms::Open.create!(name: "Digest", source_room: room, creator: users(:jason))
+    conversation_room.memberships.grant_to(room.users)
+
+    body_html = "<div>Hey #{mention_attachment_for(:david)}</div>"
+    original = room.messages.create!(creator: users(:jason), body: body_html, client_message_id: SecureRandom.uuid)
+
+    assert_no_difference "Mention.count" do
+      conversation_room.messages.create!(
+        creator: users(:jason),
+        original_message: original,
+        client_message_id: original.client_message_id
+      )
+    end
+  end
+
+  test "referenced messages do not broadcast notifications" do
+    room = rooms(:pets)
+    conversation_room = Rooms::Open.create!(name: "Digest", source_room: room, creator: users(:jason))
+    conversation_room.memberships.grant_to(room.users)
+
+    everyone_sgid = Everyone.new.attachable_sgid
+    body_html = "<div><action-text-attachment sgid=\"#{everyone_sgid}\" content-type=\"application/vnd.campfire.mention\"></action-text-attachment></div>"
+
+    original = room.messages.create!(creator: users(:jason), body: body_html, client_message_id: SecureRandom.uuid)
+
+    reference = conversation_room.messages.create!(
+      creator: users(:jason),
+      original_message: original,
+      client_message_id: original.client_message_id,
+      mentions_everyone: original.mentions_everyone
+    )
+
+    assert_no_broadcasts("user_#{users(:david).id}_notifications") do
+      reference.broadcast_notifications
+    end
+  end
+
   test "deactivating message clears unread timestamps pointing to it" do
     room = rooms(:pets)
     user = users(:david)

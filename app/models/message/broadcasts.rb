@@ -13,6 +13,8 @@ module Message::Broadcasts
   end
 
   def broadcast_notifications(ignore_if_older_message: false)
+    return if copy?
+
     memberships = if mentions_everyone?
       room.memberships
     else

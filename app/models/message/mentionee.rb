@@ -41,6 +41,8 @@ module Message::Mentionee
 
   private
     def create_mentionees
+      return if copy?
+
       if mentions_everyone_in_body?
         update_column(:mentions_everyone, true)
       else
