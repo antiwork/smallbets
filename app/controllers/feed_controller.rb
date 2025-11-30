@@ -308,31 +308,60 @@ class FeedController < AuthenticatedController
   end
 
   def load_boost_data(room_ids)
+    message_scope = Message.active.where(room_id: room_ids)
+
+    copied_pairs = message_scope
+                     .where.not(original_message_id: nil)
+                     .pluck(:room_id, :original_message_id)
+
+    original_to_rooms = copied_pairs.each_with_object(Hash.new { |h, k| h[k] = [] }) do |(room_id, original_id), hash|
+      hash[original_id] << room_id
+    end
+
+    direct_pairs = message_scope
+                     .where(original_message_id: nil)
+                     .pluck(:id, :room_id)
+
+    direct_to_room = direct_pairs.to_h { |message_id, room_id| [message_id, room_id] }
+
+    message_ids = (original_to_rooms.keys + direct_to_room.keys).uniq
+    return { last_reaction_times: {}, top_reactions: {} } if message_ids.empty?
+
     raw_data = Boost.active
                     .joins(:message)
-                    .where(messages: { room_id: room_ids, active: true })
-                    .group("messages.room_id", "boosts.content")
+                    .where(message_id: message_ids, messages: { active: true })
+                    .group("boosts.message_id", "boosts.content")
                     .pluck(
-                      Arel.sql("messages.room_id"),
+                      Arel.sql("boosts.message_id"),
                       Arel.sql("boosts.content"),
                       Arel.sql("COUNT(*)"),
                       Arel.sql("MAX(boosts.created_at)")
                     )
 
     last_reaction_times = {}
-    reactions_by_room = Hash.new { |h, k| h[k] = [] }
+    reactions_by_room = Hash.new { |h, k| h[k] = Hash.new(0) }
 
-    raw_data.each do |room_id, content, count, max_time|
-      max_time = Time.zone.parse(max_time) if max_time.is_a?(String)
-      current_max = last_reaction_times[room_id]
-      last_reaction_times[room_id] = max_time if current_max.nil? || max_time > current_max
-      reactions_by_room[room_id] << [content, count] if content.to_s.all_emoji?
+    raw_data.each do |message_id, content, count, max_time|
+      next unless content.to_s.all_emoji?
+
+      timestamp = max_time.is_a?(String) ? Time.zone.parse(max_time) : max_time
+      target_room_ids = original_to_rooms[message_id].presence || [direct_to_room[message_id]].compact
+      next if target_room_ids.empty?
+
+      target_room_ids.each do |room_id|
+        current_max = last_reaction_times[room_id]
+        if current_max.nil? || timestamp > current_max
+          last_reaction_times[room_id] = timestamp
+        end
+        reactions_by_room[room_id][content] += count
+      end
     end
 
-    top_reactions = reactions_by_room.transform_values do |reactions|
-      reactions.sort_by { |_, count| -count }
-               .first(5)
-               .map(&:first)
+    top_reactions = reactions_by_room.transform_values do |emoji_counts|
+      emoji_counts
+        .sort_by { |_, emoji_count| -emoji_count }
+        .first(5)
+        .map(&:first)
     end
 
     {
