@@ -313,7 +313,7 @@ function FeedCard({
                     href={card.topMessage.opengraph.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-foreground relative z-20 line-clamp-3 text-sm font-medium hover:underline"
+                    className="text-foreground line-clamp-3 text-sm font-medium hover:underline"
                   >
                     {card.topMessage.opengraph.title}
                   </a>
