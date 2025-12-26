@@ -419,10 +419,43 @@
   padding-inline-end: 0; /* Remove padding on the right side */
 }
 
-/* Style for the star button container */
-[data-type="list_node"] .txt-small {
+/* Style for the involvement button container */
+[data-type="list_node"] .txt-small,
+[data-type="list_node"] turbo-frame.txt-small {
   margin-inline-start: 0; /* Reset left margin to maintain spacing with timestamp */
   margin-inline-end: -1ch; /* Pull from the right side only */
+}
+
+/* Lazy-loaded involvement button placeholder */
+turbo-frame[data-controller*="lazy-involvement"]:not([src]):empty::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
+
+/* Sidebar loading indicator */
+.sidebar__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--block-space);
+  min-height: 200px;
+}
+
+.sidebar__loading .spinner {
+  color: var(--color-text);
+  opacity: 0.6;
+}
+
+/* Show loading indicator when turbo frame is loading */
+turbo-frame#user_sidebar[src]:not([src=""]):not([complete]) .sidebar__loading {
+  display: flex;
+}
+
+turbo-frame#user_sidebar:not([src]) .sidebar__loading,
+turbo-frame#user_sidebar[complete] .sidebar__loading {
+  display: none;
 }
 
 .rooms__new-btn {
