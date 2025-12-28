@@ -30,6 +30,7 @@
 .txt-tight-lines { line-height: 1.2; }
 .txt-normal { font-weight: 400; font-style: normal; }
 .txt-medium { font-weight: 500; }
+.fw-800 { font-weight: 800; }
 .txt-nowrap { white-space: nowrap; }
 
 .inline { display: inline }
