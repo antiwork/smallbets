@@ -12,6 +12,7 @@
   max-block-size: 100dvh;
   padding-inline-end: var(--sidebar-tools-width);
   position: relative;
+  overflow-anchor: none;
 }
 
 .sidebar__tools {
