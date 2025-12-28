@@ -282,3 +282,10 @@ pre {
     scrollbar-width: thin;
   }
 }
+
+/* Disable browser scroll anchoring for elements with custom JS scroll management.
+   Prevents browser scroll anchoring from conflicting with maintain-scroll controller.
+   Fixes sidebar scroll jump on Safari (#17) */
+[data-controller~="maintain-scroll"] {
+  overflow-anchor: none;
+}
