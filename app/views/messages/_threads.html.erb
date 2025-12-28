@@ -1,4 +1,5 @@
 <% threads = message.threads.to_a.select { |t| (t.messages_count || t.messages.active.count) > 0 } %>
+<% unread_thread_ids = Membership.where(room_id: threads.map(&:id), user_id: Current.user.id).unread.pluck(:room_id) %>
 <div id="<%= dom_id(message, :threads) %>" class="threads flex align-center gap full-width" style="--column-gap: 0.4ch; --row-gap: 0" data-controller="local-time">
   <% threads.each do |thread| %>
     <% # Get users who have posted in the thread, ordered by their first message timestamp %>
@@ -22,7 +23,11 @@
       </div>
       <%= pluralize(reply_count, 'reply', 'replies') %>
       <% if reply_count > 0 %>
-        <span class="txt-muted">Last reply <%= local_datetime_tag thread.last_active_at, style: :relative %></span>
+        <% if unread_thread_ids.include?(thread.id) %>
+          <strong>Last reply <%= local_datetime_tag thread.last_active_at, style: :relative %></strong>
+        <% else %>
+          <span class="txt-muted">Last reply <%= local_datetime_tag thread.last_active_at, style: :relative %></span>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
