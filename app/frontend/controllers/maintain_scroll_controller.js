@@ -28,7 +28,7 @@ export default class extends Controller {
     const render = event.detail.render
 
     event.detail.render = async (...args) => {
-      this.#scrollManager.keepScroll(false, () => render(...args), 'instant', true)
+      this.#scrollManager.keepScroll(false, () => render(...args), 'instant', false)
     }
   }
 
