@@ -1,8 +1,4 @@
 class StatsService
-  # Class variable to store the cached ranks
-  @@all_time_ranks = nil
-  @@last_cache_time = nil
-
   # Get top posters for today
   def self.top_posters_today(limit = 10)
     today = Time.now.utc.strftime("%Y-%m-%d")
@@ -329,96 +325,169 @@ class StatsService
 
   # Get total counts for the stats page
   def self.total_counts
-    {
-      total_users: User.where(active: true, suspended_at: nil).count,
-      total_messages: Message.count,
-      total_threads: Room.active
-                         .where(type: "Rooms::Thread")
-                         .joins(:messages)
-                         .where("messages.active = ?", true)
-                         .distinct.count,
-      total_boosts: Boost.count,
-      total_posters: User.active.joins(messages: :room)
-                         .where("rooms.type != ?", "Rooms::Direct")
-                         .where("messages.active = ?", true)
-                         .distinct.count
-    }
+    Rails.cache.fetch("stats/total_counts", expires_in: 5.minutes) do
+      {
+        total_users: User.where(active: true, suspended_at: nil).count,
+        total_messages: Message.count,
+        total_threads: Room.active
+                           .where(type: "Rooms::Thread")
+                           .joins(:messages)
+                           .where("messages.active = ?", true)
+                           .distinct.count,
+        total_boosts: Boost.count,
+        total_posters: User.active.joins(messages: :room)
+                           .where("rooms.type != ?", "Rooms::Direct")
+                           .where("messages.active = ?", true)
+                           .distinct.count
+      }
+    end
   end
 
   # Get top rooms by message count
   def self.top_rooms_by_message_count(limit = 10)
-    rooms_message_count_subquery = <<~SQL
-      (
-        SELECT COUNT(DISTINCT messages.id) FROM messages
-        LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'
-        LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id
-        WHERE messages.active = true AND (messages.room_id = rooms.id OR parent_messages.room_id = rooms.id)
-      ) AS message_count
-    SQL
+    Rails.cache.fetch("stats/top_rooms/#{limit}", expires_in: 10.minutes) do
+      rooms_message_count_subquery = <<~SQL
+        (
+          SELECT COUNT(DISTINCT messages.id) FROM messages
+          LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'
+          LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id
+          WHERE messages.active = true AND (messages.room_id = rooms.id OR parent_messages.room_id = rooms.id)
+        ) AS message_count
+      SQL
 
-    Room.select("rooms.*", rooms_message_count_subquery)
-        .where(type: "Rooms::Open") # Only include open rooms
-        .group("rooms.id")
-        .order("message_count DESC, rooms.created_at ASC")
-        .limit(limit)
+      Room.select("rooms.*", rooms_message_count_subquery)
+          .where(type: "Rooms::Open")
+          .group("rooms.id")
+          .order("message_count DESC, rooms.created_at ASC")
+          .limit(limit)
+          .to_a
+    end
   end
 
   # Precompute all user ranks for the all-time stats page
   # Returns a hash mapping user_id to rank
-  # Results are cached across requests and invalidated when messages or users change
+  # Results are cached using Rails.cache
   def self.precompute_all_time_ranks
-    # Return cached result if available and not too old (max 1 hour)
-    if @@all_time_ranks.present? && @@last_cache_time.present? && @@last_cache_time > 1.hour.ago
-      return @@all_time_ranks
+    Rails.cache.fetch("stats/all_time_ranks", expires_in: 1.hour) do
+      sql = <<~SQL
+        WITH user_stats AS (
+          SELECT
+            users.id,
+            COALESCE(COUNT(CASE WHEN messages.id IS NOT NULL AND messages.active = true AND rooms.type != 'Rooms::Direct' THEN messages.id END), 0) AS message_count,
+            COALESCE(users.membership_started_at, users.created_at) as joined_at
+          FROM users
+          LEFT JOIN messages ON messages.creator_id = users.id
+          LEFT JOIN rooms ON messages.room_id = rooms.id
+          WHERE users.active = true AND users.suspended_at IS NULL
+          GROUP BY users.id, users.membership_started_at, users.created_at
+        )
+        SELECT
+          id,
+          RANK() OVER (ORDER BY message_count DESC, joined_at ASC, id ASC) as rank
+        FROM user_stats
+      SQL
+
+      ranks = {}
+      ActiveRecord::Base.connection.execute(sql).each do |row|
+        ranks[row["id"].to_i] = row["rank"]
+      end
+      ranks
     end
-
-    # Use a query that includes all users, even those with no messages
-    sql = <<~SQL
-      WITH user_stats AS (
-        SELECT#{' '}
-          users.id,#{' '}
-          COALESCE(COUNT(CASE WHEN messages.id IS NOT NULL AND messages.active = true AND rooms.type != 'Rooms::Direct' THEN messages.id END), 0) AS message_count,
-          COALESCE(users.membership_started_at, users.created_at) as joined_at
-        FROM users
-        LEFT JOIN messages ON messages.creator_id = users.id
-        LEFT JOIN rooms ON messages.room_id = rooms.id
-        WHERE users.active = true AND users.suspended_at IS NULL
-        GROUP BY users.id, users.membership_started_at, users.created_at
-      )
-      SELECT#{' '}
-        id,
-        RANK() OVER (ORDER BY message_count DESC, joined_at ASC, id ASC) as rank
-      FROM user_stats
-    SQL
-
-    # Execute the query and build a hash of user_id => rank
-    ranks = {}
-    ActiveRecord::Base.connection.execute(sql).each do |row|
-      ranks[row["id"].to_i] = row["rank"]
-    end
-
-    # Cache the result
-    @@all_time_ranks = ranks
-    @@last_cache_time = Time.current
-
-    ranks
   end
 
   # Calculate a user's rank in the all-time leaderboard
-  # This is the canonical ranking method to be used by both stats pages and user profiles
   def self.calculate_all_time_rank(user_id)
     user = User.find_by(id: user_id)
     return nil unless user
 
-    # Use the precomputed ranks for consistency across the application
     precompute_all_time_ranks[user_id]
   end
 
   # Clear the cached all-time ranks
-  # This should be called when a user creates or deletes a message,
-  # or when a user is created, deleted, or suspended
   def self.clear_all_time_ranks_cache
-    @@all_time_ranks = nil
-    @@last_cache_time = nil
+    Rails.cache.delete("stats/all_time_ranks")
+  end
+
+  # ============================================
+  # Room-scoped stats methods
+  # ============================================
+
+  # Count messages in a room including messages in threads
+  def self.room_messages_count(room)
+    Rails.cache.fetch("stats/room/#{room.id}/messages_count", expires_in: 5.minutes) do
+      Message.joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+             .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+             .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+             .active.distinct.count
+    end
+  end
+
+  # Get top talkers for a specific room
+  def self.room_top_talkers(room, limit = 10)
+    Rails.cache.fetch("stats/room/#{room.id}/top_talkers/#{limit}", expires_in: 5.minutes) do
+      User.select("users.id, users.name, COUNT(DISTINCT messages.id) AS message_count, COALESCE(users.membership_started_at, users.created_at) as joined_at")
+          .joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
+          .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+          .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+          .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+          .where("users.active = true AND users.suspended_at IS NULL")
+          .group("users.id, users.name, users.membership_started_at, users.created_at")
+          .order("message_count DESC, joined_at ASC, users.id ASC")
+          .limit(limit)
+          .map { |u| { id: u.id, name: u.name, message_count: u.message_count } }
+    end
+  end
+
+  # Get user stats for a specific room
+  def self.room_user_stats(room, user)
+    return nil unless user
+
+    User.select("users.id, users.name, COUNT(DISTINCT messages.id) AS message_count")
+        .joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
+        .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+        .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+        .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+        .where("users.id = ?", user.id)
+        .group("users.id")
+        .first
+  end
+
+  # Calculate user rank in a specific room
+  def self.room_user_rank(room, user)
+    return nil unless user
+
+    Rails.cache.fetch("stats/room/#{room.id}/user/#{user.id}/rank", expires_in: 2.minutes) do
+      stats = room_user_stats(room, user)
+      next nil unless stats
+
+      users_with_more_messages = User.joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
+                                     .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+                                     .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+                                     .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+                                     .where("users.active = true AND users.suspended_at IS NULL")
+                                     .group("users.id")
+                                     .having("COUNT(DISTINCT messages.id) > ?", stats.message_count.to_i)
+                                     .count.size
+
+      if stats.message_count.to_i > 0
+        users_with_same_messages_earlier_join = User.joins("INNER JOIN messages ON messages.creator_id = users.id AND messages.active = true")
+                                                    .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+                                                    .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+                                                    .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: room.id)
+                                                    .where("users.active = true AND users.suspended_at IS NULL")
+                                                    .group("users.id")
+                                                    .having("COUNT(DISTINCT messages.id) = ?", stats.message_count.to_i)
+                                                    .where("COALESCE(users.membership_started_at, users.created_at) < ?",
+                                                           user.membership_started_at || user.created_at)
+                                                    .count.size
+      else
+        users_with_same_messages_earlier_join = User.where("COALESCE(membership_started_at, created_at) < ?",
+                                                           user.membership_started_at || user.created_at)
+                                                    .where("active = true AND suspended_at IS NULL")
+                                                    .count
+      end
+
+      users_with_more_messages + users_with_same_messages_earlier_join + 1
+    end
   end
 end
