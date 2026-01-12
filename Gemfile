@@ -79,3 +79,7 @@ gem "inertia_rails", "~> 3.11"
 gem "vite_rails", "~> 3.0"
 
 gem "ruby-openai"
+
+gem "omniauth"
+gem "omniauth-twitter2"
+gem "omniauth-rails_csrf_protection"

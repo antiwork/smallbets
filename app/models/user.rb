@@ -41,6 +41,7 @@ class User < ApplicationRecord
 
   validates_presence_of :email_address, if: :person?
   normalizes :email_address, with: ->(email_address) { email_address.downcase }
+  validates :twitter_uid, uniqueness: true, allow_nil: true
 
   scope :without_default_names, -> { where.not(name: DEFAULT_NAME) }
   scope :non_suspended, -> { where(suspended_at: nil) }
@@ -213,6 +214,10 @@ class User < ApplicationRecord
 
   def unblock!(other_user)
     blocks_given.where(blocked: other_user).destroy_all
+  end
+
+  def twitter_connected?
+    twitter_uid.present? && twitter_connected_at.present?
   end
 
   private

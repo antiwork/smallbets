@@ -75,7 +75,7 @@ FOREIGN KEY ("creator_id")
 CREATE INDEX "index_searches_on_user_id" ON "searches" ("user_id");
 CREATE INDEX "index_searches_on_creator_id" ON "searches" ("creator_id");
 CREATE TABLE IF NOT EXISTS "webhook_events" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "source" varchar, "event_type" varchar, "payload" text, "processed_at" datetime(6), "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
-CREATE TABLE IF NOT EXISTS "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "role" integer DEFAULT 0 NOT NULL, "email_address" varchar DEFAULT NULL, "password_digest" varchar DEFAULT NULL, "active" boolean DEFAULT 1, "bio" text DEFAULT NULL, "bot_token" varchar DEFAULT NULL, "avatar_url" varchar DEFAULT NULL, "twitter_username" varchar DEFAULT NULL, "linkedin_username" varchar DEFAULT NULL, "personal_url" varchar DEFAULT NULL, "membership_started_at" datetime(6) DEFAULT NULL, "ascii_name" varchar DEFAULT NULL, "twitter_url" varchar DEFAULT NULL, "linkedin_url" varchar DEFAULT NULL, "order_id" bigint DEFAULT NULL, "suspended_at" datetime(6) DEFAULT NULL, "preferences" text DEFAULT '{}', "last_authenticated_at" datetime(6));
+CREATE TABLE IF NOT EXISTS "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "role" integer DEFAULT 0 NOT NULL, "email_address" varchar DEFAULT NULL, "password_digest" varchar DEFAULT NULL, "active" boolean DEFAULT 1, "bio" text DEFAULT NULL, "bot_token" varchar DEFAULT NULL, "avatar_url" varchar DEFAULT NULL, "twitter_username" varchar DEFAULT NULL, "linkedin_username" varchar DEFAULT NULL, "personal_url" varchar DEFAULT NULL, "membership_started_at" datetime(6) DEFAULT NULL, "ascii_name" varchar DEFAULT NULL, "twitter_url" varchar DEFAULT NULL, "linkedin_url" varchar DEFAULT NULL, "order_id" bigint DEFAULT NULL, "suspended_at" datetime(6) DEFAULT NULL, "preferences" text DEFAULT '{}', "last_authenticated_at" datetime(6), "provider" varchar, "uid" varchar, "twitter_uid" varchar, "twitter_oauth_token" text, "twitter_oauth_refresh_token" text, "twitter_screen_name" varchar, "twitter_profile_image" varchar, "twitter_connected_at" datetime(6));
 CREATE UNIQUE INDEX "index_users_on_bot_token" ON "users" ("bot_token");
 CREATE UNIQUE INDEX "index_users_on_email_address" ON "users" ("email_address");
 CREATE UNIQUE INDEX "index_users_on_order_id" ON "users" ("order_id") WHERE order_id IS NOT NULL;
@@ -184,7 +184,10 @@ CREATE INDEX "index_messages_on_answered_at" ON "messages" ("answered_at");
 CREATE INDEX "index_messages_on_answered_by_id" ON "messages" ("answered_by_id");
 CREATE INDEX "index_messages_on_room_id_and_mentions_everyone" ON "messages" ("room_id", "mentions_everyone") WHERE mentions_everyone = true;
 CREATE INDEX "index_messages_on_original_message_id" ON "messages" ("original_message_id");
+CREATE UNIQUE INDEX "index_users_on_twitter_uid" ON "users" ("twitter_uid");
 INSERT INTO "schema_migrations" (version) VALUES
+('20260112044358'),
+('20260112031751'),
 ('20251128154156'),
 ('20251106202943'),
 ('20251103002249'),
