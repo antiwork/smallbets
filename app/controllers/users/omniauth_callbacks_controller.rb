@@ -46,6 +46,7 @@ class Users::OmniauthCallbacksController < ApplicationController
         twitter_oauth_token: auth_hash.dig("credentials", "token"),
         twitter_oauth_refresh_token: auth_hash.dig("credentials", "refresh_token"),
         twitter_screen_name: auth_hash.dig("info", "nickname"),
+        twitter_username: auth_hash.dig("info", "nickname"),
         twitter_profile_image: auth_hash.dig("info", "image"),
         twitter_connected_at: Time.current,
         twitter_url: "https://x.com/#{auth_hash.dig('info', 'nickname')}"
@@ -88,8 +89,10 @@ class Users::OmniauthCallbacksController < ApplicationController
       twitter_oauth_token: nil,
       twitter_oauth_refresh_token: nil,
       twitter_screen_name: nil,
+      twitter_username: nil,
       twitter_profile_image: nil,
-      twitter_connected_at: nil
+      twitter_connected_at: nil,
+      twitter_url: nil
     )
     
     redirect_to user_profile_path("me"), notice: "X account disconnected successfully!"
