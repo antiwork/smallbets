@@ -37,6 +37,22 @@
           <% end %>
         </fieldset>
       <% end %>
+
+      <div class="flex align-center gap center-block upad" style="margin-top: 0.5rem;">
+        <hr class="flex-item-grow borderless" style="border-top: 1px solid var(--color-border);">
+        <span class="txt-small txt-deemphasized">or</span>
+        <hr class="flex-item-grow borderless" style="border-top: 1px solid var(--color-border);">
+      </div>
+
+      <div class="flex align-center gap center-block upad" style="margin-top: 0; justify-content: center;">
+        <form id="x-login-form" action="/auth/twitter2/login" method="post" data-turbo="false" style="width: 100%;">
+          <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+          <button type="submit" class="flex align-center gap input input--actor txt-large" style="width: 100%; cursor: pointer; justify-content: center;">
+            <span>Sign in with</span>
+            <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 20, class: "colorize--black" %>
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
