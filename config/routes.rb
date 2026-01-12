@@ -71,6 +71,11 @@ Rails.application.routes.draw do
     resource :email_subscription, only: %i[ show update ]
   end
 
+  get "/auth/:provider/callback", to: "users/omniauth_callbacks#twitter"
+  get "/auth/failure", to: "users/omniauth_callbacks#failure"
+  delete "/auth/twitter/disconnect", to: "users/omniauth_callbacks#disconnect"
+  post "/auth/twitter2/login", to: "users/omniauth_callbacks#initiate_login"
+
   resources :users, only: :show do
     scope module: "users" do
       resource :avatar, only: %i[ show destroy ]
