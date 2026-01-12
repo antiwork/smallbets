@@ -2,7 +2,8 @@ class Users::OmniauthCallbacksController < ApplicationController
   include Authentication
   
   skip_before_action :verify_authenticity_token, only: [ :twitter, :failure ]
-  before_action :require_authentication, only: [ :disconnect ]
+  skip_before_action :require_authentication, only: [ :twitter, :failure, :initiate_login ]
+  before_action :restore_authentication, only: [ :twitter ]
 
   def twitter
     auth_hash = request.env["omniauth.auth"]
