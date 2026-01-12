@@ -79,10 +79,18 @@
       <div class="flex align-center gap">
         <%= translation_button(:twitter) %>
 
-        <label class="flex align-center gap flex-item-grow input input--actor">
-          <%= form.text_field :twitter_url, class: "input txt-medium ", placeholder: "Your X profile", required: false %>
-          <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24, class: "colorize--black" %>
-        </label>
+        <% if @user.twitter_connected_at.present? %>
+          <label class="flex align-center gap flex-item-grow input input--actor">
+            <%= link_to "@#{@user.twitter_screen_name}", @user.twitter_url, target: "_blank", class: "input txt-medium", style: "text-decoration: none; color: inherit;" %>
+            <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24, class: "colorize--black" %>
+          </label>
+          <%= link_to "Disconnect", "/auth/twitter/disconnect", data: { turbo_method: :delete, turbo_confirm: "Disconnect your X account?" }, class: "btn txt-small" %>
+        <% else %>
+          <a href="#" onclick="document.getElementById('x-oauth-form').submit(); return false;" class="flex align-center gap flex-item-grow input input--actor" style="cursor: pointer;">
+            <span class="input txt-medium txt-deemphasized">Connect your X account</span>
+            <%= image_tag "social/twitter-outline.svg", role: "presentation", size: 24, class: "colorize--black" %>
+          </a>
+        <% end %>
       </div>
 
       <div class="flex align-center gap">
@@ -162,5 +170,11 @@
       </legend>
       <%= link_to "Push Notifications Dev Mode", user_push_subscriptions_url, class: "btn txt-small center" %>
     </fieldset>
+  <% end %>
+
+  <% unless @user.twitter_connected_at.present? %>
+    <form id="x-oauth-form" action="/auth/twitter2" method="post" style="display: none;">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+    </form>
   <% end %>
 </section>
