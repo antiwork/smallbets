@@ -54,7 +54,7 @@ class Users::OmniauthCallbacksController < ApplicationController
     rescue => e
       Rails.logger.error "X OAuth Error: #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
-      redirect_to user_profile_path("me"), alert: "Failed to connect X account: #{e.message}"
+      redirect_to user_profile_path("me"), alert: "Failed to connect X account. Please try again."
     end
   end
 
