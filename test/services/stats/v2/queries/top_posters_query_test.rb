@@ -100,6 +100,52 @@ module Stats
           assert_equal 1, user_result&.message_count || 0, "Should only count today's messages"
         end
 
+        test "filters by month period" do
+          room = rooms(:pets)
+
+          user = User.create!(
+            name: "Month Test User",
+            email_address: "monthtest@example.com",
+            password: "secret123456"
+          )
+
+          # Messages from this month
+          2.times do
+            room.messages.create!(creator: user, body: "This month", client_message_id: SecureRandom.uuid, created_at: Time.current)
+          end
+
+          # Message from last month
+          room.messages.create!(creator: user, body: "Last month", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
+
+          result = TopPostersQuery.call(period: :month, limit: 10)
+          user_result = result.find { |u| u.id == user.id }
+
+          assert_equal 2, user_result&.message_count || 0, "Should only count this month's messages"
+        end
+
+        test "filters by year period" do
+          room = rooms(:pets)
+
+          user = User.create!(
+            name: "Year Test User",
+            email_address: "yeartest@example.com",
+            password: "secret123456"
+          )
+
+          # Messages from this year
+          3.times do
+            room.messages.create!(creator: user, body: "This year", client_message_id: SecureRandom.uuid, created_at: Time.current)
+          end
+
+          # Message from last year
+          room.messages.create!(creator: user, body: "Last year", client_message_id: SecureRandom.uuid, created_at: 1.year.ago)
+
+          result = TopPostersQuery.call(period: :year, limit: 10)
+          user_result = result.find { |u| u.id == user.id }
+
+          assert_equal 3, user_result&.message_count || 0, "Should only count this year's messages"
+        end
+
         test "respects limit parameter" do
           room = rooms(:pets)
 
