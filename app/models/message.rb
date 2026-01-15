@@ -67,6 +67,7 @@ class Message < ApplicationRecord
   scope :since, ->(time) { where(created_at: time..) }
   scope :in_feed, -> { where(in_feed: true) }
   scope :not_in_feed, -> { where(in_feed: false) }
+  scope :in_non_direct_rooms, -> { joins(:room).merge(Room.without_directs) }
 
   attr_accessor :bookmarked
   alias_method :bookmarked?, :bookmarked

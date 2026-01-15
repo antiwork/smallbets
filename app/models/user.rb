@@ -44,6 +44,7 @@ class User < ApplicationRecord
 
   scope :without_default_names, -> { where.not(name: DEFAULT_NAME) }
   scope :non_suspended, -> { where(suspended_at: nil) }
+  scope :active_non_suspended, -> { where(active: true, suspended_at: nil) }
   scope :unclaimed_gumroad_imports, -> { where.not(order_id: nil).where(last_authenticated_at: nil) }
 
   has_secure_password validations: false
