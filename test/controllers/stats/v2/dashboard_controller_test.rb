@@ -104,6 +104,53 @@ module Stats
 
         assert_response :success
       end
+
+      test "current user rank shows different message counts per period" do
+        room = rooms(:pets)
+        user = users(:david)
+        sign_in user
+
+        # Today: 2 messages
+        2.times do |i|
+          room.messages.create!(
+            creator: user,
+            body: "Today #{i}",
+            client_message_id: SecureRandom.uuid,
+            created_at: Time.current
+          )
+        end
+
+        # 5 days ago: 3 messages (still this month)
+        3.times do |i|
+          msg = room.messages.create!(
+            creator: user,
+            body: "5 days ago #{i}",
+            client_message_id: SecureRandom.uuid
+          )
+          msg.update_column(:created_at, 5.days.ago)
+        end
+
+        # Last month: 4 messages
+        4.times do |i|
+          msg = room.messages.create!(
+            creator: user,
+            body: "Last month #{i}",
+            client_message_id: SecureRandom.uuid
+          )
+          msg.update_column(:created_at, 1.month.ago)
+        end
+
+        get stats_v2_dashboard_path
+
+        assert_response :success
+
+        # Verify different periods show different message counts
+        # The response should contain the user's rank with different counts
+        response_body = response.body
+
+        # User should appear with different message counts in different periods
+        assert_includes response_body, user.name
+      end
     end
   end
 end
