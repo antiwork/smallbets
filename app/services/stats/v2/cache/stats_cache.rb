@@ -35,6 +35,21 @@ module Stats
             end
           end
 
+          # Fetch top rooms from cache or execute query
+          # @param limit [Integer] number of rooms to return (default: 10)
+          # @return [Array] top rooms with message_count
+          def fetch_top_rooms(limit: 10)
+            cached_data = Rails.cache.fetch(
+              cache_key('top_rooms', limit),
+              expires_in: 10.minutes
+            ) do
+              results = Queries::RoomStatsQuery.call(limit: limit)
+              serialize_rooms(results)
+            end
+
+            deserialize_rooms(cached_data)
+          end
+
           # Clear all Stats cache
           def clear_all
             Rails.cache.delete_matched("#{CACHE_PREFIX}:*")
@@ -53,6 +68,11 @@ module Stats
           # Clear system metrics cache
           def clear_system_metrics
             Rails.cache.delete("#{CACHE_PREFIX}:system_metrics")
+          end
+
+          # Clear top rooms cache
+          def clear_top_rooms
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:top_rooms:*")
           end
 
           private
@@ -81,6 +101,33 @@ module Stats
               message_count = cached_user[:message_count]
               user.define_singleton_method(:message_count) { message_count }
               user
+            end.compact
+          end
+
+          # Serialize rooms to cacheable format
+          def serialize_rooms(rooms)
+            rooms.map do |room|
+              {
+                id: room.id,
+                name: room.name,
+                type: room.type,
+                message_count: room.message_count.to_i
+              }
+            end
+          end
+
+          # Deserialize cached data back to Room objects with message_count
+          def deserialize_rooms(data)
+            room_ids = data.map { |r| r[:id] }
+            rooms_by_id = Room.where(id: room_ids).index_by(&:id)
+
+            data.map do |cached_room|
+              room = rooms_by_id[cached_room[:id]]
+              next unless room
+
+              message_count = cached_room[:message_count]
+              room.define_singleton_method(:message_count) { message_count }
+              room
             end.compact
           end
 

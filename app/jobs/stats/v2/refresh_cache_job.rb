@@ -14,8 +14,9 @@ module Stats
         end
 
         Cache::StatsCache.fetch_system_metrics
+        Cache::StatsCache.fetch_top_rooms(limit: 10)
 
-        Rails.logger.info "[STATS V2] Cache refreshed for periods: #{PERIODS.join(', ')} and system metrics"
+        Rails.logger.info "[STATS V2] Cache refreshed for periods: #{PERIODS.join(', ')}, system metrics, and top rooms"
       end
     end
   end

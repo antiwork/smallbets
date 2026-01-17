@@ -1,0 +1,33 @@
+<div class="card grid-card">
+  <%# TODO: Link to stats_v2_rooms_path when room details page is implemented %>
+  <div class="card-header">
+    <h2 class="txt-h3 margin-none">Top Rooms</h2>
+  </div>
+  <div class="card-body compact">
+    <div class="overflow-x-auto">
+      <table class="table full-width">
+        <tbody>
+          <% if top_rooms.any? %>
+            <% top_rooms.each_with_index do |room, index| %>
+              <tr>
+                <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
+                <td>
+                  <%= link_to room_path(room), style: "text-decoration: none;" do %>
+                    <span class="txt-truncate"><%= room.name %></span>
+                  <% end %>
+                </td>
+                <td class="txt-right">
+                  <%= number_with_delimiter(room.message_count) %>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="3" class="txt-center">No rooms yet</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

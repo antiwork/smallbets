@@ -127,6 +127,46 @@ module Stats
 
           refute Rails.cache.exist?("stats:system_metrics")
         end
+
+        test "fetch_top_rooms caches results" do
+          # First call - should hit database
+          result1 = StatsCache.fetch_top_rooms(limit: 10)
+
+          # Second call - should hit cache
+          result2 = StatsCache.fetch_top_rooms(limit: 10)
+
+          assert_equal result1.size, result2.size
+          assert_kind_of Array, result2
+        end
+
+        test "fetch_top_rooms returns rooms with message_count" do
+          result = StatsCache.fetch_top_rooms(limit: 10)
+
+          result.each do |room|
+            assert room.respond_to?(:message_count)
+            assert room.message_count.to_i >= 0
+          end
+        end
+
+        test "clear_top_rooms removes cache" do
+          StatsCache.fetch_top_rooms(limit: 10)
+
+          assert Rails.cache.exist?("stats:top_rooms:10")
+
+          StatsCache.clear_top_rooms
+
+          refute Rails.cache.exist?("stats:top_rooms:10")
+        end
+
+        test "clear_all removes top rooms cache" do
+          StatsCache.fetch_top_rooms(limit: 10)
+
+          assert Rails.cache.exist?("stats:top_rooms:10")
+
+          StatsCache.clear_all
+
+          refute Rails.cache.exist?("stats:top_rooms:10")
+        end
       end
     end
   end
