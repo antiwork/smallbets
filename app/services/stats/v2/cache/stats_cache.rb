@@ -24,6 +24,17 @@ module Stats
             deserialize_users(cached_data)
           end
 
+          # Fetch system metrics from cache or execute query
+          # @return [Hash] system metrics
+          def fetch_system_metrics
+            Rails.cache.fetch(
+              cache_key('system_metrics'),
+              expires_in: 5.minutes
+            ) do
+              Queries::SystemMetricsQuery.call
+            end
+          end
+
           # Clear all Stats cache
           def clear_all
             Rails.cache.delete_matched("#{CACHE_PREFIX}:*")
@@ -37,6 +48,11 @@ module Stats
             else
               Rails.cache.delete_matched("#{CACHE_PREFIX}:top_posters:*")
             end
+          end
+
+          # Clear system metrics cache
+          def clear_system_metrics
+            Rails.cache.delete("#{CACHE_PREFIX}:system_metrics")
           end
 
           private

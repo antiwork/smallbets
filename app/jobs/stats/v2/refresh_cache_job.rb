@@ -13,7 +13,9 @@ module Stats
           Cache::StatsCache.fetch_top_posters(period: period, limit: 10)
         end
 
-        Rails.logger.info "[STATS V2] Cache refreshed for periods: #{PERIODS.join(', ')}"
+        Cache::StatsCache.fetch_system_metrics
+
+        Rails.logger.info "[STATS V2] Cache refreshed for periods: #{PERIODS.join(', ')} and system metrics"
       end
     end
   end

@@ -42,4 +42,9 @@
       <% end %>
     <% end %>
   </div>
+
+  <h2 class="section-heading" style="margin-top: 2rem;">Stats</h2>
+  <div class="stats-grid margin-block">
+    <%= render 'stats/v2/dashboard/system_info', system_metrics: @system_metrics %>
+  </div>
 </section>

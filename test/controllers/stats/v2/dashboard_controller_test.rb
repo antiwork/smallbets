@@ -37,7 +37,7 @@ module Stats
         get stats_v2_dashboard_path
 
         assert_response :success
-        assert_select '.card', count: 4
+        assert_select '.card', count: 5  # 4 period cards + 1 system info card
 
         # Check that all period titles are present
         response_body = response.body
@@ -150,6 +150,36 @@ module Stats
 
         # User should appear with different message counts in different periods
         assert_includes response_body, user.name
+      end
+
+      test "index displays system metrics info card" do
+        get stats_v2_dashboard_path
+
+        assert_response :success
+
+        # Check that system info section is present
+        assert_select '.section-heading', text: 'Stats'
+
+        # Check that the info card is present
+        response_body = response.body
+        assert_includes response_body, 'Members'
+        assert_includes response_body, 'Online'
+        assert_includes response_body, 'Posters'
+        assert_includes response_body, 'Messages'
+        assert_includes response_body, 'Threads'
+        assert_includes response_body, 'Boosts'
+        assert_includes response_body, 'Database'
+      end
+
+      test "system metrics displays correct counts" do
+        get stats_v2_dashboard_path
+
+        assert_response :success
+
+        # Verify that numeric values are displayed
+        response_body = response.body
+        assert_match /Members.*\d+/m, response_body
+        assert_match /Messages.*\d+/m, response_body
       end
     end
   end

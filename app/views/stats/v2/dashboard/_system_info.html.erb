@@ -1,0 +1,82 @@
+<div class="card grid-card">
+  <div class="card-header">
+    <h2 class="txt-h3 margin-none">Info</h2>
+  </div>
+  <div class="card-body compact">
+    <div class="overflow-x-auto">
+      <table class="table full-width">
+        <tbody>
+          <tr>
+            <td>Members</td>
+            <td class="txt-right"><%= number_with_delimiter(system_metrics[:total_users]) %></td>
+          </tr>
+          <tr>
+            <td>Online</td>
+            <td class="txt-right"><%= number_with_delimiter(system_metrics[:online_users]) %></td>
+          </tr>
+          <tr>
+            <td>Posters</td>
+            <td class="txt-right"><%= number_with_delimiter(system_metrics[:total_posters]) %></td>
+          </tr>
+          <tr>
+            <td>Messages</td>
+            <td class="txt-right"><%= number_with_delimiter(system_metrics[:total_messages]) %></td>
+          </tr>
+          <tr>
+            <td>Threads</td>
+            <td class="txt-right"><%= number_with_delimiter(system_metrics[:total_threads]) %></td>
+          </tr>
+          <tr>
+            <td>Boosts</td>
+            <td class="txt-right"><%= number_with_delimiter(system_metrics[:total_boosts]) %></td>
+          </tr>
+          <tr>
+            <td>Database</td>
+            <td class="txt-right"><%= number_to_human_size(system_metrics[:database_size]) %></td>
+          </tr>
+          <% if system_metrics[:cpu_util] && system_metrics[:cpu_cores] %>
+          <tr>
+            <td>CPU</td>
+            <td class="txt-right"><%= number_to_percentage(system_metrics[:cpu_util], precision: 1) %> of <%= system_metrics[:cpu_cores] %> CPUs</td>
+          </tr>
+          <% end %>
+          <% if system_metrics[:memory_util_percent] && system_metrics[:total_memory_gb] %>
+          <tr>
+            <td>Memory</td>
+            <td class="txt-right"><%= number_to_percentage(system_metrics[:memory_util_percent], precision: 0) %> of <%= system_metrics[:total_memory_gb].to_i %>GB</td>
+          </tr>
+          <% end %>
+          <% if system_metrics[:disk_util_percent] && system_metrics[:total_disk_gb] %>
+          <tr>
+            <td>Disk</td>
+            <td class="txt-right"><%= number_to_percentage(system_metrics[:disk_util_percent], precision: 0) %> of <%= system_metrics[:total_disk_gb].to_i %>GB</td>
+          </tr>
+          <% end %>
+          <% if ENV["APP_VERSION"].present? %>
+          <tr>
+            <td>Version</td>
+            <td class="txt-right">
+              <%= link_to "https://github.com/antiwork/smallbets/commit/#{ENV["APP_VERSION"]}", target: "_blank", style: "text-decoration: none; display: inline-flex; align-items: center; justify-content: flex-end; width: 100%;" do %>
+                <span><%= ENV["APP_VERSION"] %></span>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+          <% if ENV["LAST_DEPLOY"].present? %>
+          <tr>
+            <td>Last Deploy</td>
+            <td class="txt-right">
+              <% deploy_time = Time.parse(ENV["LAST_DEPLOY"]) rescue nil %>
+              <% if deploy_time %>
+                <%= time_tag(deploy_time, deploy_time.strftime("%b %e, %Y at %l:%M %p")) %>
+              <% else %>
+                <%= ENV["LAST_DEPLOY"] %>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
