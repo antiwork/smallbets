@@ -188,7 +188,9 @@ CREATE INDEX "index_memberships_on_connected_at" ON "memberships" ("connected_at
 CREATE INDEX "index_messages_on_active_created_at_creator_id" ON "messages" ("active", "created_at", "creator_id");
 CREATE INDEX "index_messages_on_active_room_id_created_at" ON "messages" ("active", "room_id", "created_at");
 CREATE INDEX "index_users_on_active_suspended_at" ON "users" ("active", "suspended_at");
+CREATE INDEX "index_rooms_on_type" ON "rooms" ("type");
 INSERT INTO "schema_migrations" (version) VALUES
+('20260117225251'),
 ('20260115012335'),
 ('20251128154156'),
 ('20251106202943'),
