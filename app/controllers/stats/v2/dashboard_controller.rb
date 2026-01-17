@@ -6,6 +6,7 @@ module Stats
     # Responsible for displaying the main stats dashboard
     class DashboardController < BaseController
       PERIODS = [:today, :month, :year, :all_time].freeze
+      DEFAULT_LIMIT = 10
 
       def index
         load_system_metrics
@@ -21,14 +22,14 @@ module Stats
       end
 
       def load_top_rooms
-        @top_rooms = Cache::StatsCache.fetch_top_rooms(limit: 10)
+        @top_rooms = Cache::StatsCache.fetch_top_rooms(limit: DEFAULT_LIMIT)
       end
 
       def load_leaderboards
         PERIODS.each do |period|
           instance_variable_set(
             "@top_posters_#{period}",
-            Cache::StatsCache.fetch_top_posters(period: period, limit: 10)
+            Cache::StatsCache.fetch_top_posters(period: period, limit: DEFAULT_LIMIT)
           )
         end
       end
