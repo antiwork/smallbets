@@ -8,6 +8,7 @@ module Stats
 
       PERIODS = [:today, :month, :year, :all_time].freeze
       DEFAULT_LIMIT = 10
+      RECENT_HISTORY_DAYS = 7
 
       def perform
         PERIODS.each do |period|
@@ -16,7 +17,7 @@ module Stats
 
         Cache::StatsCache.fetch_system_metrics
         Cache::StatsCache.fetch_top_rooms(limit: DEFAULT_LIMIT)
-        Cache::StatsCache.fetch_message_history_recent(limit: 7)
+        Cache::StatsCache.fetch_message_history_recent(limit: RECENT_HISTORY_DAYS)
         Cache::StatsCache.fetch_message_history_all_time
 
         Rails.logger.info "[STATS V2] Cache refreshed for periods: #{PERIODS.join(', ')}, system metrics, top rooms, and message history"

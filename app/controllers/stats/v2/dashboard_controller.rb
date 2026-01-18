@@ -7,6 +7,7 @@ module Stats
     class DashboardController < BaseController
       PERIODS = [:today, :month, :year, :all_time].freeze
       DEFAULT_LIMIT = 10
+      RECENT_HISTORY_DAYS = 7
 
       def index
         load_system_metrics
@@ -27,7 +28,7 @@ module Stats
       end
 
       def load_message_history
-        @recent_message_history = Cache::StatsCache.fetch_message_history_recent(limit: 7)
+        @recent_message_history = Cache::StatsCache.fetch_message_history_recent(limit: RECENT_HISTORY_DAYS)
         @all_time_message_history = Cache::StatsCache.fetch_message_history_all_time
       end
 

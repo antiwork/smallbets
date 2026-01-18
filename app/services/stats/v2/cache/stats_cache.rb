@@ -58,9 +58,7 @@ module Stats
               cache_key('message_history', 'recent', limit),
               expires_in: 5.minutes
             ) do
-              Queries::MessageHistoryQuery.call(limit: limit, order: :desc).to_a.map do |result|
-                { date: result.date, count: result.count.to_i }
-              end
+              serialize_message_history(Queries::MessageHistoryQuery.call(limit: limit, order: :desc))
             end
           end
 
@@ -71,9 +69,7 @@ module Stats
               cache_key('message_history', 'all_time'),
               expires_in: 15.minutes
             ) do
-              Queries::MessageHistoryQuery.call(order: :asc).to_a.map do |result|
-                { date: result.date, count: result.count.to_i }
-              end
+              serialize_message_history(Queries::MessageHistoryQuery.call(order: :asc))
             end
           end
 
@@ -162,6 +158,13 @@ module Stats
           # Deserialize cached data back to Room objects with message_count
           def deserialize_rooms(data)
             deserialize_entities(data, Room)
+          end
+
+          # Serialize message history query results to cacheable format
+          def serialize_message_history(results)
+            results.to_a.map do |result|
+              { date: result.date, count: result.count.to_i }
+            end
           end
 
           def cache_key(*parts)
