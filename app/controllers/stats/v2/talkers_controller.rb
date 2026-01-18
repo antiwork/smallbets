@@ -4,7 +4,6 @@ module Stats
   module V2
     # Controller for displaying full leaderboards by period
     class TalkersController < BaseController
-      VALID_PERIODS = [:today, :month, :year, :all_time].freeze
       LEADERBOARD_LIMIT = 100
 
       def show
@@ -20,7 +19,7 @@ module Stats
       def validate_period
         period_param = params[:period]&.to_sym
 
-        unless VALID_PERIODS.include?(period_param)
+        unless PERIODS.include?(period_param)
           redirect_to stats_v2_dashboard_path, alert: "Invalid period"
           return nil
         end
@@ -44,16 +43,6 @@ module Stats
           @current_user_rank = rank_data if rank_data
         end
       end
-
-      def period_title
-        case @period
-        when :today then "Today"
-        when :month then "This Month"
-        when :year then "This Year"
-        when :all_time then "All Time"
-        end
-      end
-      helper_method :period_title
     end
   end
 end

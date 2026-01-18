@@ -1,4 +1,4 @@
-<% @page_title = "#{period_title} - Top Talkers" %>
+<% @page_title = "#{period_title(@period)} - Top Talkers" %>
 <% @body_class = "sidebar stats-page" %>
 
 <% content_for :head do %>
@@ -8,7 +8,7 @@
 <% content_for :nav do %>
   <%= account_logo_tag if Current.account.logo.attached? %>
   <%= tag.span class: "btn btn--reversed btn--faux room--current" do %>
-    <h1 class="room__contents txt-medium overflow-ellipsis"><%= period_title %> - Top Talkers</h1>
+    <h1 class="room__contents txt-medium overflow-ellipsis"><%= period_title(@period) %> - Top Talkers</h1>
   <% end %>
   <%= link_to stats_v2_dashboard_path, class: "btn" do %>
     <%= image_tag("arrow-left.svg", aria: { hidden: "true" }, size: 20) %>
@@ -26,7 +26,7 @@
   <div class="margin-block">
     <div class="card">
       <div class="card-header">
-        <h2 class="txt-h3 margin-none"><%= period_title %></h2>
+        <h2 class="txt-h3 margin-none"><%= period_title(@period) %></h2>
       </div>
       <div class="card-body compact">
         <% if @current_user_rank && @current_user_rank > 100 %>
