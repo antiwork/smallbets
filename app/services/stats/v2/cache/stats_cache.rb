@@ -73,6 +73,21 @@ module Stats
             end
           end
 
+          # Fetch newest members from cache or execute query
+          # @param limit [Integer] number of members to return (default: 10)
+          # @return [Array] newest members with joined_at
+          def fetch_newest_members(limit: 10)
+            cached_data = Rails.cache.fetch(
+              cache_key('newest_members', limit),
+              expires_in: 10.minutes
+            ) do
+              results = Queries::NewestMembersQuery.call(limit: limit)
+              serialize_newest_members(results)
+            end
+
+            deserialize_newest_members(cached_data)
+          end
+
           # Clear all Stats cache
           def clear_all
             Rails.cache.delete_matched("#{CACHE_PREFIX}:*")
@@ -101,6 +116,11 @@ module Stats
           # Clear message history cache
           def clear_message_history
             Rails.cache.delete_matched("#{CACHE_PREFIX}:message_history:*")
+          end
+
+          # Clear newest members cache
+          def clear_newest_members
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:newest_members:*")
           end
 
           private
@@ -165,6 +185,28 @@ module Stats
             results.to_a.map do |result|
               { date: result.date, count: result.count.to_i }
             end
+          end
+
+          # Serialize newest members to cacheable format
+          def serialize_newest_members(users)
+            users.map do |user|
+              { id: user.id, name: user.name, joined_at: user.joined_at }
+            end
+          end
+
+          # Deserialize cached data back to User objects with joined_at
+          def deserialize_newest_members(data)
+            ids = data.map { |u| u[:id] }
+            users_by_id = User.where(id: ids).includes(:avatar_attachment).index_by(&:id)
+
+            data.map do |cached_user|
+              user = users_by_id[cached_user[:id]]
+              next unless user
+
+              joined_at = cached_user[:joined_at]
+              user.define_singleton_method(:joined_at) { joined_at }
+              user
+            end.compact
           end
 
           def cache_key(*parts)

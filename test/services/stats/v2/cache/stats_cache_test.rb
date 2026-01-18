@@ -248,6 +248,56 @@ module Stats
           refute Rails.cache.exist?("stats:message_history:recent:7")
           refute Rails.cache.exist?("stats:message_history:all_time")
         end
+
+        test "fetch_newest_members caches results" do
+          # First call - should hit database
+          result1 = StatsCache.fetch_newest_members(limit: 10)
+
+          # Second call - should hit cache
+          result2 = StatsCache.fetch_newest_members(limit: 10)
+
+          assert_equal result1.size, result2.size
+          assert_kind_of Array, result2
+        end
+
+        test "fetch_newest_members returns users with joined_at" do
+          result = StatsCache.fetch_newest_members(limit: 10)
+
+          result.each do |user|
+            assert_kind_of User, user
+            assert_respond_to user, :joined_at
+            assert_respond_to user, :name
+          end
+        end
+
+        test "fetch_newest_members uses different cache keys per limit" do
+          StatsCache.fetch_newest_members(limit: 5)
+          StatsCache.fetch_newest_members(limit: 10)
+
+          # Should create separate cache entries
+          assert Rails.cache.exist?("stats:newest_members:5")
+          assert Rails.cache.exist?("stats:newest_members:10")
+        end
+
+        test "clear_newest_members removes cache" do
+          StatsCache.fetch_newest_members(limit: 10)
+
+          assert Rails.cache.exist?("stats:newest_members:10")
+
+          StatsCache.clear_newest_members
+
+          refute Rails.cache.exist?("stats:newest_members:10")
+        end
+
+        test "clear_all removes newest members cache" do
+          StatsCache.fetch_newest_members(limit: 10)
+
+          assert Rails.cache.exist?("stats:newest_members:10")
+
+          StatsCache.clear_all
+
+          refute Rails.cache.exist?("stats:newest_members:10")
+        end
       end
     end
   end

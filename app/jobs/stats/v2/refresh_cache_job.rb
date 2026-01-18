@@ -19,8 +19,9 @@ module Stats
         Cache::StatsCache.fetch_top_rooms(limit: DEFAULT_LIMIT)
         Cache::StatsCache.fetch_message_history_recent(limit: RECENT_HISTORY_DAYS)
         Cache::StatsCache.fetch_message_history_all_time
+        Cache::StatsCache.fetch_newest_members(limit: DEFAULT_LIMIT)
 
-        Rails.logger.info "[STATS V2] Cache refreshed for periods: #{PERIODS.join(', ')}, system metrics, top rooms, and message history"
+        Rails.logger.info "[STATS V2] Cache refreshed for periods: #{PERIODS.join(', ')}, system metrics, top rooms, message history, and newest members"
       end
     end
   end

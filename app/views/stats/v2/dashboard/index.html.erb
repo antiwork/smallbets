@@ -41,6 +41,7 @@
   <h2 class="section-heading" style="margin-top: 2rem;">Stats</h2>
   <div class="stats-grid margin-block">
     <%= render 'stats/v2/dashboard/top_rooms', top_rooms: @top_rooms %>
+    <%= render 'stats/v2/dashboard/newest_members', newest_members: @newest_members %>
     <%= render 'stats/v2/dashboard/message_history', recent_message_history: @recent_message_history, all_time_message_history: @all_time_message_history %>
     <%= render 'stats/v2/dashboard/system_info', system_metrics: @system_metrics %>
   </div>
