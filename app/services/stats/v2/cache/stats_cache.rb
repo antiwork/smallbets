@@ -139,12 +139,13 @@ module Stats
             end
           end
 
-          # Generic deserializer for entities with message_count
+          # Generic deserializer for entities with a singleton attribute
           # @param data [Array<Hash>] cached data to deserialize
           # @param model_class [Class] ActiveRecord model class
           # @param includes [Symbol, Array] associations to eager load
-          # @return [Array<ActiveRecord::Base>] deserialized entities with message_count
-          def deserialize_entities(data, model_class, includes: [])
+          # @param singleton_attr [Symbol] attribute to define as singleton method (default: :message_count)
+          # @return [Array<ActiveRecord::Base>] deserialized entities with singleton attribute
+          def deserialize_entities(data, model_class, includes: [], singleton_attr: :message_count)
             ids = data.map { |e| e[:id] }
             query = model_class.where(id: ids)
             query = query.includes(includes) if includes.present?
@@ -154,8 +155,8 @@ module Stats
               entity = entities_by_id[cached_entity[:id]]
               next unless entity
 
-              message_count = cached_entity[:message_count]
-              entity.define_singleton_method(:message_count) { message_count }
+              attr_value = cached_entity[singleton_attr]
+              entity.define_singleton_method(singleton_attr) { attr_value }
               entity
             end.compact
           end
@@ -196,17 +197,7 @@ module Stats
 
           # Deserialize cached data back to User objects with joined_at
           def deserialize_newest_members(data)
-            ids = data.map { |u| u[:id] }
-            users_by_id = User.where(id: ids).includes(:avatar_attachment).index_by(&:id)
-
-            data.map do |cached_user|
-              user = users_by_id[cached_user[:id]]
-              next unless user
-
-              joined_at = cached_user[:joined_at]
-              user.define_singleton_method(:joined_at) { joined_at }
-              user
-            end.compact
+            deserialize_entities(data, User, includes: :avatar_attachment, singleton_attr: :joined_at)
           end
 
           def cache_key(*parts)
