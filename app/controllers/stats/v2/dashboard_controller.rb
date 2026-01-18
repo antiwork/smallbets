@@ -11,6 +11,7 @@ module Stats
       def index
         load_system_metrics
         load_top_rooms
+        load_message_history
         load_leaderboards
         load_current_user_ranks if Current.user
       end
@@ -23,6 +24,11 @@ module Stats
 
       def load_top_rooms
         @top_rooms = Cache::StatsCache.fetch_top_rooms(limit: DEFAULT_LIMIT)
+      end
+
+      def load_message_history
+        @recent_message_history = Cache::StatsCache.fetch_message_history_recent(limit: 7)
+        @all_time_message_history = Cache::StatsCache.fetch_message_history_all_time
       end
 
       def load_leaderboards

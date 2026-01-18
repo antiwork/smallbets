@@ -1,0 +1,161 @@
+<div class="card grid-card">
+  <div class="card-header">
+    <h2 class="txt-h3 margin-none">Messages</h2>
+  </div>
+  <div class="card-body compact">
+    <!-- Table data -->
+    <div class="overflow-x-auto">
+      <table class="table full-width">
+        <tbody>
+          <% if recent_message_history.any? %>
+            <% recent_message_history.each do |stat| %>
+              <tr>
+                <td><%= stat[:date] %></td>
+                <td class="txt-right"><%= number_with_delimiter(stat[:count]) %></td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="2" class="txt-center">No message history yet</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Graph visualization -->
+    <% if all_time_message_history.any? %>
+      <div class="margin-top">
+        <div style="height: 300px;">
+          <%
+            # Calculate chart dimensions and data
+            max_count = all_time_message_history.map { |s| s[:count] }.max
+            total_days = all_time_message_history.length
+
+            # Fixed dimensions
+            graph_height = 240
+            left_margin = 8
+            right_margin = 2
+            bottom_margin = 25
+
+            # Calculate bar width and spacing
+            available_width = 100 - left_margin - right_margin
+            min_bar_width = 0.15
+            bar_spacing = 0.05
+            bar_width = [(available_width - (total_days * bar_spacing)) / total_days, min_bar_width].max
+
+            # Show fewer labels for readability
+            label_interval = (total_days / 6.0).ceil
+          %>
+
+          <svg width="100%" height="100%" style="background: var(--color-bg); border-radius: 4px;">
+            <%
+              # Calculate y-axis ticks at 100 message intervals
+              y_ticks = (0..max_count).step(100).to_a
+
+              # Only add max if it's significantly different from the last tick
+              last_tick = y_ticks.last
+              if (max_count - last_tick) > 50
+                y_ticks << max_count
+              end
+
+              # Remove any ticks that are too close together
+              y_ticks = y_ticks.each_with_index.reject do |tick, i|
+                next_tick = y_ticks[i + 1]
+                next_tick && (next_tick - tick) < 50
+              end.map(&:first)
+            %>
+
+            <!-- Horizontal grid lines -->
+            <% y_ticks.each do |tick| %>
+              <% y_pos = (graph_height - bottom_margin) - (tick.to_f / max_count * (graph_height - bottom_margin - 10)) %>
+              <line
+                x1="<%= left_margin %>%"
+                x2="<%= 100 - right_margin %>%"
+                y1="<%= y_pos %>"
+                y2="<%= y_pos %>"
+                stroke="var(--color-border-darker)"
+                stroke-width="1"
+                stroke-opacity="0.25"
+                stroke-dasharray="4,4"
+              />
+            <% end %>
+
+            <% y_ticks.each do |tick| %>
+              <% y_pos = (graph_height - bottom_margin) - (tick.to_f / max_count * (graph_height - bottom_margin - 10)) %>
+
+              <!-- Tick mark -->
+              <line
+                x1="<%= left_margin - 0.5 %>%"
+                x2="<%= left_margin %>%"
+                y1="<%= y_pos %>"
+                y2="<%= y_pos %>"
+                stroke="var(--color-border-darker)"
+                stroke-width="1"
+              />
+
+              <!-- Label -->
+              <text
+                x="<%= left_margin - 1 %>%"
+                y="<%= y_pos + 4 %>"
+                text-anchor="end"
+                style="font-size: 10px; fill: var(--color-text);"
+              >
+                <%= number_with_delimiter(tick) %>
+              </text>
+            <% end %>
+
+            <!-- Y-axis -->
+            <line
+              x1="<%= left_margin %>%"
+              y1="10"
+              x2="<%= left_margin %>%"
+              y2="<%= graph_height - bottom_margin %>"
+              stroke="var(--color-border-darker)"
+              stroke-width="1"
+            />
+
+            <!-- Bars -->
+            <% all_time_message_history.each_with_index do |stat, index| %>
+              <%
+                bar_height = (stat[:count].to_f / max_count * (graph_height - bottom_margin - 10)).round
+                x_pos = left_margin + (index * (bar_width + bar_spacing))
+              %>
+
+              <rect
+                x="<%= x_pos %>%"
+                y="<%= graph_height - bottom_margin - bar_height %>"
+                width="<%= bar_width %>%"
+                height="<%= bar_height %>"
+                fill="var(--color-border-darker)"
+              />
+
+              <!-- X-axis labels -->
+              <% if index % label_interval == 0 && stat[:date].present? %>
+                <text
+                  x="<%= x_pos %>%"
+                  y="<%= graph_height - 5 %>"
+                  text-anchor="start"
+                  style="font-size: 10px; fill: var(--color-text);"
+                  transform="rotate(-45, <%= x_pos %>%, <%= graph_height - 5 %>)"
+                >
+                  <%= stat[:date].split('-')[1..2].join('/') %>
+                </text>
+              <% end %>
+            <% end %>
+
+            <!-- X-axis line -->
+            <line
+              x1="<%= left_margin %>%"
+              y1="<%= graph_height - bottom_margin %>"
+              x2="<%= 100 - right_margin %>%"
+              y2="<%= graph_height - bottom_margin %>"
+              stroke="var(--color-border-darker)"
+              stroke-width="1"
+            />
+          </svg>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
