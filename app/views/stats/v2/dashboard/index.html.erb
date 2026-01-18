@@ -37,7 +37,7 @@
         users = instance_variable_get("@top_posters_#{card[:period]}")
         current_user_rank = instance_variable_get("@current_user_#{card[:period]}_rank")
       %>
-      <%= render 'stats/v2/shared/stat_card', title: card[:title], link: stats_v2_dashboard_path do %>
+      <%= render 'stats/v2/shared/stat_card', title: card[:title], link: stats_v2_talker_path(period: card[:period]) do %>
         <%= render 'stats/v2/shared/leaderboard_table', users: users, current_user_rank: current_user_rank %>
       <% end %>
     <% end %>

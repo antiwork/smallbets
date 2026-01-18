@@ -1,0 +1,78 @@
+<% @page_title = "#{period_title} - Top Talkers" %>
+<% @body_class = "sidebar stats-page" %>
+
+<% content_for :head do %>
+  <%= stylesheet_link_tag "application/stats" %>
+<% end %>
+
+<% content_for :nav do %>
+  <%= account_logo_tag if Current.account.logo.attached? %>
+  <%= tag.span class: "btn btn--reversed btn--faux room--current" do %>
+    <h1 class="room__contents txt-medium overflow-ellipsis"><%= period_title %> - Top Talkers</h1>
+  <% end %>
+  <%= link_to stats_v2_dashboard_path, class: "btn" do %>
+    <%= image_tag("arrow-left.svg", aria: { hidden: "true" }, size: 20) %>
+    <span>Back to Stats</span>
+  <% end %>
+  <%= link_to stats_v2_talker_path(period: @period), class: "btn d-hotwire-native-none" do %>
+    <%= image_tag("refresh.svg", aria: { hidden: "true" }, size: 20) %>
+    <span class="for-screen-reader">Refresh stats</span>
+  <% end %>
+<% end %>
+
+<% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
+
+<section class="full-width">
+  <div class="margin-block">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="txt-h3 margin-none"><%= period_title %></h2>
+      </div>
+      <div class="card-body compact">
+        <% if @current_user_rank && @current_user_rank > 100 %>
+          <div style="padding: 1rem; background: var(--color-bg-subtle); border-radius: 4px; margin-bottom: 1rem;">
+            <strong>Your rank:</strong> #<%= @current_user_rank %>
+          </div>
+        <% end %>
+
+        <div class="overflow-x-auto">
+          <table class="table full-width">
+            <tbody>
+              <% if @users.any? %>
+                <% @users.each_with_index do |user, index| %>
+                  <% is_current = user.id == Current.user&.id %>
+                  <tr class="<%= 'current-user' if is_current %>">
+                    <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
+                    <td>
+                      <div class="flex gap-inline align-center">
+                        <%= link_to user_path(user, from: stats_v2_talker_path(period: @period)), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+                          <% if user.avatar.attached? %>
+                            <div class="avatar avatar-xs">
+                              <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
+                            </div>
+                          <% else %>
+                            <div class="avatar avatar-xs">
+                              <%= user.name.first.upcase %>
+                            </div>
+                          <% end %>
+                          <span class="txt-truncate"><%= user.name %></span>
+                        <% end %>
+                      </div>
+                    </td>
+                    <td class="txt-right">
+                      <%= number_with_delimiter(user.message_count) %>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="3" class="txt-center">No messages yet</td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

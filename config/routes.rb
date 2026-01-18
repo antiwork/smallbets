@@ -226,6 +226,7 @@ Rails.application.routes.draw do
     namespace :v2 do
       root to: 'dashboard#index', as: :root
       get '/dashboard', to: 'dashboard#index', as: :dashboard
+      get '/talkers/:period', to: 'talkers#show', as: :talker
     end
   end
 end
