@@ -1,0 +1,10 @@
+<div class="loader">
+  <span class="loader-dot">.</span><span class="loader-dot">.</span><span class="loader-dot">.</span>
+</div>
+
+<style>
+  @keyframes blink { 50% { color: transparent } }
+  .loader-dot { animation: 1s blink infinite; font-size: 2rem; margin: 0 0.25rem; }
+  .loader-dot:nth-child(2) { animation-delay: 250ms }
+  .loader-dot:nth-child(3) { animation-delay: 500ms }
+</style>
