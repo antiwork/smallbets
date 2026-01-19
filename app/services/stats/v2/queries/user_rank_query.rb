@@ -12,8 +12,8 @@ module Stats
           @period = period
         end
 
-        # Calculate user rank
-        # @return [Integer, nil] rank (1-indexed) or nil if user has no messages
+        # Calculate user rank and message count
+        # @return [Hash, nil] hash with :rank and :message_count keys, or nil if user has no messages
         def call
           user = User.find_by(id: @user_id)
           return nil unless user
@@ -24,7 +24,10 @@ module Stats
           users_with_more = count_users_with_more_messages(user_message_count)
           users_with_same_earlier = count_users_with_same_messages_earlier_join(user_message_count, user)
 
-          users_with_more + users_with_same_earlier + 1
+          {
+            rank: users_with_more + users_with_same_earlier + 1,
+            message_count: user_message_count
+          }
         end
 
         private
