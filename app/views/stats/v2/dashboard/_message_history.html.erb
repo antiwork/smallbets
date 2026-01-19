@@ -1,8 +1,9 @@
-<div class="card grid-card">
-  <div class="card-header">
-    <h2 class="txt-h3 margin-none">Messages</h2>
-  </div>
-  <div class="card-body compact">
+<%= turbo_frame_tag "message_history" do %>
+  <div class="card grid-card">
+    <div class="card-header">
+      <h2 class="txt-h3 margin-none">Messages</h2>
+    </div>
+    <div class="card-body compact">
     <!-- Table data -->
     <div class="overflow-x-auto">
       <table class="table full-width">
@@ -159,3 +160,4 @@
     <% end %>
   </div>
 </div>
+<% end %>

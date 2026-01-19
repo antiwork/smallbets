@@ -1,0 +1,5 @@
+<%= turbo_frame_tag "top_talkers_#{period}" do %>
+  <%= render 'stats/v2/shared/stat_card', title: period_title(period), link: stats_v2_talker_path(period: period) do %>
+    <%= render 'stats/v2/shared/leaderboard_table', users: users, current_user_rank: current_user_rank %>
+  <% end %>
+<% end %>

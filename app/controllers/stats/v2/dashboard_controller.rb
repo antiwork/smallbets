@@ -9,12 +9,53 @@ module Stats
       RECENT_HISTORY_DAYS = 7
 
       def index
+        # Just render the shell - turbo frames will lazy load each card
+      end
+
+      # Card endpoints for turbo frame lazy loading
+      def top_talkers_card
+        period = params[:period].to_sym
+        load_leaderboard_for_period(period)
+        load_current_user_rank_for_period(period) if Current.user
+
+        render partial: 'stats/v2/dashboard/top_talkers_card',
+               locals: {
+                 period: period,
+                 users: instance_variable_get("@top_posters_#{period}"),
+                 current_user_rank: instance_variable_get("@current_user_#{period}_rank")
+               },
+               layout: false
+      end
+
+      def system_info_card
         load_system_metrics
+        render partial: 'stats/v2/dashboard/system_info',
+               locals: { system_metrics: @system_metrics },
+               layout: false
+      end
+
+      def top_rooms_card
         load_top_rooms
-        load_message_history
+        render partial: 'stats/v2/dashboard/top_rooms',
+               locals: { top_rooms: @top_rooms },
+               layout: false
+      end
+
+      def newest_members_card
         load_newest_members
-        load_leaderboards
-        load_current_user_ranks if Current.user
+        render partial: 'stats/v2/dashboard/newest_members',
+               locals: { newest_members: @newest_members },
+               layout: false
+      end
+
+      def message_history_card
+        load_message_history
+        render partial: 'stats/v2/dashboard/message_history',
+               locals: {
+                 recent_message_history: @recent_message_history,
+                 all_time_message_history: @all_time_message_history
+               },
+               layout: false
       end
 
       private
@@ -79,6 +120,17 @@ module Stats
 
       def calculate_rank_for_period(period)
         Queries::UserRankQuery.call(user_id: Current.user.id, period: period)
+      end
+
+      def load_leaderboard_for_period(period)
+        users = Cache::StatsCache.fetch_top_posters(period: period, limit: DEFAULT_LIMIT)
+        instance_variable_set("@top_posters_#{period}", users)
+      end
+
+      def load_current_user_rank_for_period(period)
+        top_posters = instance_variable_get("@top_posters_#{period}")
+        rank_data = calculate_user_rank(period, top_posters)
+        instance_variable_set("@current_user_#{period}_rank", rank_data) if rank_data
       end
     end
   end
