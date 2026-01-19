@@ -1,4 +1,4 @@
-<% @page_title = "Stats V2" %>
+<% @page_title = "Message Stats" %>
 <% @body_class = "sidebar stats-page" %>
 
 <% content_for :head do %>
@@ -8,7 +8,7 @@
 <% content_for :nav do %>
   <%= account_logo_tag if Current.account.logo.attached? %>
   <%= tag.span class: "btn btn--reversed btn--faux room--current" do %>
-    <h1 class="room__contents txt-medium overflow-ellipsis">Message Stats (V2)</h1>
+    <h1 class="room__contents txt-medium overflow-ellipsis">Message Stats</h1>
   <% end %>
   <%= link_back %>
   <%= link_to stats_v2_dashboard_path, class: "btn d-hotwire-native-none" do %>
@@ -20,11 +20,6 @@
 <% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
 
 <section class="full-width">
-  <div class="alert alert-info" style="margin: 1rem 0;">
-    <strong>Stats V2 (Beta)</strong> - You're viewing the new stats implementation.
-    <%= link_to "Switch to V1", stats_path %>
-  </div>
-
   <h2 class="section-heading">Top Talkers</h2>
   <div class="stats-grid margin-block">
     <% Stats::V2::BaseController::PERIODS.each do |period| %>

@@ -211,17 +211,7 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Stats routes (V1 - existing)
-  get "/stats", to: "stats#index", as: "stats"
-  get "stats/daily/month_data", to: "stats#month_data", as: "stats_month_data"
-  get "stats/daily/:month", to: "stats#today", as: "stats_daily_month"
-  get "stats/daily", to: "stats#today", as: "stats_daily"
-  get "stats/monthly", to: "stats#month", as: "stats_monthly"
-  get "stats/yearly", to: "stats#year", as: "stats_yearly"
-  get "stats/all", to: "stats#all", as: "stats_all"
-  get "stats/rooms", to: "stats#rooms", as: "stats_rooms"
-
-  # Stats routes (V2 - new implementation)
+  # Stats routes (V2 - now default)
   namespace :stats do
     namespace :v2 do
       root to: 'dashboard#index', as: :root
@@ -236,4 +226,17 @@ Rails.application.routes.draw do
       get '/dashboard/cards/message_history', to: 'dashboard#message_history_card', as: :dashboard_message_history_card
     end
   end
+
+  # Redirect main stats path to V2
+  get "/stats", to: redirect("/stats/v2/dashboard"), as: "stats"
+
+  # Stats routes (V1 - legacy, temporary access)
+  get "/stats/legacy", to: "stats#index", as: "stats_legacy"
+  get "/stats/legacy/daily/month_data", to: "stats#month_data", as: "stats_legacy_month_data"
+  get "/stats/legacy/daily/:month", to: "stats#today", as: "stats_legacy_daily_month"
+  get "/stats/legacy/daily", to: "stats#today", as: "stats_legacy_daily"
+  get "/stats/legacy/monthly", to: "stats#month", as: "stats_legacy_monthly"
+  get "/stats/legacy/yearly", to: "stats#year", as: "stats_legacy_yearly"
+  get "/stats/legacy/all", to: "stats#all", as: "stats_legacy_all"
+  get "/stats/legacy/rooms", to: "stats#rooms", as: "stats_legacy_rooms"
 end
