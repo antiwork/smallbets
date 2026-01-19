@@ -1,14 +1,15 @@
 <%
   # Shared partial for displaying a leaderboard table
   # Required locals: users
-  # Optional locals: current_user_rank (hash with :user, :rank, :message_count)
+  # Optional locals: current_user_rank (hash with :user, :rank, :message_count), from_path
+  from_path = local_assigns[:from_path]
 %>
 <div class="overflow-x-auto">
   <table class="table full-width">
     <tbody>
       <% if users.any? %>
         <% users.each_with_index do |user, index| %>
-          <%= render 'stats/v2/shared/user_row', user: user, rank: index + 1 %>
+          <%= render 'stats/v2/shared/user_row', user: user, rank: index + 1, from_path: from_path %>
         <% end %>
 
         <% if defined?(current_user_rank) && current_user_rank && current_user_rank[:message_count] > 0 %>
@@ -17,7 +18,7 @@
               <div style="border-top: 1px dashed var(--color-border-darker); margin: 0.25rem 0;"></div>
             </td>
           </tr>
-          <%= render 'stats/v2/shared/user_row', user: current_user_rank[:user], rank: current_user_rank[:rank] %>
+          <%= render 'stats/v2/shared/user_row', user: current_user_rank[:user], rank: current_user_rank[:rank], from_path: from_path %>
         <% end %>
       <% else %>
         <tr>

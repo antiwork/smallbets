@@ -123,6 +123,33 @@ module Stats
             Rails.cache.delete_matched("#{CACHE_PREFIX}:newest_members:*")
           end
 
+          # Fetch top posters for a specific room from cache or execute query
+          # @param room_id [Integer] room ID
+          # @param limit [Integer] number of results (default: 10)
+          # @return [Array] top posters with message_count
+          def fetch_room_top_posters(room_id:, limit: 10)
+            cached_data = Rails.cache.fetch(
+              cache_key('room_top_posters', room_id, limit),
+              expires_in: 5.minutes
+            ) do
+              results = Queries::RoomTopPostersQuery.call(room_id: room_id, limit: limit)
+              serialize_users(results)
+            end
+
+            deserialize_users(cached_data)
+          end
+
+          # Clear cache for specific room stats
+          # @param room_id [Integer] room ID to clear cache for
+          def clear_room_stats(room_id:)
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:room_top_posters:#{room_id}:*")
+          end
+
+          # Clear cache for all room stats
+          def clear_all_room_stats
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:room_top_posters:*")
+          end
+
           private
 
           # Generic serializer for entities with message_count
