@@ -1,0 +1,29 @@
+<%
+  # Shared partial for displaying a leaderboard table
+  # Required locals: users
+  # Optional locals: current_user_rank (hash with :user, :rank, :message_count)
+%>
+<div class="overflow-x-auto">
+  <table class="table full-width">
+    <tbody>
+      <% if users.any? %>
+        <% users.each_with_index do |user, index| %>
+          <%= render 'stats/v2/shared/user_row', user: user, rank: index + 1 %>
+        <% end %>
+
+        <% if defined?(current_user_rank) && current_user_rank && current_user_rank[:message_count] > 0 %>
+          <tr>
+            <td colspan="3" class="txt-center txt-small txt-faded" style="padding: 0.25rem;">
+              <div style="border-top: 1px dashed var(--color-border-darker); margin: 0.25rem 0;"></div>
+            </td>
+          </tr>
+          <%= render 'stats/v2/shared/user_row', user: current_user_rank[:user], rank: current_user_rank[:rank] %>
+        <% end %>
+      <% else %>
+        <tr>
+          <td colspan="3" class="txt-center">No messages yet</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

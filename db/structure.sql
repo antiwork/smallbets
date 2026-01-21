@@ -184,7 +184,12 @@ CREATE INDEX "index_messages_on_answered_at" ON "messages" ("answered_at");
 CREATE INDEX "index_messages_on_answered_by_id" ON "messages" ("answered_by_id");
 CREATE INDEX "index_messages_on_room_id_and_mentions_everyone" ON "messages" ("room_id", "mentions_everyone") WHERE mentions_everyone = true;
 CREATE INDEX "index_messages_on_original_message_id" ON "messages" ("original_message_id");
+CREATE INDEX "index_memberships_on_connected_at" ON "memberships" ("connected_at");
+CREATE INDEX "index_messages_on_active_created_at_creator_id" ON "messages" ("active", "created_at", "creator_id");
+CREATE INDEX "index_messages_on_active_room_id_created_at" ON "messages" ("active", "room_id", "created_at");
+CREATE INDEX "index_users_on_active_suspended_at" ON "users" ("active", "suspended_at");
 INSERT INTO "schema_migrations" (version) VALUES
+('20260115012335'),
 ('20251128154156'),
 ('20251106202943'),
 ('20251103002249'),

@@ -1,0 +1,28 @@
+<%
+  # Shared partial for displaying a stat card
+  # Required locals: title
+  # Optional locals: link (if card header should be clickable)
+  # Content passed via block
+%>
+<div class="card grid-card">
+  <% if defined?(link) && link %>
+    <%= link_to link, class: "card-header-link" do %>
+      <div class="card-header">
+        <div class="txt-h3 margin-none d-flex justify-content-between align-items-center">
+          <%= title %>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="card-header">
+      <h2 class="txt-h3 margin-none"><%= title %></h2>
+    </div>
+  <% end %>
+
+  <div class="card-body compact">
+    <%= yield %>
+  </div>
+</div>
