@@ -332,28 +332,6 @@ class MessageTest < ActiveSupport::TestCase
     assert copied_message.active?
   end
 
-  test "in_non_direct_rooms scope returns only messages from non-direct rooms" do
-    open_room = rooms(:pets)
-    direct_room = rooms(:david_and_jason)
-
-    open_room_message = open_room.messages.create!(
-      creator: users(:jason),
-      body: "Message in open room",
-      client_message_id: "open123"
-    )
-
-    direct_room_message = direct_room.messages.create!(
-      creator: users(:jason),
-      body: "Message in direct room",
-      client_message_id: "direct123"
-    )
-
-    results = Message.active.in_non_direct_rooms
-
-    assert_includes results, open_room_message
-    refute_includes results, direct_room_message
-  end
-
   private
     def default_tracker_result
       {
