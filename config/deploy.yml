@@ -24,6 +24,7 @@ env:
   clear:
     DISABLE_SSL: "true"
     RAILS_ENV: "production"
+    AUTOMATED_FEED_ENABLED: "false"
 
   secret:
     - APP_VERSION
