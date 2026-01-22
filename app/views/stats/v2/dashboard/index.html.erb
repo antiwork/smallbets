@@ -27,8 +27,19 @@
 
   <h2 class="section-heading">Top Talkers</h2>
   <div class="stats-grid margin-block">
-    <%= render 'stats/v2/shared/stat_card', title: 'All Time', link: stats_v2_dashboard_path do %>
-      <%= render 'stats/v2/shared/leaderboard_table', users: @top_posters_all_time, current_user_rank: @current_user_all_time_rank %>
+    <% [
+      { period: :today, title: 'Today' },
+      { period: :month, title: 'This Month' },
+      { period: :year, title: 'This Year' },
+      { period: :all_time, title: 'All Time' }
+    ].each do |card| %>
+      <%
+        users = instance_variable_get("@top_posters_#{card[:period]}")
+        current_user_rank = instance_variable_get("@current_user_#{card[:period]}_rank")
+      %>
+      <%= render 'stats/v2/shared/stat_card', title: card[:title], link: stats_v2_dashboard_path do %>
+        <%= render 'stats/v2/shared/leaderboard_table', users: users, current_user_rank: current_user_rank %>
+      <% end %>
     <% end %>
   </div>
 </section>

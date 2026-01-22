@@ -5,35 +5,57 @@ module Stats
     # Dashboard controller for Stats V2
     # Responsible for displaying the main stats dashboard
     class DashboardController < BaseController
+      PERIODS = [:today, :month, :year, :all_time].freeze
+
       def index
-        @top_posters_all_time = Queries::TopPostersQuery.call(period: :all_time, limit: 10)
+        load_leaderboards
+        load_current_user_ranks if Current.user
+      end
 
-        # Get current user rank if they're not in top 10
-        if Current.user
-          current_user_in_top_10 = @top_posters_all_time.any? { |user| user.id == Current.user.id }
+      private
 
-          unless current_user_in_top_10
-            user_stats = Queries::TopPostersQuery.call(period: :all_time, limit: 1)
-              .where(id: Current.user.id)
-              .first
-
-            if user_stats && user_stats.message_count.to_i > 0
-              # Calculate rank using existing StatsService for now (will be replaced in Slice 4)
-              rank = StatsService.calculate_all_time_rank(Current.user.id)
-
-              # Add message_count to the user object for the view
-              current_user_with_count = Current.user
-              message_count = user_stats.message_count.to_i
-              current_user_with_count.define_singleton_method(:message_count) { message_count }
-
-              @current_user_all_time_rank = {
-                user: current_user_with_count,
-                rank: rank,
-                message_count: message_count
-              }
-            end
-          end
+      def load_leaderboards
+        PERIODS.each do |period|
+          instance_variable_set(
+            "@top_posters_#{period}",
+            Queries::TopPostersQuery.call(period: period, limit: 10)
+          )
         end
+      end
+
+      def load_current_user_ranks
+        PERIODS.each do |period|
+          top_posters = instance_variable_get("@top_posters_#{period}")
+          rank_data = calculate_user_rank(period, top_posters)
+
+          instance_variable_set("@current_user_#{period}_rank", rank_data) if rank_data
+        end
+      end
+
+      def calculate_user_rank(period, top_posters)
+        return nil if top_posters.any? { |user| user.id == Current.user.id }
+
+        user_stats = Queries::TopPostersQuery.call(period: period, limit: 1)
+          .where(id: Current.user.id)
+          .first
+
+        return nil unless user_stats && user_stats.message_count.to_i > 0
+
+        rank = calculate_rank_for_period(period)
+        message_count = user_stats.message_count.to_i
+
+        current_user_with_count = Current.user
+        current_user_with_count.define_singleton_method(:message_count) { message_count }
+
+        {
+          user: current_user_with_count,
+          rank: rank,
+          message_count: message_count
+        }
+      end
+
+      def calculate_rank_for_period(period)
+        StatsService.calculate_user_rank(Current.user.id, period)
       end
     end
   end
