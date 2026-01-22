@@ -55,16 +55,7 @@ module Stats
       end
 
       def calculate_rank_for_period(period)
-        case period
-        when :all_time
-          StatsService.calculate_all_time_rank(Current.user.id)
-        when :today
-          StatsService.calculate_today_rank(Current.user.id)
-        when :month
-          StatsService.calculate_month_rank(Current.user.id)
-        when :year
-          StatsService.calculate_year_rank(Current.user.id)
-        end
+        StatsService.calculate_user_rank(Current.user.id, period)
       end
     end
   end
