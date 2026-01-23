@@ -50,6 +50,29 @@ module Stats
             deserialize_rooms(cached_data)
           end
 
+          # Fetch recent message history from cache or execute query
+          # @param limit [Integer] number of days to return (default: 7)
+          # @return [Array<Hash>] recent daily message counts with date and count
+          def fetch_message_history_recent(limit: 7)
+            Rails.cache.fetch(
+              cache_key('message_history', 'recent', limit),
+              expires_in: 5.minutes
+            ) do
+              serialize_message_history(Queries::MessageHistoryQuery.call(limit: limit, order: :desc))
+            end
+          end
+
+          # Fetch all-time message history from cache or execute query
+          # @return [Array<Hash>] all-time daily message counts with date and count
+          def fetch_message_history_all_time
+            Rails.cache.fetch(
+              cache_key('message_history', 'all_time'),
+              expires_in: 15.minutes
+            ) do
+              serialize_message_history(Queries::MessageHistoryQuery.call(order: :asc))
+            end
+          end
+
           # Clear all Stats cache
           def clear_all
             Rails.cache.delete_matched("#{CACHE_PREFIX}:*")
@@ -73,6 +96,11 @@ module Stats
           # Clear top rooms cache
           def clear_top_rooms
             Rails.cache.delete_matched("#{CACHE_PREFIX}:top_rooms:*")
+          end
+
+          # Clear message history cache
+          def clear_message_history
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:message_history:*")
           end
 
           private
@@ -130,6 +158,13 @@ module Stats
           # Deserialize cached data back to Room objects with message_count
           def deserialize_rooms(data)
             deserialize_entities(data, Room)
+          end
+
+          # Serialize message history query results to cacheable format
+          def serialize_message_history(results)
+            results.to_a.map do |result|
+              { date: result.date, count: result.count.to_i }
+            end
           end
 
           def cache_key(*parts)

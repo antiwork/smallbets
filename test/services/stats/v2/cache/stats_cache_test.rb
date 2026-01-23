@@ -167,6 +167,87 @@ module Stats
 
           refute Rails.cache.exist?("stats:top_rooms:10")
         end
+
+        test "fetch_message_history_recent caches results" do
+          # First call - should hit database
+          result1 = StatsCache.fetch_message_history_recent(limit: 7)
+
+          # Second call - should hit cache
+          result2 = StatsCache.fetch_message_history_recent(limit: 7)
+
+          assert_equal result1.size, result2.size
+          assert_kind_of Array, result2
+        end
+
+        test "fetch_message_history_recent returns hashes with date and count" do
+          result = StatsCache.fetch_message_history_recent(limit: 7)
+
+          result.each do |stat|
+            assert_kind_of Hash, stat
+            assert_includes stat, :date
+            assert_includes stat, :count
+            assert_kind_of String, stat[:date]
+            assert_kind_of Integer, stat[:count]
+          end
+        end
+
+        test "fetch_message_history_recent uses different cache keys per limit" do
+          StatsCache.fetch_message_history_recent(limit: 3)
+          StatsCache.fetch_message_history_recent(limit: 7)
+
+          # Should create separate cache entries
+          assert Rails.cache.exist?("stats:message_history:recent:3")
+          assert Rails.cache.exist?("stats:message_history:recent:7")
+        end
+
+        test "fetch_message_history_all_time caches results" do
+          # First call - should hit database
+          result1 = StatsCache.fetch_message_history_all_time
+
+          # Second call - should hit cache
+          result2 = StatsCache.fetch_message_history_all_time
+
+          assert_equal result1.size, result2.size
+          assert_kind_of Array, result2
+        end
+
+        test "fetch_message_history_all_time returns hashes with date and count" do
+          result = StatsCache.fetch_message_history_all_time
+
+          result.each do |stat|
+            assert_kind_of Hash, stat
+            assert_includes stat, :date
+            assert_includes stat, :count
+            assert_kind_of String, stat[:date]
+            assert_kind_of Integer, stat[:count]
+          end
+        end
+
+        test "clear_message_history removes cache" do
+          StatsCache.fetch_message_history_recent(limit: 7)
+          StatsCache.fetch_message_history_all_time
+
+          assert Rails.cache.exist?("stats:message_history:recent:7")
+          assert Rails.cache.exist?("stats:message_history:all_time")
+
+          StatsCache.clear_message_history
+
+          refute Rails.cache.exist?("stats:message_history:recent:7")
+          refute Rails.cache.exist?("stats:message_history:all_time")
+        end
+
+        test "clear_all removes message history cache" do
+          StatsCache.fetch_message_history_recent(limit: 7)
+          StatsCache.fetch_message_history_all_time
+
+          assert Rails.cache.exist?("stats:message_history:recent:7")
+          assert Rails.cache.exist?("stats:message_history:all_time")
+
+          StatsCache.clear_all
+
+          refute Rails.cache.exist?("stats:message_history:recent:7")
+          refute Rails.cache.exist?("stats:message_history:all_time")
+        end
       end
     end
   end
