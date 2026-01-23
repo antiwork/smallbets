@@ -8,11 +8,16 @@ module Stats
       PERIODS = [:today, :month, :year, :all_time].freeze
 
       def index
+        load_system_metrics
         load_leaderboards
         load_current_user_ranks if Current.user
       end
 
       private
+
+      def load_system_metrics
+        @system_metrics = Cache::StatsCache.fetch_system_metrics
+      end
 
       def load_leaderboards
         PERIODS.each do |period|

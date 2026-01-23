@@ -93,6 +93,40 @@ module Stats
           assert_equal 15.minutes, cache_service.send(:ttl_for_period, :year)
           assert_equal 30.minutes, cache_service.send(:ttl_for_period, :all_time)
         end
+
+        test "fetch_system_metrics caches results" do
+          # First call - should hit database
+          result1 = StatsCache.fetch_system_metrics
+
+          # Second call - should hit cache
+          result2 = StatsCache.fetch_system_metrics
+
+          assert_equal result1, result2
+          assert_kind_of Hash, result2
+          assert_includes result2, :total_users
+          assert_includes result2, :online_users
+          assert_includes result2, :database_size
+        end
+
+        test "clear_system_metrics removes system metrics cache" do
+          StatsCache.fetch_system_metrics
+
+          assert Rails.cache.exist?("stats:system_metrics")
+
+          StatsCache.clear_system_metrics
+
+          refute Rails.cache.exist?("stats:system_metrics")
+        end
+
+        test "clear_all removes system metrics cache" do
+          StatsCache.fetch_system_metrics
+
+          assert Rails.cache.exist?("stats:system_metrics")
+
+          StatsCache.clear_all
+
+          refute Rails.cache.exist?("stats:system_metrics")
+        end
       end
     end
   end
