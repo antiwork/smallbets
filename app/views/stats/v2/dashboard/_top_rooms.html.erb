@@ -7,7 +7,7 @@
     <div class="card-body compact">
       <%= render 'stats/v2/shared/ranked_list', items: top_rooms, empty_message: 'No rooms yet' do |room, rank| %>
         <td>
-          <%= link_to room_path(room), style: "text-decoration: none;" do %>
+          <%= link_to room_path(room), style: "text-decoration: none;", data: { turbo_frame: "_top" } do %>
             <span class="txt-truncate"><%= room.name %></span>
           <% end %>
         </td>

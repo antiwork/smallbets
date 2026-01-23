@@ -9,7 +9,7 @@
   <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= rank %></td>
   <td>
     <div class="flex gap-inline items-center">
-      <%= link_to user_path(user, from: from_path), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+      <%= link_to user_path(user, from: from_path), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;", data: { turbo_frame: "_top" } do %>
         <% if user.avatar.attached? %>
           <div class="avatar avatar-xs">
             <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
