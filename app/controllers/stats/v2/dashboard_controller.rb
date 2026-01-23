@@ -44,18 +44,19 @@ module Stats
         rank = calculate_rank_for_period(period)
         message_count = user_stats.message_count.to_i
 
-        current_user_with_count = Current.user
-        current_user_with_count.define_singleton_method(:message_count) { message_count }
+        # Create a fresh user instance to avoid singleton method collision
+        user_for_display = User.includes(:avatar_attachment).find(Current.user.id)
+        user_for_display.define_singleton_method(:message_count) { message_count }
 
         {
-          user: current_user_with_count,
+          user: user_for_display,
           rank: rank,
           message_count: message_count
         }
       end
 
       def calculate_rank_for_period(period)
-        StatsService.calculate_user_rank(Current.user.id, period)
+        Queries::UserRankQuery.call(user_id: Current.user.id, period: period)
       end
     end
   end
