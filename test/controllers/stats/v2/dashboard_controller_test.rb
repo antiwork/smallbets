@@ -37,7 +37,7 @@ module Stats
         get stats_v2_dashboard_path
 
         assert_response :success
-        assert_select '.card', count: 7  # 4 period cards + 1 top rooms + 1 message history + 1 system info
+        assert_select '.card', count: 8  # 4 period cards + 1 top rooms + 1 newest members + 1 message history + 1 system info
 
         # Check that all period titles are present
         response_body = response.body

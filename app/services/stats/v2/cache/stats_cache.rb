@@ -73,6 +73,21 @@ module Stats
             end
           end
 
+          # Fetch newest members from cache or execute query
+          # @param limit [Integer] number of members to return (default: 10)
+          # @return [Array] newest members with joined_at
+          def fetch_newest_members(limit: 10)
+            cached_data = Rails.cache.fetch(
+              cache_key('newest_members', limit),
+              expires_in: 10.minutes
+            ) do
+              results = Queries::NewestMembersQuery.call(limit: limit)
+              serialize_newest_members(results)
+            end
+
+            deserialize_newest_members(cached_data)
+          end
+
           # Clear all Stats cache
           def clear_all
             Rails.cache.delete_matched("#{CACHE_PREFIX}:*")
@@ -103,6 +118,11 @@ module Stats
             Rails.cache.delete_matched("#{CACHE_PREFIX}:message_history:*")
           end
 
+          # Clear newest members cache
+          def clear_newest_members
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:newest_members:*")
+          end
+
           private
 
           # Generic serializer for entities with message_count
@@ -119,12 +139,13 @@ module Stats
             end
           end
 
-          # Generic deserializer for entities with message_count
+          # Generic deserializer for entities with a singleton attribute
           # @param data [Array<Hash>] cached data to deserialize
           # @param model_class [Class] ActiveRecord model class
           # @param includes [Symbol, Array] associations to eager load
-          # @return [Array<ActiveRecord::Base>] deserialized entities with message_count
-          def deserialize_entities(data, model_class, includes: [])
+          # @param singleton_attr [Symbol] attribute to define as singleton method (default: :message_count)
+          # @return [Array<ActiveRecord::Base>] deserialized entities with singleton attribute
+          def deserialize_entities(data, model_class, includes: [], singleton_attr: :message_count)
             ids = data.map { |e| e[:id] }
             query = model_class.where(id: ids)
             query = query.includes(includes) if includes.present?
@@ -134,8 +155,8 @@ module Stats
               entity = entities_by_id[cached_entity[:id]]
               next unless entity
 
-              message_count = cached_entity[:message_count]
-              entity.define_singleton_method(:message_count) { message_count }
+              attr_value = cached_entity[singleton_attr]
+              entity.define_singleton_method(singleton_attr) { attr_value }
               entity
             end.compact
           end
@@ -165,6 +186,18 @@ module Stats
             results.to_a.map do |result|
               { date: result.date, count: result.count.to_i }
             end
+          end
+
+          # Serialize newest members to cacheable format
+          def serialize_newest_members(users)
+            users.map do |user|
+              { id: user.id, name: user.name, joined_at: user.joined_at }
+            end
+          end
+
+          # Deserialize cached data back to User objects with joined_at
+          def deserialize_newest_members(data)
+            deserialize_entities(data, User, includes: :avatar_attachment, singleton_attr: :joined_at)
           end
 
           def cache_key(*parts)
