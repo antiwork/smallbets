@@ -213,8 +213,6 @@ Rails.application.routes.draw do
 
   # Stats routes (V1 - existing)
   get "/stats", to: "stats#index", as: "stats"
-  # Stats routes (V1 - existing)
-  get "/stats", to: "stats#index", as: "stats"
   get "stats/daily/month_data", to: "stats#month_data", as: "stats_month_data"
   get "stats/daily/:month", to: "stats#today", as: "stats_daily_month"
   get "stats/daily", to: "stats#today", as: "stats_daily"
