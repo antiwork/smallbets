@@ -18,7 +18,7 @@ module Stats
         PERIODS.each do |period|
           instance_variable_set(
             "@top_posters_#{period}",
-            Queries::TopPostersQuery.call(period: period, limit: 10)
+            Cache::StatsCache.fetch_top_posters(period: period, limit: 10)
           )
         end
       end

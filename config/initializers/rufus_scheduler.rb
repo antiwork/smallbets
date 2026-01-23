@@ -15,5 +15,10 @@ Rails.application.config.after_initialize do
     $rufus_scheduler.cron fallback_cron do
       AutomatedFeed::ScheduledScanJob.perform_later
     end
+
+    # Stats V2 cache refresh - every 5 minutes
+    $rufus_scheduler.every "5m" do
+      Stats::V2::RefreshCacheJob.perform_later
+    end
   end
 end
