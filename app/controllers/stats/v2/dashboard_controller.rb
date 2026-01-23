@@ -77,6 +77,10 @@ module Stats
         @newest_members = Cache::StatsCache.fetch_newest_members(limit: DEFAULT_LIMIT)
       end
 
+      def load_newest_members
+        @newest_members = Cache::StatsCache.fetch_newest_members(limit: DEFAULT_LIMIT)
+      end
+
       def load_leaderboards
         PERIODS.each do |period|
           instance_variable_set(
