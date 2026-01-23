@@ -6,7 +6,7 @@
 %>
 <div class="card grid-card">
   <% if defined?(link) && link %>
-    <%= link_to link, class: "card-header-link" do %>
+    <%= link_to link, class: "card-header-link", data: { turbo_frame: "_top" } do %>
       <div class="card-header">
         <div class="txt-h3 margin-none d-flex justify-content-between align-items-center">
           <%= title %>

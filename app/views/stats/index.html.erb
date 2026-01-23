@@ -11,7 +11,7 @@
     <h1 class="room__contents txt-medium overflow-ellipsis">Message Stats</h1>
   <% end %>
   <%= link_back %>
-  <%= link_to stats_path, class: "btn d-hotwire-native-none" do %>
+  <%= link_to stats_legacy_path, class: "btn d-hotwire-native-none" do %>
     <%= image_tag("refresh.svg", aria: { hidden: "true" }, size: 20) %>
     <span class="for-screen-reader">Refresh stats</span>
   <% end %>
@@ -20,12 +20,14 @@
 <% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
 
 <section class="full-width">
+  <%= render 'stats/legacy_warning' %>
+
   <!-- Top Talkers Section -->
   <h2 class="section-heading">Top Talkers</h2>
   <div class="stats-grid margin-block">
     <!-- Today's top talkers -->
     <div class="card grid-card">
-      <%= link_to stats_daily_path, class: "card-header-link" do %>
+      <%= link_to stats_legacy_daily_path, class: "card-header-link" do %>
         <div class="card-header">
           <div class="txt-h3 margin-none d-flex justify-content-between align-items-center">
             Today
@@ -107,7 +109,7 @@
 
     <!-- This month's top talkers -->
     <div class="card grid-card">
-      <%= link_to stats_monthly_path, class: "card-header-link" do %>
+      <%= link_to stats_legacy_monthly_path, class: "card-header-link" do %>
         <div class="card-header">
           <div class="txt-h3 margin-none d-flex justify-content-between align-items-center">
             This Month
@@ -189,7 +191,7 @@
 
     <!-- This year's top talkers -->
     <div class="card grid-card">
-      <%= link_to stats_yearly_path, class: "card-header-link" do %>
+      <%= link_to stats_legacy_yearly_path, class: "card-header-link" do %>
         <div class="card-header">
           <div class="txt-h3 margin-none d-flex justify-content-between align-items-center">
             This Year
@@ -271,7 +273,7 @@
 
     <!-- All time top talkers -->
     <div class="card grid-card">
-      <%= link_to stats_all_path, class: "card-header-link" do %>
+      <%= link_to stats_legacy_all_path, class: "card-header-link" do %>
         <div class="card-header">
           <div class="txt-h3 margin-none d-flex justify-content-between align-items-center">
             All Time
@@ -441,7 +443,7 @@
 
     <!-- Top Rooms -->
     <div class="card grid-card">
-      <%= link_to stats_rooms_path, class: "card-header-link" do %>
+      <%= link_to stats_legacy_rooms_path, class: "card-header-link" do %>
         <div class="card-header">
           <div class="txt-h3 margin-none d-flex justify-content-between align-items-center">
             Top Rooms

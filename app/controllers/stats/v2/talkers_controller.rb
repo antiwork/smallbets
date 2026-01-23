@@ -40,7 +40,7 @@ module Stats
         else
           # User is not in top 100, calculate their rank
           rank_data = Queries::UserRankQuery.call(user_id: Current.user.id, period: @period)
-          @current_user_rank = rank_data if rank_data
+          @current_user_rank = rank_data[:rank] if rank_data
         end
       end
     end

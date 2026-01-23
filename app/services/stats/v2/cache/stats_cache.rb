@@ -123,6 +123,62 @@ module Stats
             Rails.cache.delete_matched("#{CACHE_PREFIX}:newest_members:*")
           end
 
+          # Fetch top posters for a specific room from cache or execute query
+          # @param room_id [Integer] room ID
+          # @param limit [Integer] number of results (default: 10)
+          # @return [Array] top posters with message_count
+          def fetch_room_top_posters(room_id:, limit: 10)
+            cached_data = Rails.cache.fetch(
+              cache_key('room_top_posters', room_id, limit),
+              expires_in: 5.minutes
+            ) do
+              results = Queries::RoomTopPostersQuery.call(room_id: room_id, limit: limit)
+              serialize_users(results)
+            end
+
+            deserialize_users(cached_data)
+          end
+
+          # Clear cache for specific room stats
+          # @param room_id [Integer] room ID to clear cache for
+          def clear_room_stats(room_id:)
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:room_top_posters:#{room_id}:*")
+          end
+
+          # Clear cache for all room stats
+          def clear_all_room_stats
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:room_top_posters:*")
+          end
+
+          # Fetch user stats (rank and message count) from cache or execute query
+          # @param user_id [Integer] user ID
+          # @param period [Symbol] time period (:today, :month, :year, :all_time)
+          # @return [Hash, nil] hash with :rank and :message_count keys, or nil if no messages
+          def fetch_user_stats(user_id:, period: :all_time)
+            Rails.cache.fetch(
+              cache_key('user_stats', user_id, period),
+              expires_in: ttl_for_period(period)
+            ) do
+              Queries::UserRankQuery.call(user_id: user_id, period: period)
+            end
+          end
+
+          # Clear cache for specific user stats
+          # @param user_id [Integer] user ID to clear cache for
+          # @param period [Symbol, nil] specific period to clear, or nil for all periods
+          def clear_user_stats(user_id:, period: nil)
+            if period
+              Rails.cache.delete(cache_key('user_stats', user_id, period))
+            else
+              Rails.cache.delete_matched("#{CACHE_PREFIX}:user_stats:#{user_id}:*")
+            end
+          end
+
+          # Clear cache for all user stats
+          def clear_all_user_stats
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:user_stats:*")
+          end
+
           private
 
           # Generic serializer for entities with message_count

@@ -298,6 +298,81 @@ module Stats
 
           refute Rails.cache.exist?("stats:newest_members:10")
         end
+
+        # Room cache tests
+        test "fetch_room_top_posters caches query results" do
+          room = rooms(:pets)
+          user = users(:jason)
+
+          3.times { |i| room.messages.create!(creator: user, body: "Test #{i}", client_message_id: SecureRandom.uuid) }
+
+          # First call - should hit database
+          result1 = StatsCache.fetch_room_top_posters(room_id: room.id, limit: 10)
+
+          # Second call - should hit cache
+          result2 = StatsCache.fetch_room_top_posters(room_id: room.id, limit: 10)
+
+          assert_equal result1.size, result2.size
+          assert_kind_of Array, result2
+        end
+
+        test "fetch_room_top_posters uses different cache keys per room" do
+          room1 = rooms(:pets)
+          room2 = rooms(:watercooler)
+          user = users(:jason)
+
+          room1.messages.create!(creator: user, body: "Message", client_message_id: SecureRandom.uuid)
+
+          room1_result = StatsCache.fetch_room_top_posters(room_id: room1.id, limit: 10)
+          room2_result = StatsCache.fetch_room_top_posters(room_id: room2.id, limit: 10)
+
+          # Should use different cache keys
+          assert Rails.cache.exist?("stats:room_top_posters:#{room1.id}:10")
+          assert Rails.cache.exist?("stats:room_top_posters:#{room2.id}:10")
+        end
+
+        test "fetch_room_top_posters uses different cache keys per limit" do
+          room = rooms(:pets)
+
+          StatsCache.fetch_room_top_posters(room_id: room.id, limit: 5)
+          StatsCache.fetch_room_top_posters(room_id: room.id, limit: 10)
+
+          # Should create separate cache entries
+          assert Rails.cache.exist?("stats:room_top_posters:#{room.id}:5")
+          assert Rails.cache.exist?("stats:room_top_posters:#{room.id}:10")
+        end
+
+        test "clear_room_stats removes cache for specific room" do
+          room1 = rooms(:pets)
+          room2 = rooms(:watercooler)
+
+          StatsCache.fetch_room_top_posters(room_id: room1.id, limit: 10)
+          StatsCache.fetch_room_top_posters(room_id: room2.id, limit: 10)
+
+          assert Rails.cache.exist?("stats:room_top_posters:#{room1.id}:10")
+          assert Rails.cache.exist?("stats:room_top_posters:#{room2.id}:10")
+
+          StatsCache.clear_room_stats(room_id: room1.id)
+
+          refute Rails.cache.exist?("stats:room_top_posters:#{room1.id}:10")
+          assert Rails.cache.exist?("stats:room_top_posters:#{room2.id}:10"), "Should not clear other rooms"
+        end
+
+        test "clear_all_room_stats removes all room caches" do
+          room1 = rooms(:pets)
+          room2 = rooms(:watercooler)
+
+          StatsCache.fetch_room_top_posters(room_id: room1.id, limit: 10)
+          StatsCache.fetch_room_top_posters(room_id: room2.id, limit: 10)
+
+          assert Rails.cache.exist?("stats:room_top_posters:#{room1.id}:10")
+          assert Rails.cache.exist?("stats:room_top_posters:#{room2.id}:10")
+
+          StatsCache.clear_all_room_stats
+
+          refute Rails.cache.exist?("stats:room_top_posters:#{room1.id}:10")
+          refute Rails.cache.exist?("stats:room_top_posters:#{room2.id}:10")
+        end
       end
     end
   end

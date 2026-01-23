@@ -100,73 +100,10 @@
         <h2 class="txt-h3 margin-none">Top Talkers</h2>
       </div>
       <div class="card-body compact">
-        <div class="overflow-x-auto">
-          <table class="table full-width">
-            <tbody>
-              <% if @top_talkers.any? %>
-                <% @top_talkers.each_with_index do |user, index| %>
-                  <% is_current = user.id == Current.user&.id %>
-                  <tr class="<%= 'current-user' if is_current %>">
-                    <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
-                    <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(user, from: room_stats_path(@room)), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
-                          <% if user.avatar.attached? %>
-                            <div class="avatar avatar-xs">
-                              <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
-                            </div>
-                          <% else %>
-                            <div class="avatar avatar-xs">
-                              <%= user.name.first.upcase %>
-                            </div>
-                          <% end %>
-                          <span class="txt-truncate"><%= user.name %></span>
-                        <% end %>
-                      </div>
-                    </td>
-                    <td class="txt-right">
-                      <%= number_with_delimiter(user.message_count) %>
-                    </td>
-                  </tr>
-                <% end %>
-                
-                <% if Current.user && @current_user_stats && @current_user_stats.message_count.to_i > 0 %>
-                  <tr>
-                    <td colspan="3" class="txt-center txt-small txt-faded" style="padding: 0.25rem;">
-                      <div style="border-top: 1px dashed var(--color-border-darker); margin: 0.25rem 0;"></div>
-                    </td>
-                  </tr>
-                  <tr class="current-user">
-                    <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= @current_user_rank %></td>
-                    <td>
-                      <div class="flex gap-inline align-center">
-                        <%= link_to user_path(Current.user, from: room_stats_path(@room)), class: "flex align-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
-                          <% if Current.user.avatar.attached? %>
-                            <div class="avatar avatar-xs">
-                              <%= image_tag Current.user.avatar, alt: Current.user.name, loading: "lazy" %>
-                            </div>
-                          <% else %>
-                            <div class="avatar avatar-xs">
-                              <%= Current.user.name.first.upcase %>
-                            </div>
-                          <% end %>
-                          <span class="txt-truncate"><%= Current.user.name %></span>
-                        <% end %>
-                      </div>
-                    </td>
-                    <td class="txt-right">
-                      <%= number_with_delimiter(@current_user_stats.message_count) %>
-                    </td>
-                  </tr>
-                <% end %>
-              <% else %>
-                <tr>
-                  <td colspan="3" class="txt-center">No messages yet</td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
+        <%= render 'stats/v2/shared/leaderboard_table',
+                   users: @top_talkers,
+                   current_user_rank: @current_user_rank,
+                   from_path: room_stats_path(@room) %>
       </div>
     </div>
   </div>

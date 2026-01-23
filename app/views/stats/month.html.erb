@@ -10,11 +10,11 @@
   <%= tag.span class: "btn btn--reversed btn--faux room--current" do %>
     <h1 class="room__contents txt-medium overflow-ellipsis">Monthly Stats</h1>
   <% end %>
-  <%= link_to stats_path, class: "btn" do %>
+  <%= link_to stats_legacy_path, class: "btn" do %>
     <%= image_tag("arrow-left.svg", aria: { hidden: "true" }, size: 20) %>
     <span>Back to Stats</span>
   <% end %>
-  <%= link_to stats_monthly_path, class: "btn d-hotwire-native-none" do %>
+  <%= link_to stats_legacy_monthly_path, class: "btn d-hotwire-native-none" do %>
     <%= image_tag("refresh.svg", aria: { hidden: "true" }, size: 20) %>
     <span class="for-screen-reader">Refresh stats</span>
   <% end %>
@@ -23,7 +23,9 @@
 <% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
 
 <section class="full-width">
-  <% 
+  <%= render 'stats/legacy_warning' %>
+
+  <%
     # Group months by year
     months_by_year = @months.group_by do |month|
       year, _ = month.split('-')

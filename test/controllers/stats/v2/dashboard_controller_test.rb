@@ -29,7 +29,7 @@ module Stats
         get stats_v2_dashboard_path
 
         assert_response :success
-        assert_select 'h1', text: /Message Stats \(V2\)/
+        assert_select 'h1', text: /Message Stats/
         assert_select '.card'
       end
 

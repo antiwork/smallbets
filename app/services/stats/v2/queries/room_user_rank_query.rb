@@ -3,17 +3,18 @@
 module Stats
   module V2
     module Queries
-      # Query object for calculating user rank
-      class UserRankQuery < BaseQuery
+      # Query object for calculating user rank within a specific room
+      # Includes messages from both the main room and any threads within that room
+      class RoomUserRankQuery < BaseQuery
         # @param user_id [Integer] User ID
-        # @param period [Symbol] time period (:today, :month, :year, :all_time)
-        def initialize(user_id:, period:)
+        # @param room_id [Integer] Room ID
+        def initialize(user_id:, room_id:)
           @user_id = user_id
-          @period = period
+          @room_id = room_id
         end
 
-        # Calculate user rank and message count
-        # @return [Hash, nil] hash with :rank and :message_count keys, or nil if user has no messages
+        # Calculate user rank
+        # @return [Hash, nil] hash with :rank and :message_count, or nil if user has no messages
         def call
           user = User.find_by(id: @user_id)
           return nil unless user
@@ -36,7 +37,7 @@ module Stats
           result = base_query
             .where("users.id = ?", @user_id)
             .group("users.id")
-            .select("COUNT(messages.id) AS message_count")
+            .select("COUNT(DISTINCT messages.id) AS message_count")
             .first
 
           result&.message_count&.to_i
@@ -45,7 +46,7 @@ module Stats
         def count_users_with_more_messages(user_message_count)
           base_query
             .group("users.id")
-            .having("COUNT(messages.id) > ?", user_message_count)
+            .having("COUNT(DISTINCT messages.id) > ?", user_message_count)
             .count
             .size
         end
@@ -55,31 +56,19 @@ module Stats
 
           base_query
             .group("users.id")
-            .having("COUNT(messages.id) = ?", user_message_count)
+            .having("COUNT(DISTINCT messages.id) = ?", user_message_count)
             .where("COALESCE(users.membership_started_at, users.created_at) < ?", user_join_date)
             .count
             .size
         end
 
         def base_query
-          query = User.active_non_suspended
+          User.active_non_suspended
             .joins("INNER JOIN messages ON messages.creator_id = users.id")
-            .joins("INNER JOIN rooms ON rooms.id = messages.room_id")
-            .where("messages.active = ?", true)
-            .where("rooms.type != ?", "Rooms::Direct")
-
-          apply_time_filter(query)
-        end
-
-        def apply_time_filter(query)
-          time_range = time_range_for_period(@period)
-          return query if time_range.nil?
-
-          if @period == :today
-            query.where("strftime('%Y-%m-%d', messages.created_at) = ?", today_date_string)
-          else
-            query.where(messages: { created_at: time_range })
-          end
+            .joins("LEFT JOIN rooms threads ON messages.room_id = threads.id AND threads.type = 'Rooms::Thread'")
+            .joins("LEFT JOIN messages parent_messages ON threads.parent_message_id = parent_messages.id")
+            .where("messages.room_id = :room_id OR parent_messages.room_id = :room_id", room_id: @room_id)
+            .where("messages.active = true")
         end
       end
     end

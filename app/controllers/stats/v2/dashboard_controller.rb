@@ -77,10 +77,6 @@ module Stats
         @newest_members = Cache::StatsCache.fetch_newest_members(limit: DEFAULT_LIMIT)
       end
 
-      def load_newest_members
-        @newest_members = Cache::StatsCache.fetch_newest_members(limit: DEFAULT_LIMIT)
-      end
-
       def load_leaderboards
         PERIODS.each do |period|
           instance_variable_set(
@@ -108,7 +104,10 @@ module Stats
 
         return nil unless user_stats && user_stats.message_count.to_i > 0
 
-        rank = calculate_rank_for_period(period)
+        rank_data = calculate_rank_for_period(period)
+        return nil unless rank_data
+
+        rank = rank_data[:rank]
         message_count = user_stats.message_count.to_i
 
         # Create a fresh user instance to avoid singleton method collision

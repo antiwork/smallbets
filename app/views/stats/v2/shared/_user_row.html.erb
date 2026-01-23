@@ -1,13 +1,15 @@
 <%
   # Shared partial for displaying a single user row in leaderboard
   # Required locals: user, rank
+  # Optional locals: from_path (defaults to stats_v2_dashboard_path)
   is_current = user.id == Current.user&.id
+  from_path = local_assigns.fetch(:from_path, stats_v2_dashboard_path)
 %>
 <tr class="<%= 'current-user' if is_current %>">
   <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= rank %></td>
   <td>
     <div class="flex gap-inline items-center">
-      <%= link_to user_path(user, from: stats_v2_dashboard_path), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
+      <%= link_to user_path(user, from: from_path), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0;" do %>
         <% if user.avatar.attached? %>
           <div class="avatar avatar-xs">
             <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
