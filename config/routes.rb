@@ -227,6 +227,13 @@ Rails.application.routes.draw do
       root to: 'dashboard#index', as: :root
       get '/dashboard', to: 'dashboard#index', as: :dashboard
       get '/talkers/:period', to: 'talkers#show', as: :talker
+
+      # Card endpoints for turbo frame lazy loading
+      get '/dashboard/cards/top_talkers/:period', to: 'dashboard#top_talkers_card', as: :dashboard_top_talkers_card
+      get '/dashboard/cards/system_info', to: 'dashboard#system_info_card', as: :dashboard_system_info_card
+      get '/dashboard/cards/top_rooms', to: 'dashboard#top_rooms_card', as: :dashboard_top_rooms_card
+      get '/dashboard/cards/newest_members', to: 'dashboard#newest_members_card', as: :dashboard_newest_members_card
+      get '/dashboard/cards/message_history', to: 'dashboard#message_history_card', as: :dashboard_message_history_card
     end
   end
 end

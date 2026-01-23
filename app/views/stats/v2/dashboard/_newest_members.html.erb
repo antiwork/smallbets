@@ -1,28 +1,30 @@
-<div class="card grid-card">
-  <div class="card-header">
-    <h2 class="txt-h3 margin-none">Newest Members</h2>
-  </div>
-  <div class="card-body compact">
-    <%= render 'stats/v2/shared/ranked_list', items: newest_members, empty_message: 'No members yet' do |user, rank| %>
-      <td style="max-width: 0; width: 100%;">
-        <div class="flex gap-inline align-center">
-          <%= link_to user_path(user, from: stats_v2_dashboard_path), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0; width: 100%;" do %>
-            <% if user.avatar.attached? %>
-              <div class="avatar avatar-xs">
-                <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
-              </div>
-            <% else %>
-              <div class="avatar avatar-xs">
-                <%= user.name.first.upcase %>
-              </div>
+<%= turbo_frame_tag "newest_members" do %>
+  <div class="card grid-card">
+    <div class="card-header">
+      <h2 class="txt-h3 margin-none">Newest Members</h2>
+    </div>
+    <div class="card-body compact">
+      <%= render 'stats/v2/shared/ranked_list', items: newest_members, empty_message: 'No members yet' do |user, rank| %>
+        <td style="max-width: 0; width: 100%;">
+          <div class="flex gap-inline align-center">
+            <%= link_to user_path(user, from: stats_v2_dashboard_path), class: "flex items-center hover-target", style: "text-decoration: none; gap: 4px; min-width: 0; width: 100%;" do %>
+              <% if user.avatar.attached? %>
+                <div class="avatar avatar-xs">
+                  <%= image_tag user.avatar, alt: user.name, loading: "lazy" %>
+                </div>
+              <% else %>
+                <div class="avatar avatar-xs">
+                  <%= user.name.first.upcase %>
+                </div>
+              <% end %>
+              <span class="txt-truncate" style="width: 100%;"><%= user.name %></span>
             <% end %>
-            <span class="txt-truncate" style="width: 100%;"><%= user.name %></span>
-          <% end %>
-        </div>
-      </td>
-      <td class="txt-right" style="width: 90px; white-space: nowrap;">
-        <%= user.joined_at.strftime("%Y-%m-%d") %>
-      </td>
-    <% end %>
+          </div>
+        </td>
+        <td class="txt-right" style="width: 90px; white-space: nowrap;">
+          <%= user.joined_at.strftime("%Y-%m-%d") %>
+        </td>
+      <% end %>
+    </div>
   </div>
-</div>
+<% end %>
