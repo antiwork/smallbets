@@ -5,7 +5,6 @@ module Stats
     # Dashboard controller for Stats V2
     # Responsible for displaying the main stats dashboard
     class DashboardController < BaseController
-      PERIODS = [:today, :month, :year, :all_time].freeze
       DEFAULT_LIMIT = 10
       RECENT_HISTORY_DAYS = 7
 
