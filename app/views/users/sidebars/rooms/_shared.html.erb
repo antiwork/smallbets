@@ -13,7 +13,10 @@
      data-sidebar-starred-rooms-target="room" data-involvement="<%= involvement %>"
      data-type="list_node"
      <%= "hidden" if hide_in_starred_list %>
-     class="flex gap align-center justify-space-between">
+     class="flex gap align-center justify-space-between room-item"
+     data-controller="lazy-involvement"
+     data-lazy-involvement-src-value="<%= room_involvement_path(room, from_sidebar: true) unless room.conversation_room? %>"
+     data-action="mouseenter->lazy-involvement#load focusin->lazy-involvement#load">
     <%= link_to_room room,
                      class: [ "flex flex-item-grow gap align-center justify-space-between room full-height txt-nowrap overflow-ellipsis txt-lighter txt-undecorated pad-block position-relative", "unread": unread, "badge": has_notifications ],
                      style: "padding-block: calc(var(--block-space) / 4);" do %>
@@ -25,9 +28,13 @@
     <% end %>
 
     <% unless room.conversation_room? %>
-      <span class="txt-small">
-        <%= turbo_frame_tag dom_id(room, dom_prefix(:sidebar, :involvement)) do %>
-          <%= button_to_change_involvement(room, involvement, from_sidebar: true) %>
+      <span class="txt-small room-involvement">
+        <%= turbo_frame_tag dom_id(room, dom_prefix(:sidebar, :involvement)),
+                            data: { lazy_involvement_target: "frame" },
+                            class: "involvement-frame" do %>
+          <span class="involvement-placeholder" data-involvement="<%= involvement %>">
+            <%= image_tag("notification-bell-#{involvement}.svg", aria: { hidden: "true" }, size: 20, class: "involvement-icon") %>
+          </span>
         <% end %>
       </span>
     <% end %>
