@@ -35,6 +35,21 @@ module Stats
             end
           end
 
+          # Fetch top rooms from cache or execute query
+          # @param limit [Integer] number of rooms to return (default: 10)
+          # @return [Array] top rooms with message_count
+          def fetch_top_rooms(limit: 10)
+            cached_data = Rails.cache.fetch(
+              cache_key('top_rooms', limit),
+              expires_in: 10.minutes
+            ) do
+              results = Queries::RoomStatsQuery.call(limit: limit)
+              serialize_rooms(results)
+            end
+
+            deserialize_rooms(cached_data)
+          end
+
           # Clear all Stats cache
           def clear_all
             Rails.cache.delete_matched("#{CACHE_PREFIX}:*")
@@ -55,33 +70,66 @@ module Stats
             Rails.cache.delete("#{CACHE_PREFIX}:system_metrics")
           end
 
+          # Clear top rooms cache
+          def clear_top_rooms
+            Rails.cache.delete_matched("#{CACHE_PREFIX}:top_rooms:*")
+          end
+
           private
+
+          # Generic serializer for entities with message_count
+          # @param entities [ActiveRecord::Relation] entities to serialize
+          # @param attributes [Array<Symbol>] additional attributes to cache
+          # @return [Array<Hash>] serialized data
+          def serialize_entities(entities, *attributes)
+            entities.map do |entity|
+              base = { id: entity.id, message_count: entity.message_count.to_i }
+              attributes.each do |attr|
+                base[attr] = entity[attr] || entity.send(attr)
+              end
+              base
+            end
+          end
+
+          # Generic deserializer for entities with message_count
+          # @param data [Array<Hash>] cached data to deserialize
+          # @param model_class [Class] ActiveRecord model class
+          # @param includes [Symbol, Array] associations to eager load
+          # @return [Array<ActiveRecord::Base>] deserialized entities with message_count
+          def deserialize_entities(data, model_class, includes: [])
+            ids = data.map { |e| e[:id] }
+            query = model_class.where(id: ids)
+            query = query.includes(includes) if includes.present?
+            entities_by_id = query.index_by(&:id)
+
+            data.map do |cached_entity|
+              entity = entities_by_id[cached_entity[:id]]
+              next unless entity
+
+              message_count = cached_entity[:message_count]
+              entity.define_singleton_method(:message_count) { message_count }
+              entity
+            end.compact
+          end
 
           # Serialize users to cacheable format
           def serialize_users(users)
-            users.map do |user|
-              {
-                id: user.id,
-                name: user.name,
-                message_count: user.message_count.to_i,
-                joined_at: user[:joined_at]
-              }
-            end
+            serialize_entities(users, :name, :joined_at)
           end
 
           # Deserialize cached data back to User objects with message_count
           def deserialize_users(data)
-            user_ids = data.map { |u| u[:id] }
-            users_by_id = User.where(id: user_ids).includes(:avatar_attachment).index_by(&:id)
+            deserialize_entities(data, User, includes: :avatar_attachment)
+          end
 
-            data.map do |cached_user|
-              user = users_by_id[cached_user[:id]]
-              next unless user
+          # Serialize rooms to cacheable format
+          def serialize_rooms(rooms)
+            serialize_entities(rooms, :name, :type)
+          end
 
-              message_count = cached_user[:message_count]
-              user.define_singleton_method(:message_count) { message_count }
-              user
-            end.compact
+          # Deserialize cached data back to Room objects with message_count
+          def deserialize_rooms(data)
+            deserialize_entities(data, Room)
           end
 
           def cache_key(*parts)

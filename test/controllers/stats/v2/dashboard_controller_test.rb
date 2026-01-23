@@ -37,7 +37,7 @@ module Stats
         get stats_v2_dashboard_path
 
         assert_response :success
-        assert_select '.card', count: 5  # 4 period cards + 1 system info card
+        assert_select '.card', count: 6  # 4 period cards + 1 top rooms card + 1 system info card
 
         # Check that all period titles are present
         response_body = response.body
@@ -180,6 +180,38 @@ module Stats
         response_body = response.body
         assert_match /Members.*\d+/m, response_body
         assert_match /Messages.*\d+/m, response_body
+      end
+
+      test "displays top rooms card" do
+        get stats_v2_dashboard_path
+
+        assert_response :success
+
+        # Check that top rooms card is present
+        response_body = response.body
+        assert_includes response_body, 'Top Rooms'
+      end
+
+      test "top rooms displays room names and message counts" do
+        room = rooms(:pets)
+        user = users(:david)
+
+        # Create some messages
+        3.times do |i|
+          room.messages.create!(
+            creator: user,
+            body: "Test message #{i}",
+            client_message_id: SecureRandom.uuid
+          )
+        end
+
+        get stats_v2_dashboard_path
+
+        assert_response :success
+
+        # Verify room appears in response
+        response_body = response.body
+        assert_includes response_body, room.name
       end
     end
   end

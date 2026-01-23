@@ -1,0 +1,24 @@
+<%
+  # Generic ranked list partial
+  # Required locals: items, empty_message
+  # Optional locals: link_method (default: nil)
+  # Block: yields |item, rank| for custom row content
+%>
+<div class="overflow-x-auto">
+  <table class="table full-width">
+    <tbody>
+      <% if items.any? %>
+        <% items.each_with_index do |item, index| %>
+          <tr>
+            <td class="txt-right txt-small txt-faded" style="width: 20px;"><%= index + 1 %></td>
+            <%= yield item, index + 1 %>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr>
+          <td colspan="3" class="txt-center"><%= empty_message %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
