@@ -72,12 +72,16 @@ module Stats
                       .order("date DESC")
                       .map(&:date)
 
-        @days_by_month = days.group_by { |day| day[0..6] } # "YYYY-MM"
-        @sorted_months = @days_by_month.keys.sort.reverse
+        days_by_month = days.group_by { |day| day[0..6] }
 
-        @daily_stats = {}
-        days.each do |day|
-          @daily_stats[day] = StatsService.top_posters_for_day(day, BREAKDOWN_LIMIT)
+        @groups = days_by_month.keys.sort.reverse.map do |month_key|
+          {
+            heading: Date.parse("#{month_key}-01").strftime("%B %Y"),
+            cards: days_by_month[month_key].sort.reverse.map do |day|
+              { title: Date.parse(day).strftime("%A, %B %-d, %Y"),
+                users: StatsService.top_posters_for_day(day, BREAKDOWN_LIMIT) }
+            end
+          }
         end
       end
 
@@ -87,25 +91,32 @@ module Stats
                         .order("month DESC")
                         .map(&:month)
 
-        @months_by_year = months.group_by { |m| m[0..3] } # "YYYY"
-        @sorted_years = @months_by_year.keys.sort.reverse
+        months_by_year = months.group_by { |m| m[0..3] }
 
-        @monthly_stats = {}
-        months.each do |month|
-          @monthly_stats[month] = StatsService.top_posters_for_month(month, BREAKDOWN_LIMIT)
+        @groups = months_by_year.keys.sort.reverse.map do |year|
+          {
+            heading: year,
+            cards: months_by_year[year].sort.reverse.map do |month|
+              { title: Date.parse("#{month}-01").strftime("%B %Y"),
+                users: StatsService.top_posters_for_month(month, BREAKDOWN_LIMIT) }
+            end
+          }
         end
       end
 
       def load_yearly_breakdown
-        @years = Message.select("strftime('%Y', created_at) as year")
-                        .group("year")
-                        .order("year DESC")
-                        .map(&:year)
+        years = Message.select("strftime('%Y', created_at) as year")
+                       .group("year")
+                       .order("year DESC")
+                       .map(&:year)
 
-        @yearly_stats = {}
-        @years.each do |year|
-          @yearly_stats[year] = StatsService.top_posters_for_year(year, BREAKDOWN_LIMIT)
-        end
+        @groups = [{
+          heading: nil,
+          cards: years.map do |year|
+            { title: year,
+              users: StatsService.top_posters_for_year(year, BREAKDOWN_LIMIT) }
+          end
+        }]
       end
     end
   end
