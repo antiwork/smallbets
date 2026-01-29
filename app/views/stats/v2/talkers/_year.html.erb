@@ -1,0 +1,26 @@
+<div class="stats-grid margin-block">
+  <% @years.each do |year| %>
+    <div class="card grid-card">
+      <div class="card-header">
+        <h2 class="txt-h3 margin-none"><%= year %></h2>
+      </div>
+      <div class="card-body compact">
+        <div class="overflow-x-auto">
+          <table class="table full-width">
+            <tbody>
+              <% if @yearly_stats[year].present? %>
+                <% @yearly_stats[year].each_with_index do |user, index| %>
+                  <%= render "stats/v2/shared/user_row", user: user, rank: index + 1, from_path: from_path %>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="3" class="txt-center">No messages yet</td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

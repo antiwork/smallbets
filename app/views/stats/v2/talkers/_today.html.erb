@@ -1,0 +1,32 @@
+<% @sorted_months.each do |month_key| %>
+  <% year_num, month_num = month_key.split('-') %>
+  <% month_name = Date.new(year_num.to_i, month_num.to_i, 1).strftime("%B %Y") %>
+  <h2 class="section-heading"><%= month_name %></h2>
+  <div class="stats-grid margin-block" style="margin-bottom: 2rem;">
+    <% @days_by_month[month_key].sort.reverse.each do |day| %>
+      <% day_label = Date.parse(day).strftime("%A, %B %-d, %Y") %>
+      <div class="card grid-card">
+        <div class="card-header">
+          <h2 class="txt-h3 margin-none"><%= day_label %></h2>
+        </div>
+        <div class="card-body compact">
+          <div class="overflow-x-auto">
+            <table class="table full-width">
+              <tbody>
+                <% if @daily_stats[day].present? %>
+                  <% @daily_stats[day].each_with_index do |user, index| %>
+                    <%= render "stats/v2/shared/user_row", user: user, rank: index + 1, from_path: from_path %>
+                  <% end %>
+                <% else %>
+                  <tr>
+                    <td colspan="3" class="txt-center">No messages yet</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
