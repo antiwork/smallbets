@@ -22,8 +22,6 @@
 
 <% content_for :sidebar, sidebar_turbo_frame_tag(src: user_sidebar_path) %>
 
-<% from_path = stats_v2_talker_path(period: @period) %>
-
 <section class="full-width">
-  <%= render "stats/v2/talkers/#{@period == :all_time ? 'all_time' : 'breakdown'}", from_path: from_path %>
+  <%= render "stats/v2/talkers/#{@period == :all_time ? 'all_time' : 'breakdown'}", from_path: @from_path %>
 </section>

@@ -10,6 +10,8 @@ module Stats
         @period = validate_period
         return unless @period
 
+        @from_path = stats_v2_talker_path(period: @period)
+
         if @period == :all_time
           load_leaderboard
         else
