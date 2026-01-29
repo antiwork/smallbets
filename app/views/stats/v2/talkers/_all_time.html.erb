@@ -4,12 +4,6 @@
       <h2 class="txt-h3 margin-none"><%= period_title(@period) %></h2>
     </div>
     <div class="card-body compact">
-      <% if @current_user_rank && @current_user_rank > 100 %>
-        <div style="padding: 1rem; background: var(--color-bg-subtle); border-radius: 4px; margin-bottom: 1rem;">
-          <strong>Your rank:</strong> #<%= @current_user_rank %>
-        </div>
-      <% end %>
-
       <div class="overflow-x-auto">
         <table class="table full-width">
           <tbody>

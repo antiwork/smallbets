@@ -43,15 +43,6 @@ module Stats
         assert_select 'tr.current-user', count: 1
       end
 
-      test "show displays current user rank when outside top 100" do
-        # This test assumes the test database has fewer than 100 users with messages
-        # If current user is in top 100, they won't see the rank notice
-        get stats_v2_talker_path(period: :today)
-
-        assert_response :success
-        # Test passes if page renders (rank display is conditional)
-      end
-
       test "show redirects to dashboard with invalid period" do
         get stats_v2_talker_path(period: :invalid)
 
