@@ -373,6 +373,84 @@ module Stats
           refute Rails.cache.exist?("stats:room_top_posters:#{room1.id}:10")
           refute Rails.cache.exist?("stats:room_top_posters:#{room2.id}:10")
         end
+
+        # Talkers breakdown cache tests
+        test "fetch_talkers_breakdown caches results" do
+          room = rooms(:pets)
+          user = users(:jason)
+          3.times { |i| room.messages.create!(creator: user, body: "Test #{i}", client_message_id: SecureRandom.uuid) }
+
+          call_count = 0
+          fetch = -> {
+            StatsCache.fetch_talkers_breakdown(period: :year) do
+              call_count += 1
+              [{ heading: nil, cards: [{ title: "2026", users: StatsService.top_posters_for_year("2026", 10) }] }]
+            end
+          }
+
+          result1 = fetch.call
+          result2 = fetch.call
+
+          assert_equal 1, call_count, "Block should only be called once (second call should use cache)"
+          assert_equal result1.size, result2.size
+        end
+
+        test "fetch_talkers_breakdown deserializes users correctly" do
+          room = rooms(:pets)
+          user = users(:jason)
+          3.times { |i| room.messages.create!(creator: user, body: "Test #{i}", client_message_id: SecureRandom.uuid) }
+
+          result = StatsCache.fetch_talkers_breakdown(period: :year) do
+            [{ heading: nil, cards: [{ title: "2026", users: StatsService.top_posters_for_year("2026", 10) }] }]
+          end
+
+          card_users = result.first[:cards].first[:users]
+          assert card_users.any?, "Should have users"
+          card_users.each do |u|
+            assert_kind_of User, u
+            assert_respond_to u, :message_count
+          end
+        end
+
+        test "fetch_talkers_breakdown uses different cache keys per period" do
+          StatsCache.fetch_talkers_breakdown(period: :today) { [] }
+          StatsCache.fetch_talkers_breakdown(period: :month) { [] }
+
+          assert Rails.cache.exist?("stats:talkers_breakdown:today")
+          assert Rails.cache.exist?("stats:talkers_breakdown:month")
+        end
+
+        test "clear_talkers_breakdown removes cache for specific period" do
+          StatsCache.fetch_talkers_breakdown(period: :today) { [] }
+          StatsCache.fetch_talkers_breakdown(period: :month) { [] }
+
+          StatsCache.clear_talkers_breakdown(period: :today)
+
+          refute Rails.cache.exist?("stats:talkers_breakdown:today")
+          assert Rails.cache.exist?("stats:talkers_breakdown:month")
+        end
+
+        test "clear_talkers_breakdown without period removes all breakdown caches" do
+          StatsCache.fetch_talkers_breakdown(period: :today) { [] }
+          StatsCache.fetch_talkers_breakdown(period: :month) { [] }
+          StatsCache.fetch_talkers_breakdown(period: :year) { [] }
+
+          StatsCache.clear_talkers_breakdown
+
+          refute Rails.cache.exist?("stats:talkers_breakdown:today")
+          refute Rails.cache.exist?("stats:talkers_breakdown:month")
+          refute Rails.cache.exist?("stats:talkers_breakdown:year")
+        end
+
+        test "clear_all removes talkers breakdown cache" do
+          StatsCache.fetch_talkers_breakdown(period: :month) { [] }
+
+          assert Rails.cache.exist?("stats:talkers_breakdown:month")
+
+          StatsCache.clear_all
+
+          refute Rails.cache.exist?("stats:talkers_breakdown:month")
+        end
       end
     end
   end

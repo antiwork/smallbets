@@ -179,6 +179,46 @@ module Stats
             Rails.cache.delete_matched("#{CACHE_PREFIX}:user_stats:*")
           end
 
+          # Fetch talkers breakdown groups from cache or execute block
+          # @param period [Symbol] time period (:today, :month, :year)
+          # @yield block that returns groups array with :heading and :cards (each card has :title and :users)
+          # @return [Array<Hash>] groups with deserialized user objects
+          def fetch_talkers_breakdown(period:, &block)
+            cached_data = Rails.cache.fetch(
+              cache_key('talkers_breakdown', period),
+              expires_in: ttl_for_period(period)
+            ) do
+              groups = block.call
+              groups.map do |group|
+                {
+                  heading: group[:heading],
+                  cards: group[:cards].map do |card|
+                    { title: card[:title], users: serialize_users(card[:users]) }
+                  end
+                }
+              end
+            end
+
+            cached_data.map do |group|
+              {
+                heading: group[:heading],
+                cards: group[:cards].map do |card|
+                  { title: card[:title], users: deserialize_users(card[:users]) }
+                end
+              }
+            end
+          end
+
+          # Clear talkers breakdown cache
+          # @param period [Symbol, nil] specific period to clear, or nil for all
+          def clear_talkers_breakdown(period: nil)
+            if period
+              Rails.cache.delete(cache_key('talkers_breakdown', period))
+            else
+              Rails.cache.delete_matched("#{CACHE_PREFIX}:talkers_breakdown:*")
+            end
+          end
+
           private
 
           # Generic serializer for entities with message_count

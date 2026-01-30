@@ -43,15 +43,6 @@ module Stats
         assert_select 'tr.current-user', count: 1
       end
 
-      test "show displays current user rank when outside top 100" do
-        # This test assumes the test database has fewer than 100 users with messages
-        # If current user is in top 100, they won't see the rank notice
-        get stats_v2_talker_path(period: :today)
-
-        assert_response :success
-        # Test passes if page renders (rank display is conditional)
-      end
-
       test "show redirects to dashboard with invalid period" do
         get stats_v2_talker_path(period: :invalid)
 
@@ -73,20 +64,20 @@ module Stats
         assert_select 'a[href=?]', stats_v2_talker_path(period: :month)
       end
 
-      test "show displays correct period title" do
-        periods_and_titles = {
-          today: 'Today',
-          month: 'This Month',
-          year: 'This Year',
-          all_time: 'All Time'
-        }
-
-        periods_and_titles.each do |period, title|
+      test "show displays correct period title in header" do
+        [:today, :month, :year, :all_time].each do |period|
           get stats_v2_talker_path(period: period)
 
           assert_response :success
-          assert_select 'h2', text: title
+          assert_select 'h1', text: /Top Talkers/
         end
+      end
+
+      test "all_time show displays All Time card title" do
+        get stats_v2_talker_path(period: :all_time)
+
+        assert_response :success
+        assert_select 'h2', text: 'All Time'
       end
 
       test "show displays rank numbers" do
@@ -128,6 +119,83 @@ module Stats
         get stats_v2_talker_path(period: :today)
 
         assert_redirected_to new_session_path
+      end
+
+      # -- Breakdown card tests --
+
+      test "today period shows daily breakdown cards grouped by month" do
+        get stats_v2_talker_path(period: :today)
+
+        assert_response :success
+        # Should have section headings for months (e.g. "January 2026")
+        assert_select 'h2.section-heading', minimum: 1
+        # Should have grid cards for individual days
+        assert_select 'div.card.grid-card', minimum: 1
+      end
+
+      test "month period shows monthly breakdown cards grouped by year" do
+        get stats_v2_talker_path(period: :month)
+
+        assert_response :success
+        # Should have section headings for years
+        assert_select 'h2.section-heading', minimum: 1
+        # Should have grid cards for individual months
+        assert_select 'div.card.grid-card', minimum: 1
+      end
+
+      test "year period shows yearly breakdown cards" do
+        get stats_v2_talker_path(period: :year)
+
+        assert_response :success
+        # Should have grid cards for individual years
+        assert_select 'div.card.grid-card', minimum: 1
+      end
+
+      test "all_time period shows single leaderboard card" do
+        get stats_v2_talker_path(period: :all_time)
+
+        assert_response :success
+        # Should NOT have grid cards (single leaderboard, not breakdown)
+        assert_select 'div.card.grid-card', count: 0
+        # Should have a single card with table
+        assert_select 'div.card', minimum: 1
+        assert_select 'table.table', count: 1
+      end
+
+      test "breakdown cards use shared user_row partial with from_path" do
+        room = rooms(:hq)
+        3.times { |i| room.messages.create!(creator: @user, body: "Test #{i}", client_message_id: SecureRandom.uuid) }
+
+        get stats_v2_talker_path(period: :month)
+
+        assert_response :success
+        # The user_row partial links with data-turbo-frame="_top" and from param
+        assert_select 'a[data-turbo-frame="_top"]', minimum: 1
+      end
+
+      test "today breakdown only loads current and previous month" do
+        room = rooms(:hq)
+        # Create a message 3 months ago — should NOT appear
+        room.messages.create!(creator: @user, body: "Old message", client_message_id: SecureRandom.uuid, created_at: 3.months.ago)
+
+        get stats_v2_talker_path(period: :today)
+
+        assert_response :success
+        old_month = 3.months.ago.utc.strftime("%B %Y")
+        # The old month should not appear as a section heading
+        assert_select 'h2.section-heading', text: old_month, count: 0
+      end
+
+      test "year breakdown shows users in each year card" do
+        room = rooms(:hq)
+        3.times { |i| room.messages.create!(creator: @user, body: "Test #{i}", client_message_id: SecureRandom.uuid) }
+
+        get stats_v2_talker_path(period: :year)
+
+        assert_response :success
+        assert_select 'div.card.grid-card' do
+          assert_select 'table tbody tr', minimum: 1
+        end
       end
     end
   end
