@@ -1,12 +1,14 @@
 <% join_url = join_now_path %>
 <div class="min-h-screen bg-cod-50 overflow-x-hidden">
 
-  <%= link_to join_url, id: "marketing-event-banner", class: "marketing-event-banner" do %>
-    <span class="marketing-event-banner__label">CYBER WEEK Deal: 60% Off</span>
-    <span class="marketing-event-banner__divider" aria-hidden="true">•</span>
-    <span class="marketing-event-banner__message">
-      Get access to all live events, all recordings, and our support network of <%= number_with_delimiter(@user_count) %> members.
-    </span>
+  <% if false # Hidden promo banner — set to true to re-enable %>
+    <%= link_to join_url, id: "marketing-event-banner", class: "marketing-event-banner" do %>
+      <span class="marketing-event-banner__label">CYBER WEEK Deal: 60% Off</span>
+      <span class="marketing-event-banner__divider" aria-hidden="true">•</span>
+      <span class="marketing-event-banner__message">
+        Get access to all live events, all recordings, and our support network of <%= number_with_delimiter(@user_count) %> members.
+      </span>
+    <% end %>
   <% end %>
 
   <!-- Header Section -->
