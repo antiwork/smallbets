@@ -195,7 +195,7 @@ module Stats
 
         assert_response :success
         assert_select '#load-more-months', count: 1
-        assert_select '#load-more-months a', text: "Load more"
+        assert_select '#load-more-months a', text: "Load previous month"
       end
 
       test "today breakdown hides load more when no previous months" do
@@ -232,7 +232,7 @@ module Stats
         get stats_v2_talker_daily_month_path(month: month, format: :turbo_stream)
 
         assert_response :success
-        assert_includes response.body, "Load more"
+        assert_includes response.body, "Load previous month"
       end
 
       test "daily_month endpoint removes load more when no earlier months" do
@@ -243,7 +243,7 @@ module Stats
         assert_response :success
         assert_includes response.body, "remove"
         assert_includes response.body, "load-more-months"
-        assert_not_includes response.body, "Load more"
+        assert_not_includes response.body, "Load previous month"
       end
 
       test "daily_month requires authentication" do

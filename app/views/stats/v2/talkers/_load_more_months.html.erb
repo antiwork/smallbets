@@ -1,7 +1,10 @@
 <div id="load-more-months" style="text-align: center; margin: 1rem 0;" data-controller="load-more">
   <div data-load-more-target="link">
-    <%= link_to "Load more", stats_v2_talker_daily_month_path(month: previous_month),
-          data: { turbo_stream: true, action: "click->load-more#load" } %>
+    <%= link_to stats_v2_talker_daily_month_path(month: previous_month),
+          class: "btn", data: { turbo_stream: true, action: "click->load-more#load" } do %>
+      <span>Load previous month</span>
+      <%= image_tag("arrow-down.svg", aria: { hidden: "true" }, size: 20) %>
+    <% end %>
   </div>
   <div data-load-more-target="loading" hidden>
     <%= render "stats/v2/shared/loading" %>

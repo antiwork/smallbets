@@ -222,7 +222,7 @@
       color: var(--lch-black);
     }
     
-    .full-width a:hover {
+    .full-width a:hover:not(.btn) {
       text-decoration: underline;
     }
   }
