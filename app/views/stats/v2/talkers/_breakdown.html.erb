@@ -1,5 +1,7 @@
-<% @groups.each do |group| %>
-  <%= render "stats/v2/talkers/month_group", group: group, from_path: from_path %>
+<%= tag.div id: ("daily-months" if @period == :today) do %>
+  <% @groups.each do |group| %>
+    <%= render "stats/v2/talkers/month_group", group: group, from_path: from_path %>
+  <% end %>
 <% end %>
 
 <% if @previous_month.present? %>

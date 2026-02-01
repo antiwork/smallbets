@@ -1,0 +1,13 @@
+<% if @group %>
+  <%= turbo_stream.append "daily-months" do %>
+    <%= render "stats/v2/talkers/month_group", group: @group, from_path: @from_path %>
+  <% end %>
+<% end %>
+
+<% if @previous_month.present? %>
+  <%= turbo_stream.replace "load-more-months" do %>
+    <%= render "stats/v2/talkers/load_more_months", previous_month: @previous_month %>
+  <% end %>
+<% else %>
+  <%= turbo_stream.remove "load-more-months" %>
+<% end %>

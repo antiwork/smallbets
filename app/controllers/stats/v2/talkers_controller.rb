@@ -27,7 +27,9 @@ module Stats
         @group = load_month_group(month)
         @previous_month = previous_month_before(month)
 
-        render partial: "stats/v2/talkers/daily_month", layout: false
+        respond_to do |format|
+          format.turbo_stream
+        end
       end
 
       private

@@ -186,7 +186,7 @@ module Stats
         assert_select 'h2.section-heading', text: last_month, count: 0
       end
 
-      test "today breakdown shows load more frame when previous months exist" do
+      test "today breakdown shows load more when previous months exist" do
         room = rooms(:hq)
         room.messages.create!(creator: @user, body: "This month", client_message_id: SecureRandom.uuid)
         room.messages.create!(creator: @user, body: "Last month", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
@@ -194,11 +194,11 @@ module Stats
         get stats_v2_talker_path(period: :today)
 
         assert_response :success
-        assert_select 'turbo-frame#load_more_months', count: 1
-        assert_select 'turbo-frame#load_more_months a', text: "Load more"
+        assert_select '#load-more-months', count: 1
+        assert_select '#load-more-months a', text: "Load more"
       end
 
-      test "today breakdown hides load more frame when no previous months" do
+      test "today breakdown hides load more when no previous months" do
         # Only messages this month — no previous month to load
         room = rooms(:hq)
         room.messages.create!(creator: @user, body: "This month", client_message_id: SecureRandom.uuid)
@@ -207,47 +207,49 @@ module Stats
         get stats_v2_talker_path(period: :today)
 
         assert_response :success
-        assert_select 'turbo-frame#load_more_months', count: 0
+        assert_select '#load-more-months', count: 0
       end
 
-      test "daily_month endpoint renders successfully" do
+      test "daily_month endpoint renders turbo stream with month content" do
         room = rooms(:hq)
         month = 1.month.ago.utc.strftime("%Y-%m")
         room.messages.create!(creator: @user, body: "Test", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
 
-        get stats_v2_talker_daily_month_path(month: month)
+        get stats_v2_talker_daily_month_path(month: month, format: :turbo_stream)
 
         assert_response :success
-        assert_select 'turbo-frame#load_more_months', count: 1
-      end
-
-      test "daily_month endpoint renders the month heading and cards" do
-        room = rooms(:hq)
-        month = 1.month.ago.utc.strftime("%Y-%m")
-        room.messages.create!(creator: @user, body: "Test", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
-
-        get stats_v2_talker_daily_month_path(month: month)
-
-        assert_response :success
+        assert_includes response.body, "daily-months"
         expected_heading = Date.parse("#{month}-01").strftime("%B %Y")
-        assert_select 'h2.section-heading', text: expected_heading
-        assert_select 'div.card.grid-card', minimum: 1
+        assert_includes response.body, expected_heading
       end
 
-      test "daily_month endpoint has no load more when no earlier months" do
-        # Request the earliest month that has data — there should be nothing before it
+      test "daily_month endpoint includes load more when earlier months exist" do
+        room = rooms(:hq)
+        room.messages.create!(creator: @user, body: "Old", client_message_id: SecureRandom.uuid, created_at: 2.months.ago)
+        month = 1.month.ago.utc.strftime("%Y-%m")
+        room.messages.create!(creator: @user, body: "Test", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
+
+        get stats_v2_talker_daily_month_path(month: month, format: :turbo_stream)
+
+        assert_response :success
+        assert_includes response.body, "Load more"
+      end
+
+      test "daily_month endpoint removes load more when no earlier months" do
         earliest_month = Message.minimum("strftime('%Y-%m', created_at)")
 
-        get stats_v2_talker_daily_month_path(month: earliest_month)
+        get stats_v2_talker_daily_month_path(month: earliest_month, format: :turbo_stream)
 
         assert_response :success
-        assert_select 'turbo-frame#load_more_months a', text: "Load more", count: 0
+        assert_includes response.body, "remove"
+        assert_includes response.body, "load-more-months"
+        assert_not_includes response.body, "Load more"
       end
 
       test "daily_month requires authentication" do
         reset!
 
-        get stats_v2_talker_daily_month_path(month: "2026-01")
+        get stats_v2_talker_daily_month_path(month: "2026-01", format: :turbo_stream)
 
         assert_redirected_to new_session_path
       end
@@ -257,7 +259,7 @@ module Stats
           get stats_v2_talker_path(period: period)
 
           assert_response :success
-          assert_select 'turbo-frame#load_more_months', count: 0
+          assert_select '#load-more-months', count: 0
         end
       end
 

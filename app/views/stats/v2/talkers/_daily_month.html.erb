@@ -1,9 +1,0 @@
-<%= turbo_frame_tag :load_more_months do %>
-  <% if @group %>
-    <%= render "stats/v2/talkers/month_group", group: @group, from_path: @from_path %>
-  <% end %>
-
-  <% if @previous_month.present? %>
-    <%= render "stats/v2/talkers/load_more_months", previous_month: @previous_month %>
-  <% end %>
-<% end %>
