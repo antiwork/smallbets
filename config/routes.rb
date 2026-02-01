@@ -216,6 +216,7 @@ Rails.application.routes.draw do
     namespace :v2 do
       root to: 'dashboard#index', as: :root
       get '/dashboard', to: 'dashboard#index', as: :dashboard
+      get '/talkers/today/months/:month', to: 'talkers#daily_month', as: :talker_daily_month
       get '/talkers/:period', to: 'talkers#show', as: :talker
 
       # Card endpoints for turbo frame lazy loading

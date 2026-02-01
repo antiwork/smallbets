@@ -1,31 +1,7 @@
 <% @groups.each do |group| %>
-  <% if group[:heading] %>
-    <h2 class="section-heading"><%= group[:heading] %></h2>
-  <% end %>
-  <div class="stats-grid margin-block" style="margin-bottom: 2rem;">
-    <% group[:cards].each do |card| %>
-      <div class="card grid-card">
-        <div class="card-header">
-          <h2 class="txt-h3 margin-none"><%= card[:title] %></h2>
-        </div>
-        <div class="card-body compact">
-          <div class="overflow-x-auto">
-            <table class="table full-width">
-              <tbody>
-                <% if card[:users].present? %>
-                  <% card[:users].each_with_index do |user, index| %>
-                    <%= render "stats/v2/shared/user_row", user: user, rank: index + 1, from_path: from_path %>
-                  <% end %>
-                <% else %>
-                  <tr>
-                    <td colspan="3" class="txt-center">No messages yet</td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    <% end %>
-  </div>
+  <%= render "stats/v2/talkers/month_group", group: group, from_path: from_path %>
+<% end %>
+
+<% if @previous_month.present? %>
+  <%= render "stats/v2/talkers/load_more_months", previous_month: @previous_month %>
 <% end %>

@@ -1,0 +1,5 @@
+<%= turbo_frame_tag :load_more_months do %>
+  <div style="text-align: center; margin: 1rem 0;">
+    <%= link_to "Load more", stats_v2_talker_daily_month_path(month: previous_month), data: { turbo_frame: :load_more_months } %>
+  </div>
+<% end %>
