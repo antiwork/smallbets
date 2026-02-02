@@ -19,6 +19,19 @@ module Stats
         end
       end
 
+      def daily_month
+        @period = :today
+        @from_path = stats_v2_talker_path(period: @period)
+        month = params[:month]
+
+        @group = load_month_group(month)
+        @previous_month = previous_month_before(month)
+
+        respond_to do |format|
+          format.turbo_stream
+        end
+      end
+
       private
 
       def validate_period
@@ -48,30 +61,36 @@ module Stats
       end
 
       def load_daily_breakdown
-        @groups = Cache::StatsCache.fetch_talkers_breakdown(period: :today) do
-          # Only load the current and previous month (matching legacy behavior
-          # which lazy-loads one month at a time via infinite scroll)
-          current_month = Time.now.utc.strftime("%Y-%m")
-          previous_month = 1.month.ago.utc.strftime("%Y-%m")
+        latest_month = Message.maximum("strftime('%Y-%m', created_at)")
+        return @groups = [] unless latest_month
 
+        @groups = [load_month_group(latest_month)].compact
+        @previous_month = previous_month_before(latest_month)
+      end
+
+      def load_month_group(month)
+        Cache::StatsCache.fetch_talkers_breakdown(period: "today:#{month}") do
           days = Message.select("strftime('%Y-%m-%d', created_at) as date")
-                        .where("strftime('%Y-%m', created_at) IN (?, ?)", current_month, previous_month)
+                        .where("strftime('%Y-%m', created_at) = ?", month)
                         .group("date")
                         .order("date DESC")
                         .map(&:date)
 
-          days_by_month = days.group_by { |day| day[0..6] }
+          next [] if days.empty?
 
-          days_by_month.keys.sort.reverse.map do |month_key|
-            {
-              heading: Date.parse("#{month_key}-01").strftime("%B %Y"),
-              cards: days_by_month[month_key].sort.reverse.map do |day|
-                { title: Date.parse(day).strftime("%A, %B %-d, %Y"),
-                  users: StatsService.top_posters_for_day(day, BREAKDOWN_LIMIT) }
-              end
-            }
-          end
-        end
+          [{
+            heading: Date.parse("#{month}-01").strftime("%B %Y"),
+            cards: days.sort.reverse.map do |day|
+              { title: Date.parse(day).strftime("%A, %B %-d, %Y"),
+                users: StatsService.top_posters_for_day(day, BREAKDOWN_LIMIT) }
+            end
+          }]
+        end.first
+      end
+
+      def previous_month_before(month)
+        Message.where("strftime('%Y-%m', created_at) < ?", month)
+               .maximum("strftime('%Y-%m', created_at)")
       end
 
       def load_monthly_breakdown

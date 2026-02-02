@@ -173,17 +173,94 @@ module Stats
         assert_select 'a[data-turbo-frame="_top"]', minimum: 1
       end
 
-      test "today breakdown only loads current and previous month" do
+      test "today breakdown only loads current month initially" do
         room = rooms(:hq)
-        # Create a message 3 months ago — should NOT appear
-        room.messages.create!(creator: @user, body: "Old message", client_message_id: SecureRandom.uuid, created_at: 3.months.ago)
+        # Create a message last month — should NOT appear on initial load
+        room.messages.create!(creator: @user, body: "Last month message", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
 
         get stats_v2_talker_path(period: :today)
 
         assert_response :success
-        old_month = 3.months.ago.utc.strftime("%B %Y")
-        # The old month should not appear as a section heading
-        assert_select 'h2.section-heading', text: old_month, count: 0
+        last_month = 1.month.ago.utc.strftime("%B %Y")
+        # The previous month should not appear as a section heading (only via load more)
+        assert_select 'h2.section-heading', text: last_month, count: 0
+      end
+
+      test "today breakdown shows load more when previous months exist" do
+        room = rooms(:hq)
+        room.messages.create!(creator: @user, body: "This month", client_message_id: SecureRandom.uuid)
+        room.messages.create!(creator: @user, body: "Last month", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
+
+        get stats_v2_talker_path(period: :today)
+
+        assert_response :success
+        assert_select '#load-more-months', count: 1
+        assert_select '#load-more-months a', text: "Load previous month"
+      end
+
+      test "today breakdown hides load more when no previous months" do
+        # Only messages this month — no previous month to load
+        room = rooms(:hq)
+        room.messages.create!(creator: @user, body: "This month", client_message_id: SecureRandom.uuid)
+        Message.where("created_at < ?", Time.now.utc.beginning_of_month).delete_all
+
+        get stats_v2_talker_path(period: :today)
+
+        assert_response :success
+        assert_select '#load-more-months', count: 0
+      end
+
+      test "daily_month endpoint renders turbo stream with month content" do
+        room = rooms(:hq)
+        month = 1.month.ago.utc.strftime("%Y-%m")
+        room.messages.create!(creator: @user, body: "Test", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
+
+        get stats_v2_talker_daily_month_path(month: month, format: :turbo_stream)
+
+        assert_response :success
+        assert_includes response.body, "daily-months"
+        expected_heading = Date.parse("#{month}-01").strftime("%B %Y")
+        assert_includes response.body, expected_heading
+      end
+
+      test "daily_month endpoint includes load more when earlier months exist" do
+        room = rooms(:hq)
+        room.messages.create!(creator: @user, body: "Old", client_message_id: SecureRandom.uuid, created_at: 2.months.ago)
+        month = 1.month.ago.utc.strftime("%Y-%m")
+        room.messages.create!(creator: @user, body: "Test", client_message_id: SecureRandom.uuid, created_at: 1.month.ago)
+
+        get stats_v2_talker_daily_month_path(month: month, format: :turbo_stream)
+
+        assert_response :success
+        assert_includes response.body, "Load previous month"
+      end
+
+      test "daily_month endpoint removes load more when no earlier months" do
+        earliest_month = Message.minimum("strftime('%Y-%m', created_at)")
+
+        get stats_v2_talker_daily_month_path(month: earliest_month, format: :turbo_stream)
+
+        assert_response :success
+        assert_includes response.body, "remove"
+        assert_includes response.body, "load-more-months"
+        assert_not_includes response.body, "Load previous month"
+      end
+
+      test "daily_month requires authentication" do
+        reset!
+
+        get stats_v2_talker_daily_month_path(month: "2026-01", format: :turbo_stream)
+
+        assert_redirected_to new_session_path
+      end
+
+      test "month and year periods do not show load more frame" do
+        [:month, :year].each do |period|
+          get stats_v2_talker_path(period: period)
+
+          assert_response :success
+          assert_select '#load-more-months', count: 0
+        end
       end
 
       test "year breakdown shows users in each year card" do
