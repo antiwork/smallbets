@@ -2,7 +2,14 @@
 
 # Make sure it matches the Ruby version in .ruby-version and Gemfile
 ARG RUBY_VERSION=3.3.1
-FROM ruby:$RUBY_VERSION-slim as base
+FROM ruby:$RUBY_VERSION-slim AS base
+
+# Configure trusted repositories and clean apt cache
+RUN rm -rf /etc/apt/sources.list.d/* && \
+    echo "deb [trusted=yes] http://deb.debian.org/debian bookworm main" > /etc/apt/sources.list && \
+    echo "deb [trusted=yes] http://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list && \
+    echo "deb [trusted=yes] http://deb.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list && \
+    apt-get clean && rm -rf /var/cache/apt/archives/*
 
 # Rails app lives here
 WORKDIR /rails
@@ -14,11 +21,13 @@ ENV RAILS_ENV="production" \
     BUNDLE_WITHOUT="development"
 
 # Throw-away build stage to reduce size of final image
-FROM --platform=$TARGETPLATFORM base as build
+FROM base AS build
 
 # Install packages need to build gems and Node.js for Vite
 RUN apt-get update -qq && \
-    apt-get install -y build-essential git pkg-config nodejs npm
+    apt-get install -y build-essential git pkg-config curl && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -70,4 +79,4 @@ HEALTHCHECK --interval=5s --timeout=3s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3000/up || exit 1
 
 # Start the server by default, this can be overwritten at runtime
-CMD service cron start && bin/configure && bin/boot
+CMD ["sh", "-c", "service cron start && bin/configure && bin/boot"]
