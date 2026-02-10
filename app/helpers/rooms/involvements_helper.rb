@@ -26,10 +26,10 @@ module Rooms::InvolvementsHelper
     def next_involvement_for(room, involvement:, from_sidebar: false)
       if room.direct?
         DIRECT_INVOLVEMENT_ORDER[DIRECT_INVOLVEMENT_ORDER.index(involvement) + 1] || DIRECT_INVOLVEMENT_ORDER.first
-      elsif from_sidebar
-        SHARED_SIDEBAR_INVOLVEMENT_ORDER[(SHARED_SIDEBAR_INVOLVEMENT_ORDER.index(involvement) || 0) + 1] || SHARED_SIDEBAR_INVOLVEMENT_ORDER.first
       else
-        SHARED_INVOLVEMENT_ORDER[SHARED_INVOLVEMENT_ORDER.index(involvement) + 1] || SHARED_INVOLVEMENT_ORDER.first
+        # Use the same involvement order for both sidebar and room view
+        # to prevent accidentally hiding rooms by cycling to "invisible"
+        SHARED_SIDEBAR_INVOLVEMENT_ORDER[(SHARED_SIDEBAR_INVOLVEMENT_ORDER.index(involvement) || 0) + 1] || SHARED_SIDEBAR_INVOLVEMENT_ORDER.first
       end
     end
 end
