@@ -544,25 +544,30 @@
         
         <!-- Graph visualization -->
         <div class="margin-top">
+          <div class="flex justify-content-end" style="margin-bottom: 8px; gap: 6px;">
+            <%= form_with url: stats_path, method: :get, local: true do |f| %>
+              <label class="txt-small txt-faded" for="range">Range:</label>
+              <select name="range" id="range" onchange="this.form.submit()">
+                <option value="90" <%= 'selected' if @range == '90' %>>Last 90</option>
+                <option value="365" <%= 'selected' if @range == '365' %>>Last 365</option>
+                <option value="all" <%= 'selected' if @range == 'all' %>>All</option>
+              </select>
+            <% end %>
+          </div>
           <div style="height: 300px;">
             <%
-              # Use all-time stats
-              max_count = @all_time_stats.map(&:count).max
-              total_days = @all_time_stats.length
+              max_count = @chart_stats.map(&:count).max
+              total_days = @chart_stats.length
               
-              # Fixed dimensions
               graph_height = 240
               left_margin = 8
               right_margin = 2
               bottom_margin = 25
               
-              # Calculate bar width and spacing
               available_width = 100 - left_margin - right_margin
               min_bar_width = 0.15
               bar_spacing = 0.05
               bar_width = [(available_width - (total_days * bar_spacing)) / total_days, min_bar_width].max
-              
-              # Show fewer labels for readability
               label_interval = (total_days / 6.0).ceil
             %>
 
@@ -634,7 +639,7 @@
               />
 
               <!-- Bars -->
-              <% @all_time_stats.each_with_index do |stat, index| %>
+              <% @chart_stats.each_with_index do |stat, index| %>
                 <% 
                   bar_height = (stat.count.to_f / max_count * (graph_height - bottom_margin - 10)).round
                   x_pos = left_margin + (index * (bar_width + bar_spacing))

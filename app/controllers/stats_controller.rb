@@ -124,7 +124,44 @@ class StatsController < ApplicationController
 
     # Get daily and all-time stats
     @daily_stats = StatsService.daily_stats
-    @all_time_stats = StatsService.all_time_daily_stats
+    full_series = StatsService.all_time_daily_stats
+
+    @range = params[:range].to_s
+    @range = "all" unless ["90", "365", "all"].include?(@range)
+
+    series_for_range = case @range
+    when "90"
+      full_series.last(90)
+    when "365"
+      full_series.last(365)
+    else
+      full_series
+    end
+
+    left_margin = 8
+    right_margin = 2
+    available_width = 100 - left_margin - right_margin
+    min_bar_width = 0.15
+    bar_spacing = 0.05
+    max_bars = (available_width / (min_bar_width + bar_spacing)).floor
+
+    if series_for_range.length <= max_bars
+      @chart_stats = series_for_range
+    else
+      bin_size = (series_for_range.length.to_f / max_bars).ceil
+      @chart_stats = []
+      
+      series_for_range.each_slice(bin_size) do |bin|
+        if bin.length == 1
+          @chart_stats << bin.first
+        else
+          total_count = bin.sum(&:count)
+          last_date = bin.last.date
+          @chart_stats << OpenStruct.new(date: last_date, count: total_count)
+        end
+      end
+    end
+    @all_time_stats = full_series
 
     # Get top posters for different time periods
     @top_posters_today = StatsService.top_posters_today
