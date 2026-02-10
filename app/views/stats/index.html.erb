@@ -546,9 +546,10 @@
         <div class="margin-top">
           <div style="height: 300px;">
             <%
-              # Use all-time stats
-              max_count = @all_time_stats.map(&:count).max
-              total_days = @all_time_stats.length
+              # Use last 6 months of stats to keep the chart readable and fitting width
+              chart_stats = @all_time_stats.last(185) 
+              max_count = chart_stats.map(&:count).max
+              total_days = chart_stats.length
               
               # Fixed dimensions
               graph_height = 240
@@ -634,7 +635,7 @@
               />
 
               <!-- Bars -->
-              <% @all_time_stats.each_with_index do |stat, index| %>
+              <% chart_stats.each_with_index do |stat, index| %>
                 <% 
                   bar_height = (stat.count.to_f / max_count * (graph_height - bottom_margin - 10)).round
                   x_pos = left_margin + (index * (bar_width + bar_spacing))
