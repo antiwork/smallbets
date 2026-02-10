@@ -98,10 +98,6 @@ legend {
   text-align: center;
 }
 
-.membership-item:has(.btn.invisible) {
-  opacity: 0.5;
-}
-
 /* Dialogs */
 .dialog {
   --width: 50ch;
