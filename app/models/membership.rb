@@ -4,6 +4,10 @@ class Membership < ApplicationRecord
   belongs_to :room
   belongs_to :user
 
+  def self.broadcast_involvement_to(user_id:, room_id:, involvement:)
+    ActionCable.server.broadcast "user_#{user_id}_involvements", { roomId: room_id, involvement: involvement }
+  end
+
   has_many :unread_notifications, ->(membership) {
     scope = since(membership.unread_at || Time.current)
 
@@ -50,6 +54,7 @@ class Membership < ApplicationRecord
   }
 
   after_update_commit { user.reset_remote_connections if deactivated? }
+  after_update_commit :promote_thread_memberships, if: :starred_parent_room?
   after_destroy_commit { user.reset_remote_connections }
 
   enum involvement: %w[ invisible nothing mentions everything ].index_by(&:itself), _prefix: :involved_in
@@ -123,6 +128,25 @@ class Membership < ApplicationRecord
   end
 
   private
+
+  def starred_parent_room?
+    saved_change_to_involvement? && involved_in_everything? && !room.thread?
+  end
+
+  def promote_thread_memberships
+    thread_ids = []
+    ApplicationRecord.transaction do
+      room.threads.find_each do |thread|
+        updated = thread.memberships.where(user_id: user_id, involvement: "invisible")
+                                     .update_all(involvement: "mentions", updated_at: Time.current)
+        thread_ids << thread.id if updated.positive?
+      end
+    end
+    # Manual broadcast since update_all bypasses callbacks
+    thread_ids.each do |tid|
+      Membership.broadcast_involvement_to(user_id: user_id, room_id: tid, involvement: "mentions")
+    end
+  end
 
   def broadcast_read
     ActionCable.server.broadcast "user_#{user_id}_reads", { room_id: room_id }

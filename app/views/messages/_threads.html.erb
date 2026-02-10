@@ -12,7 +12,7 @@
     <% ordered_participants = participant_users.map { |id| participants[id] }.compact %>
     <% reply_count = thread.messages_count || thread.messages.active.count %>
 
-    <%= link_to room_path(thread), class: "thread__link flex-inline align-center gap", data: { turbo_frame: "_top", updated_at: thread.last_active_at.iso8601 } do %>
+    <%= link_to room_path(thread), class: "thread__link flex-inline align-center gap", data: { turbo_frame: "_top", updated_at: thread.last_active_at.iso8601, unread: thread.unread_for?(Current.user) } do %>
       <div class="thread__avatars flex-inline gap">
         <% ordered_participants.each do |user| %>
           <figure class="avatar thread__avatar flex-item-no-shrink" data-stop-propagation="true">
