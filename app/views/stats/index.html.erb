@@ -556,11 +556,26 @@
               right_margin = 2
               bottom_margin = 25
               
-              # Calculate bar width and spacing
+              # Calculate bar width and spacing that actually fits
               available_width = 100 - left_margin - right_margin
-              min_bar_width = 0.15
-              bar_spacing = 0.05
-              bar_width = [(available_width - (total_days * bar_spacing)) / total_days, min_bar_width].max
+              target_bar_width = available_width / total_days.to_f
+              min_bar_width = 0.1  # Minimum visible bar width
+              max_bar_spacing = 0.05  # Maximum spacing when there's room
+
+              if target_bar_width >= min_bar_width + max_bar_spacing
+                # Plenty of room - use max spacing
+                bar_spacing = max_bar_spacing
+                bar_width = target_bar_width - bar_spacing
+              else
+                # Tight on space - eliminate spacing and use minimum width
+                bar_spacing = 0
+                bar_width = [target_bar_width, min_bar_width].max
+
+                # If still can't fit, scale everything down proportionally
+                if bar_width * total_days > available_width
+                  bar_width = available_width / total_days.to_f
+                end
+              end
               
               # Show fewer labels for readability
               label_interval = (total_days / 6.0).ceil
