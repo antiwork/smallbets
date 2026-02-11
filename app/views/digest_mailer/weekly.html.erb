@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: sans-serif; color: #333; line-height: 1.5; }
+      .topic { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #eee; }
+      .topic:last-child { border-bottom: none; }
+      .topic-title { font-size: 16px; font-weight: bold; }
+      .topic-summary { color: #666; font-size: 14px; margin-top: 4px; }
+      .topic-meta { color: #999; font-size: 12px; margin-top: 4px; }
+      .topic-position { color: #999; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <p>Hi <%= @user.name %>,</p>
+    <p>Here are the top topics from the past week:</p>
+
+    <% @rooms.each_with_index do |room, index| %>
+      <div class="topic">
+        <span class="topic-position">#<%= index + 1 %></span>
+        <% feed_card = room.automated_feed_card %>
+        <% source = room.source_room || room %>
+        <%= link_to room_url(room), class: "topic-title" do %>
+          <%= feed_card&.title || room.name %>
+        <% end %>
+        <% if feed_card&.summary.present? %>
+          <p class="topic-summary"><%= feed_card.summary %></p>
+        <% end %>
+        <p class="topic-meta">
+          in <%= strip_emoji_from_name(source.name) || source.name %>
+        </p>
+      </div>
+    <% end %>
+
+    <p>
+      <br/>
+      <small>
+        --
+        <br/>
+        To opt out of these emails, click <%= link_to "here", mailkick_unsubscribe_url(@user, "weekly_digest") %>.
+      </small>
+    </p>
+  </body>
+</html>

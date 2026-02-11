@@ -93,8 +93,27 @@ module HomeFeed
     
     test "new limits results correctly" do
       result = Ranker.new(limit: 2)
-      
+
       assert_equal 2, result.length
+    end
+
+    test "top filters by since parameter" do
+      @card2.update!(created_at: 2.weeks.ago)
+
+      result = Ranker.top(limit: 10, since: 1.week.ago)
+
+      room_ids = result.map(&:room_id)
+      assert_includes room_ids, @room1.id
+      assert_includes room_ids, @room3.id
+      assert_not_includes room_ids, @room2.id
+    end
+
+    test "top excludes rooms by exclude_room_ids" do
+      result = Ranker.top(limit: 10, exclude_room_ids: [@room1.id])
+
+      room_ids = result.map(&:room_id)
+      assert_not_includes room_ids, @room1.id
+      assert_includes room_ids, @room2.id
     end
   end
 end

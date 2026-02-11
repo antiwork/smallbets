@@ -16,6 +16,11 @@ Rails.application.config.after_initialize do
       AutomatedFeed::ScheduledScanJob.perform_later
     end
 
+    # Weekly email digest - Monday 9 AM Pacific
+    $rufus_scheduler.cron "0 9 * * 1 America/Los_Angeles" do
+      WeeklyDigestJob.new.perform
+    end
+
     # Stats V2 cache refresh - every 5 minutes
     $rufus_scheduler.every "5m" do
       Stats::V2::RefreshCacheJob.perform_later

@@ -1,0 +1,6 @@
+<%= turbo_frame_tag :weekly_digest do %>
+  <%= button_to email_subscription_path(list: "weekly_digest"), method: :put, role: "checkbox", class: "btn #{"btn--reversed" if Current.user.subscribed?("weekly_digest")}" do %>
+    <%= image_tag(Current.user.subscribed?("weekly_digest") ? "check.svg" : "minus.svg", aria: { hidden: "true" }, size: 12) %>
+    <%= tag.span("Toggle weekly digest", class: "for-screen-reader", id: :weekly_digest) %>
+  <% end %>
+<% end %>

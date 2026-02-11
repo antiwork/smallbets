@@ -2,9 +2,9 @@ module HomeFeed
   class Ranker
     Result = Struct.new(:top, :new, :metrics, keyword_init: true)
 
-    def self.all(limit: 50, offset: 0)
+    def self.all(limit: 50, offset: 0, since: nil, exclude_room_ids: nil)
       fetch_limit = (limit + offset) * 2
-      cards = load_base_cards(fetch_limit)
+      cards = load_base_cards(fetch_limit, since: since, exclude_room_ids: exclude_room_ids)
       return Result.new(top: [], new: [], metrics: {}) if cards.empty?
 
       room_ids = cards.map(&:room_id)
@@ -18,9 +18,9 @@ module HomeFeed
       )
     end
 
-    def self.top(limit: 50, offset: 0)
+    def self.top(limit: 50, offset: 0, since: nil, exclude_room_ids: nil)
       fetch_limit = (limit + offset) * 2
-      cards = load_base_cards(fetch_limit)
+      cards = load_base_cards(fetch_limit, since: since, exclude_room_ids: exclude_room_ids)
       return [] if cards.empty?
 
       room_ids = cards.map(&:room_id)
@@ -30,9 +30,9 @@ module HomeFeed
       rank_by_score(cards, metrics, earliest_times, limit, offset)
     end
 
-    def self.new(limit: 50, offset: 0)
+    def self.new(limit: 50, offset: 0, since: nil, exclude_room_ids: nil)
       fetch_limit = (limit + offset) * 2
-      cards = load_base_cards(fetch_limit)
+      cards = load_base_cards(fetch_limit, since: since, exclude_room_ids: exclude_room_ids)
       return [] if cards.empty?
 
       room_ids = cards.map(&:room_id)
@@ -41,10 +41,14 @@ module HomeFeed
       rank_by_recency(cards, earliest_times, limit, offset)
     end
 
-    def self.load_base_cards(limit)
-      AutomatedFeedCard.includes(room: :source_room)
-                       .order(created_at: :desc)
-                       .limit(limit)
+    def self.load_base_cards(limit, since: nil, exclude_room_ids: nil)
+      scope = AutomatedFeedCard.includes(room: :source_room)
+                               .order(created_at: :desc)
+
+      scope = scope.where("feed_cards.created_at >= ?", since) if since
+      scope = scope.where.not(room_id: exclude_room_ids) if exclude_room_ids.present?
+
+      scope.limit(limit)
     end
 
     def self.rank_by_score(cards, metrics, earliest_times, limit, offset = 0)

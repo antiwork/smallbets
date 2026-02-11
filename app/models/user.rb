@@ -3,6 +3,7 @@ class User < ApplicationRecord
 
   has_subscriptions
   after_create_commit :subscribe_to_emails
+  after_create_commit :subscribe_to_weekly_digest
 
   include Avatar, Bot, Mentionable, Role, Transferable, Deactivatable, Preferences
 
@@ -187,6 +188,22 @@ class User < ApplicationRecord
 
   def toggle_email_subscription
     subscribed_to_emails? ? unsubscribe_from_emails : subscribe_to_emails
+  end
+
+  def subscribed_to_weekly_digest?
+    subscribed?("weekly_digest")
+  end
+
+  def subscribe_to_weekly_digest
+    subscribe("weekly_digest")
+  end
+
+  def unsubscribe_from_weekly_digest
+    unsubscribe("weekly_digest")
+  end
+
+  def toggle_weekly_digest_subscription
+    subscribed_to_weekly_digest? ? unsubscribe_from_weekly_digest : subscribe_to_weekly_digest
   end
 
   def blocked_in?(room)
