@@ -2,7 +2,9 @@ class WeeklyDigestJob < ApplicationJob
   MIN_TOPICS = 3
   MAX_TOPICS = 10
 
-  def perform
+  def perform(since: 1.week.ago)
+    @since = since
+
     unless Current.account&.email_digest_enabled?
       log "Email digest is disabled. Skipping."
       return
@@ -24,7 +26,7 @@ class WeeklyDigestJob < ApplicationJob
 
   def top_rooms_from_last_week
     excluded_room_ids = EmailDigestEntry.previously_sent_room_ids
-    cards = HomeFeed::Ranker.top(limit: MAX_TOPICS, since: 1.week.ago, exclude_room_ids: excluded_room_ids)
+    cards = HomeFeed::Ranker.top(limit: MAX_TOPICS, since: @since, exclude_room_ids: excluded_room_ids)
     room_ids = cards.map(&:room_id)
 
     Room.includes(:source_room, :automated_feed_card).where(id: room_ids).index_by(&:id)
