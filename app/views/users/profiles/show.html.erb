@@ -137,15 +137,17 @@
         </span>
       </li>
 
-      <li class="flex align-center gap margin-none min-width membership-item">
-        Receive weekly email digest
+      <% if Current.account&.email_digest_enabled? %>
+        <li class="flex align-center gap margin-none min-width membership-item">
+          Receive weekly email digest
 
-        <hr class="separator" aria-hidden="true">
+          <hr class="separator" aria-hidden="true">
 
-        <span class="txt-small">
-          <%= render "users/email_subscriptions/weekly_digest" %>
-        </span>
-      </li>
+          <span class="txt-small">
+            <%= render "users/email_subscriptions/weekly_digest" %>
+          </span>
+        </li>
+      <% end %>
     </menu>
   </div>
 
