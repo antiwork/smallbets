@@ -73,12 +73,9 @@
           <hr class="separator" aria-hidden="true">
 
           <span class="txt-small">
-            <%= form_with model: @account, method: :patch, data: { controller: "form" } do |form| %>
-              <button type="submit" role="checkbox" class="btn <%= "btn--reversed" if @account.email_digest_enabled? %>">
-                <%= image_tag(@account.email_digest_enabled? ? "check.svg" : "minus.svg", aria: { hidden: "true" }, size: 12) %>
-                <span class="for-screen-reader">Toggle weekly digest</span>
-              </button>
-              <%= form.hidden_field :email_digest_enabled, value: !@account.email_digest_enabled? %>
+            <%= button_to account_email_digest_path, method: :put, role: "checkbox", class: "btn #{"btn--reversed" if @account.email_digest_enabled?}" do %>
+              <%= image_tag(@account.email_digest_enabled? ? "check.svg" : "minus.svg", aria: { hidden: "true" }, size: 12) %>
+              <span class="for-screen-reader">Toggle weekly digest</span>
             <% end %>
           </span>
         </li>

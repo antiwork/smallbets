@@ -17,6 +17,6 @@ class AccountsController < ApplicationController
     end
 
     def account_params
-      params.require(:account).permit(:name, :logo, :email_digest_enabled)
+      params.require(:account).permit(:name, :logo)
     end
 end
