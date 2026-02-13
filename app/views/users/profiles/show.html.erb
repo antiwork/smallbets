@@ -137,7 +137,7 @@
         </span>
       </li>
 
-      <% if Current.account&.email_digest_enabled? %>
+      <% if Current.user.can_administer? && Current.account&.email_digest_enabled? %>
         <li class="flex align-center gap margin-none min-width membership-item">
           Receive weekly email digest
 
