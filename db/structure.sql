@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS 'message_search_index_idx'(segid, term, pgno, PRIMARY
 CREATE TABLE IF NOT EXISTS 'message_search_index_content'(id INTEGER PRIMARY KEY, c0);
 CREATE TABLE IF NOT EXISTS 'message_search_index_docsize'(id INTEGER PRIMARY KEY, sz BLOB);
 CREATE TABLE IF NOT EXISTS 'message_search_index_config'(k PRIMARY KEY, v) WITHOUT ROWID;
-CREATE TABLE IF NOT EXISTS "accounts" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "join_code" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "custom_styles" text, "active" boolean DEFAULT 1);
+CREATE TABLE IF NOT EXISTS "accounts" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "join_code" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "custom_styles" text, "active" boolean DEFAULT 1, "email_digest_enabled" boolean DEFAULT 1 NOT NULL);
 CREATE TABLE IF NOT EXISTS "action_text_rich_texts" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "body" text, "record_type" varchar NOT NULL, "record_id" bigint NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
 CREATE UNIQUE INDEX "index_action_text_rich_texts_uniqueness" ON "action_text_rich_texts" ("record_type", "record_id", "name");
 CREATE TABLE IF NOT EXISTS "boosts" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "message_id" integer NOT NULL, "booster_id" integer NOT NULL, "content" varchar(16) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "active" boolean DEFAULT 1, CONSTRAINT "fk_rails_3539c52d73"
@@ -189,7 +189,15 @@ CREATE INDEX "index_messages_on_active_created_at_creator_id" ON "messages" ("ac
 CREATE INDEX "index_messages_on_active_room_id_created_at" ON "messages" ("active", "room_id", "created_at");
 CREATE INDEX "index_users_on_active_suspended_at" ON "users" ("active", "suspended_at");
 CREATE INDEX "index_rooms_on_type" ON "rooms" ("type");
+CREATE TABLE IF NOT EXISTS "email_digest_entries" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "room_id" integer NOT NULL, "digest_date" date NOT NULL, "position" integer NOT NULL, "created_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_c1594ea8a2"
+FOREIGN KEY ("room_id")
+  REFERENCES "rooms" ("id")
+);
+CREATE INDEX "index_email_digest_entries_on_room_id" ON "email_digest_entries" ("room_id");
+CREATE INDEX "index_email_digest_entries_on_digest_date" ON "email_digest_entries" ("digest_date");
+CREATE UNIQUE INDEX "index_email_digest_entries_on_room_id_and_digest_date" ON "email_digest_entries" ("room_id", "digest_date");
 INSERT INTO "schema_migrations" (version) VALUES
+('20260211014105'),
 ('20260117225251'),
 ('20260115012335'),
 ('20251128154156'),

@@ -64,6 +64,23 @@
         <% end %>
       </div>
     <% end %>
+
+    <div class="margin-block pad-inline pad-block-half fill-shade border-radius">
+      <menu class="flex flex-column gap-half margin-none pad">
+        <li class="flex align-center gap margin-none min-width membership-item">
+          Weekly email digest
+
+          <hr class="separator" aria-hidden="true">
+
+          <span class="txt-small">
+            <%= button_to account_email_digest_path, method: :put, role: "checkbox", class: "btn #{"btn--reversed" if @account.email_digest_enabled?}" do %>
+              <%= image_tag(@account.email_digest_enabled? ? "check.svg" : "minus.svg", aria: { hidden: "true" }, size: 12) %>
+              <span class="for-screen-reader">Toggle weekly digest</span>
+            <% end %>
+          </span>
+        </li>
+      </menu>
+    </div>
   <% else %>
     <%= account_logo_tag style: "txt-xx-large center" %>
     <h1 class="flex-item-grow txt-x-large"><%= @account.name %></h1>
