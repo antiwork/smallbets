@@ -1,0 +1,6 @@
+<span id="<%= dom_id(room, :email_digest_exclusion) %>" class="txt-small">
+  <%= link_to room_email_digest_exclusion_path(room), data: { turbo_method: :put }, role: "checkbox", class: "btn #{"btn--reversed" if room.exclude_from_digest?}" do %>
+    <%= image_tag(room.exclude_from_digest? ? "check.svg" : "minus.svg", aria: { hidden: "true" }, size: 12) %>
+    <span class="for-screen-reader">Toggle exclude from email digest</span>
+  <% end %>
+</span>

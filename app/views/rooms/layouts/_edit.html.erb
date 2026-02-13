@@ -10,6 +10,23 @@
   <%= yield %>
 </section>
 
+<% if Current.user.administrator? && @room.persisted? %>
+  <section class="panel">
+    <div class="pad-inline pad-block-half fill-shade border-radius">
+      <menu class="flex flex-column gap-half margin-none pad">
+        <li class="flex align-center gap margin-none min-width membership-item">
+          Exclude from email digest
+
+          <hr class="separator" aria-hidden="true">
+
+          <%= render "rooms/email_digest_exclusions/toggle", room: @room %>
+        </li>
+      </menu>
+      <p class="txt-small txt-subtle pad-inline">Checking this will prevent this room from appearing in the weekly email digest.</p>
+    </div>
+  </section>
+<% end %>
+
 <% if Current.user.can_administer?(@room) %>
   <section class="panel flex flex-column gap">
     

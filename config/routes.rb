@@ -58,6 +58,7 @@ Rails.application.routes.draw do
       resource :logo, only: %i[ show destroy ]
       resource :custom_styles, only: %i[ edit update ]
       resource :email_digest, only: %i[ update ]
+      resource :digest_preview, only: :create
     end
   end
 
@@ -124,6 +125,7 @@ Rails.application.routes.draw do
       resource :involvement, only: %i[ show update ] do
         get :notifications_ready, on: :member
       end
+      resource :email_digest_exclusion, only: %i[ update ]
       resources :merges, only: :create
     end
 
