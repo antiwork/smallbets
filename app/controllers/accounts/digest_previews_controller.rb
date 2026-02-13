@@ -12,11 +12,7 @@ class Accounts::DigestPreviewsController < ApplicationController
       return
     end
 
-    weeks_ago = params[:since].to_i
-    window_start = (weeks_ago + 1).weeks.ago
-    window_end = weeks_ago.weeks.ago
-    cards = HomeFeed::Ranker.top(limit: 50, since: window_start)
-    cards = cards.select { |card| card.created_at < window_end }.first(MAX_TOPICS)
+    cards = HomeFeed::Ranker.top(limit: MAX_TOPICS, since: 1.week.ago)
     room_ids = cards.map(&:room_id)
     rooms = Room.where(id: room_ids).index_by(&:id)
                .then { |by_id| room_ids.filter_map { |id| by_id[id] } }
