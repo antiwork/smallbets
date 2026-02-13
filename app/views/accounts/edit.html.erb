@@ -91,10 +91,6 @@
             <%= form.email_field :email, placeholder: "Recipient email", class: "input", required: true %>
           </label>
 
-          <label class="flex align-center gap">
-            <%= form.select :since, [["1 week ago", 1], ["4 weeks ago", 4], ["10 weeks ago", 10]], {}, class: "input" %>
-          </label>
-
           <%= form.button class: "btn btn--reversed", type: "submit" do %>
             Send test digest
           <% end %>
