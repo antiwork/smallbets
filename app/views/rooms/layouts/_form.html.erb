@@ -33,6 +33,20 @@
       </label>
     </div>
 
+    <% if room.persisted? %>
+      <div class="pad-inline pad-block-half fill-shade border-radius">
+        <menu class="flex flex-column gap-half margin-none pad">
+          <li class="flex align-center gap margin-none min-width membership-item">
+            Exclude from email digest
+
+            <hr class="separator" aria-hidden="true">
+
+            <%= render "rooms/email_digest_exclusions/toggle", room: room %>
+          </li>
+        </menu>
+      </div>
+    <% end %>
+
     <hr class="margin-block borderless">
   <% end %>
 

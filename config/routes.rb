@@ -124,6 +124,7 @@ Rails.application.routes.draw do
       resource :involvement, only: %i[ show update ] do
         get :notifications_ready, on: :member
       end
+      resource :email_digest_exclusion, only: %i[ update ]
       resources :merges, only: :create
     end
 

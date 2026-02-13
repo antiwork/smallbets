@@ -25,7 +25,7 @@ class WeeklyDigestJob < ApplicationJob
   private
 
   def top_rooms_from_last_week
-    excluded_room_ids = EmailDigestEntry.previously_sent_room_ids
+    excluded_room_ids = EmailDigestEntry.previously_sent_room_ids + Room.where(exclude_from_digest: true).ids
     cards = HomeFeed::Ranker.top(limit: MAX_TOPICS, since: @since, exclude_room_ids: excluded_room_ids)
     room_ids = cards.map(&:room_id)
 

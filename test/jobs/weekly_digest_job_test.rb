@@ -74,6 +74,15 @@ class WeeklyDigestJobTest < ActiveSupport::TestCase
     assert_not_includes room_ids, @rooms.first.id
   end
 
+  test "excludes rooms marked as exclude_from_digest" do
+    @rooms.first.update!(exclude_from_digest: true)
+
+    WeeklyDigestJob.new.perform
+
+    room_ids = EmailDigestEntry.where(digest_date: Date.current).pluck(:room_id)
+    assert_not_includes room_ids, @rooms.first.id
+  end
+
   test "does not include topics older than one week" do
     FeedCard.update_all(created_at: 2.weeks.ago)
 

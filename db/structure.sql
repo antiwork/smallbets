@@ -138,7 +138,7 @@ CREATE INDEX "index_live_events_on_active" ON "live_events" ("active");
 CREATE INDEX "index_live_events_on_target_time" ON "live_events" ("target_time");
 CREATE INDEX "index_library_sessions_on_featured" ON "library_sessions" ("featured");
 CREATE INDEX "index_library_sessions_on_featured_position" ON "library_sessions" ("featured_position");
-CREATE TABLE IF NOT EXISTS "rooms" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar DEFAULT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "type" varchar NOT NULL, "creator_id" bigint NOT NULL, "messages_count" integer DEFAULT 0, "parent_message_id" integer DEFAULT NULL, "last_active_at" datetime(6) DEFAULT NULL, "active" boolean DEFAULT 1, "sortable_name" varchar DEFAULT NULL, "slug" varchar DEFAULT NULL, "source_room_id" integer DEFAULT NULL, CONSTRAINT "fk_rails_76a8fc443c"
+CREATE TABLE IF NOT EXISTS "rooms" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar DEFAULT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "type" varchar NOT NULL, "creator_id" bigint NOT NULL, "messages_count" integer DEFAULT 0, "parent_message_id" integer DEFAULT NULL, "last_active_at" datetime(6) DEFAULT NULL, "active" boolean DEFAULT 1, "sortable_name" varchar DEFAULT NULL, "slug" varchar DEFAULT NULL, "source_room_id" integer DEFAULT NULL, "exclude_from_digest" boolean DEFAULT 0 NOT NULL, CONSTRAINT "fk_rails_76a8fc443c"
 FOREIGN KEY ("parent_message_id")
   REFERENCES "messages" ("id")
 , CONSTRAINT "fk_rails_9e9e33cdb1"
@@ -197,6 +197,7 @@ CREATE INDEX "index_email_digest_entries_on_room_id" ON "email_digest_entries" (
 CREATE INDEX "index_email_digest_entries_on_digest_date" ON "email_digest_entries" ("digest_date");
 CREATE UNIQUE INDEX "index_email_digest_entries_on_room_id_and_digest_date" ON "email_digest_entries" ("room_id", "digest_date");
 INSERT INTO "schema_migrations" (version) VALUES
+('20260213125842'),
 ('20260211014105'),
 ('20260117225251'),
 ('20260115012335'),
